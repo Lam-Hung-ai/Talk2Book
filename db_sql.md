@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS currencies (
 );
 
 CREATE TABLE IF NOT EXISTS countries (
-  country_code  CHAR(2) PRIMARY KEY,
+  code  CHAR(2) PRIMARY KEY,
   name          TEXT NOT NULL,
   currency_code CHAR(3) NOT NULL REFERENCES currencies(code) ON DELETE RESTRICT
 );
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   user_id      UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   full_name    TEXT NOT NULL,
   gender       gender_type,
-  dob          DATE,
+  bithday          DATE,
   nationality  CHAR(2) REFERENCES countries(country_code) ON DELETE RESTRICT,
   avatar_url   TEXT,
   address      TEXT,
