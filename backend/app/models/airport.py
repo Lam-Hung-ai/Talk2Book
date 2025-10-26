@@ -1,9 +1,10 @@
-from sqlmodel import SQLModel, Field, UniqueConstraint, Relationship
-from uuid import UUID
 from typing import TYPE_CHECKING, Optional
+from uuid import UUID
+
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from database.models.city import City
+    from app.models.city import City
 
 class Airport(SQLModel, table=True):
     __tabel_args__ = UniqueConstraint("city", "name", name="uq_airports_city_name")
