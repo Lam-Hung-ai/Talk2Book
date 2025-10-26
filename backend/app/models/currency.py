@@ -1,7 +1,6 @@
-from sqlmodel import SQLModel, Field, Relationship
-from uuid import UUID
-
 from typing import TYPE_CHECKING, List
+
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .country import Country

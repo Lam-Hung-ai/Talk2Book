@@ -1,9 +1,10 @@
-from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING, List, Optional
 
+from sqlmodel import Field, Relationship, SQLModel
+
 if TYPE_CHECKING:
-    from database.models.city import City
-    from database.models.currency import Currency
+    from app.models.city import City
+    from app.models.currency import Currency
 
 class Country(SQLModel, table = True):
     code: str = Field(primary_key=True, max_length=2)
