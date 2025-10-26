@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .flight import Flight
+    from app.models.flight import Flight
     from .airport import Airport
 
 class Routes (SQLModel, table=True)

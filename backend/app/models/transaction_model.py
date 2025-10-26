@@ -2,10 +2,9 @@ from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from typing import Optional
 
-from database.models.payment_model import Payment
+from app.models.payment_model import Payment
 
 class PaymentTransaction(SQLModel, table=True):
-    __tablename__ = "payment_transactions"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     payment_id: int = Field(foreign_key="payments.id")
