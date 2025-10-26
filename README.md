@@ -29,3 +29,11 @@ git push -u oringin ten_cua_ban     # Đẩy code lên repo với nhánh ten_cua
 ```cmd
 git pull --no-rebase
 ```
+## 3. Hướng dẫn tạo cơ sở dữ liệu
+- Tải [postgres](https://www.postgresql.org/download/) vào máy tính
+- Đổi tên file backend/.env.example thành backend/.env, đồng thời cấu hình các thông số phù hợp với postgres
+- Vào thư mục backend và chạy chương trình
+```cmd
+cd backend
+python -m app.core.db
+```

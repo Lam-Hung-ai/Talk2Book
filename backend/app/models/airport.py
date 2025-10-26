@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from app.models.city import City
 
 class Airport(SQLModel, table=True):
-    __tabel_args__ = UniqueConstraint("city", "name", name="uq_airports_city_name")
+    __table_args__ = (UniqueConstraint("city_id", "name", name="uq_airports_city_name"),)
     
     iata: str | None = Field(primary_key=True, max_length=3)
     itao: str | None = Field(max_length=4, unique=True)
