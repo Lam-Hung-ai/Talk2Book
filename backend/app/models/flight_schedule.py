@@ -1,15 +1,15 @@
-from sqlmodel import SQLModel, Feild, Relationship, UniqueConstranit
+from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from typing import TYPE_CHECKING, Optional
-from uuid from UUID 
+from uuid import UUID, uuid4
 
 if TYPE_CHECKING:
-    from .route import Route
-    from .flight_instance from FlightInstance
+    from app.models.route import Route
+    from app.model.flight_instance from FlightInstance
 
 class FlightSchedule(SQLModel, table = True):
     _table_args_ = UniqueConstraint ("route_id", "flight_number", name = "uq_schedules_route_flight")
 
-    schedule_id: UUID = Field(primary_key=True, index=True)
+    schedule_id: UUID = Field(primary_key=True, index=True, default_factory=uuid4)
     provider_id: UUID = Field(foreign_key="provider.provider_id", nullable=False)
     route_id: UUID = Field(foreign_key="route.route_id", nullable=False)
 
