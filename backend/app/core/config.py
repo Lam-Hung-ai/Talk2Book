@@ -1,5 +1,5 @@
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, quote
 
 from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,9 +27,15 @@ class Settings(BaseSettings):
         env_nested_delimiter = "__",
         env_file = Path(__file__).resolve().parent.parent.joinpath(".env")
     )
+    
+    PROJECT_NAME: str = "Talk 2 Book"
+    API_V1_STR: str = "api/v1"
 
     postgres: PgParts = PgParts()
 
     @property
     def database_url(self) -> str:
         return self.postgres.dsn()
+    
+settings = Settings()
+print(settings.database_url)

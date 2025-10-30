@@ -11,5 +11,5 @@ class Country(SQLModel, table = True):
     name: str = Field(nullable=False)
     currency_code: str = Field(nullable=False, foreign_key="currency.code", ondelete="RESTRICT", max_length=3)
 
-    currency: Optional["City"] = Relationship(back_populates="countries")
-    cities: List['Currency'] = Relationship(back_populates="country")
+    currency: Optional["Currency"] = Relationship(back_populates="countries")
+    cities: List['City'] = Relationship(back_populates="country")
