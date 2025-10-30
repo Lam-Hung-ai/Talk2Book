@@ -15,7 +15,7 @@ class PgParts(BaseModel):
 
     def dsn(self) -> str:
 
-        pwd = quote_plus(self.password.get_secret_value())
+        pwd = quote_plus(self.password.get_secret_value(), safe="")
         user = quote_plus(self.user)
         query = "&".join(f"{k}={v}" for k, v in self.options.items())
 
