@@ -1,10 +1,12 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
+from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
+from datetime import time 
+from sqlalchemy import UniqueConstraint
 
 if TYPE_CHECKING:
     from app.models.route import Route
-    from app.model.flight_instance from FlightInstance
+    from app.models.flight_instance import FlightInstance
 
 class FlightSchedule(SQLModel, table = True):
     _table_args_ = UniqueConstraint ("route_id", "flight_number", name = "uq_schedules_route_flight")

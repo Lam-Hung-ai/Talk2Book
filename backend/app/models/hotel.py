@@ -1,10 +1,10 @@
 from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from typing import TYPE_CHECKING, Optional
-from uuid import UUID
+from uuid import UUID,uuid4
 from datetime import time
 
 if TYPE_CHECKING:
-    from .city import City
+    from app.models.city import City
 
 
 class Hotel(SQLModel, table=True):

@@ -21,4 +21,5 @@ async def init_db() -> None:
 
 if __name__ == "__main__":
     import asyncio
+    print(settings.database_url)
     asyncio.run(init_db())
