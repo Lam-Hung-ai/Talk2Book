@@ -1,9 +1,9 @@
 from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
 from typing import TYPE_CHECKING, Optional
-from uuid import UUID
+from uuid import UUID,uuid4
 
 if TYPE_CHECKING:
-    from .hotel import Hotel
+    from app.models.hotel import Hotel 
 
 
 class HotelRoom(SQLModel, table=True):
