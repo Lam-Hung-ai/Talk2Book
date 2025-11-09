@@ -1,5 +1,7 @@
 from uuid import UUID
+
 from pydantic import BaseModel, Field
+
 
 class CurrencyCreate(BaseModel):
     code: str = Field(min_length=3, max_length=3)

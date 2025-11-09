@@ -6,11 +6,14 @@ from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 if TYPE_CHECKING:
     from app.models.city import City
 
+
 class Airport(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint("city_id", "name", name="uq_airports_city_name"),)
-    
+    __table_args__ = (
+        UniqueConstraint("city_id", "name", name="uq_airports_city_name"),
+    )
+
     iata: str | None = Field(primary_key=True, max_length=3)
-    itao: str | None = Field(max_length=4, unique=True)
+    icao: str | None = Field(max_length=4, unique=True)
     city_id: UUID = Field(nullable=False, foreign_key="city.id", ondelete="RESTRICT")
     name: str = Field(nullable=False)
     timezone: str = Field(nullable=False)

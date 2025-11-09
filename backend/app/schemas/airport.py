@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from uuid import UUID
+
+from pydantic import BaseModel, Field
+
 
 class AirportCreate(BaseModel):
     iata: str = Field(min_length=3, max_length=3)

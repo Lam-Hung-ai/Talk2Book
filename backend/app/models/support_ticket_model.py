@@ -5,6 +5,7 @@ from uuid import UUID
 
 from database.models.user_model import User
 
+
 class SupportTicket(SQLModel, table=True):
     __tablename__ = "support_tickets"
 

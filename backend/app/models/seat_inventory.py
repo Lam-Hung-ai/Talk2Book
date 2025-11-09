@@ -3,12 +3,14 @@ from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 if TYPE_CHECKING:
-    from .flight_instance import FlightInstance 
+    from .flight_instance import FlightInstance
 
 
 class SeatInventory(SQLModel, table=True):
     __table_args__ = (
-        UniqueConstraint("instance_id", "cabin", "fare_bucket", name="uq_instance_cabin_bucket"),
+        UniqueConstraint(
+            "instance_id", "cabin", "fare_bucket", name="uq_instance_cabin_bucket"
+        ),
     )
 
     instance_id: UUID = Field(

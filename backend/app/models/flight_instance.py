@@ -7,15 +7,14 @@ if TYPE_CHECKING:
     from app.models.flight_schedule import FlightSchedule  
 
 class FlightInstance(SQLModel, table=True):
-    __table_args__ = UniqueConstraint("schedule_id", "flight_date", name="uq_instance_schedule_date")
-
-    instance_id: UUID = Field(primary_key=True, index=True)
-    schedule_id: UUID = Field(
-        foreign_key="flightschedule.schedule_id",  
-        nullable=False
+    __table_args__ = UniqueConstraint(
+        "schedule_id", "flight_date", name="uq_instance_schedule_date"
     )
 
-    flight_date: date = Field(nullable=False) 
+    instance_id: UUID = Field(primary_key=True, index=True)
+    schedule_id: UUID = Field(foreign_key="flightschedule.schedule_id", nullable=False)
+
+    flight_date: date = Field(nullable=False)
     dep_datetime: Optional[datetime] = Field(
         default=None, description="Departure datetime with timezone (timestamptz)"
     )
@@ -24,5 +23,5 @@ class FlightInstance(SQLModel, table=True):
     )
     status: Optional[str] = Field(
         default="scheduled",
-        description="VD: scheduled, departed, arrived, cancelled, delayed..."
+        description="VD: scheduled, departed, arrived, cancelled, delayed...",
     )

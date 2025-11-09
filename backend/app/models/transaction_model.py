@@ -4,8 +4,8 @@ from typing import Optional
 
 from app.models.payment_model import Payment
 
-class PaymentTransaction(SQLModel, table=True):
 
+class PaymentTransaction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     payment_id: int = Field(foreign_key="payments.id")
     step: str

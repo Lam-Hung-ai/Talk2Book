@@ -1,0 +1,9 @@
+2025-11-08 23:40:57,706 | INFO | uvicorn.error | Shutting down
+2025-11-08 23:40:57,808 | INFO | uvicorn.error | Waiting for application shutdown.
+2025-11-08 23:40:57,810 | INFO | uvicorn.error | Application shutdown complete.
+2025-11-08 23:40:57,811 | INFO | uvicorn.error | Finished server process [12690]
+2025-11-08 23:40:59,229 | INFO | app.core.logging | Logging ready: level=20, output=/home/lamhung/code/Talk2Book/backend/log/backend.log
+2025-11-08 23:40:59,299 | INFO | uvicorn.error | Started server process [13001]
+2025-11-08 23:40:59,300 | INFO | uvicorn.error | Waiting for application startup.
+2025-11-08 23:40:59,300 | INFO | uvicorn.error | Application startup complete.
+2025-11-08 23:40:59,301 | INFO | uvicorn.error | Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
