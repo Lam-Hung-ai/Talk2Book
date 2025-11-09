@@ -7,7 +7,6 @@ from sqlalchemy import Column
 
 if TYPE_CHECKING:
     from .hotel import Hotel
-     
 
 
 class RoomRatePlan(SQLModel, table=True):
@@ -30,9 +29,5 @@ class RoomRatePlan(SQLModel, table=True):
     )
 
     currency_code: str = Field(
-        foreign_key="currency.code",  
-        nullable=False,
-        max_length=3
+        foreign_key="currency.code", nullable=False, max_length=3
     )
-
-   

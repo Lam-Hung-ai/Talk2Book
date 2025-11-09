@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from typing import Optional
 
+
 class Refund(SQLModel, table=True):
     __tablename__ = "refunds"
 
@@ -13,4 +14,3 @@ class Refund(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     payment: Optional["Payment"] = Relationship(back_populates="refunds")
-    

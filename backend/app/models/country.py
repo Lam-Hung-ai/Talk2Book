@@ -6,10 +6,13 @@ if TYPE_CHECKING:
     from app.models.city import City
     from app.models.currency import Currency
 
-class Country(SQLModel, table = True):
+
+class Country(SQLModel, table=True):
     code: str = Field(primary_key=True, max_length=2)
     name: str = Field(nullable=False)
-    currency_code: str = Field(nullable=False, foreign_key="currency.code", ondelete="RESTRICT", max_length=3)
+    currency_code: str = Field(
+        nullable=False, foreign_key="currency.code", ondelete="RESTRICT", max_length=3
+    )
 
     currency: Optional["Currency"] = Relationship(back_populates="countries")
-    cities: List['City'] = Relationship(back_populates="country")
+    cities: List["City"] = Relationship(back_populates="country")

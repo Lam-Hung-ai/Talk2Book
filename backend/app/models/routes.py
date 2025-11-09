@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.flight import Flight
-    from .airport import Airport
+    from app.models.airport import Airport
 
 class Routes (SQLModel, table=True)
     _table_args_ =  UniqueConstraint ("origin_iata", "destination_iata", name = "uq_routes_od")
