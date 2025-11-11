@@ -37,3 +37,19 @@ git pull --no-rebase
 cd backend
 python -m app.core.db
 ```
+
+# 4. Hướng dẫn sử dụng [uv](https://docs.astral.sh/uv/getting-started/installation/) trong dự án
+- Tạo môi trường ảo với [uv](https://docs.astral.sh/uv/pip/environments/#creating-a-virtual-environment) và đồng bộ các thư viện
+```cmd
+cd /backend
+uv env
+uv sync
+```
+- Kích hoạt môi trường ảo
+```cmd
+.venv\Scripts\activate
+```
+- chạy backend 
+```cmd
+fastapi run main.py
+```

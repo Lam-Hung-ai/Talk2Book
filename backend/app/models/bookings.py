@@ -26,7 +26,9 @@ class Booking(SQLModel, table=True):
     created_at: datetime | None = Field(default=datetime.now())
     updated_at: datetime | None = Field(default=datetime.now())
     total_amount: float | None = Field(default=0.0)
-    currency_code: str | None = Field(default=None, foreign_key="currency.code", max_length=3)
+    currency_code: str | None = Field(
+        default=None, foreign_key="currency.code", max_length=3
+    )
     quote_id: UUID | None = Field(default=None, foreign_key="pricequote.id")
     payment_method: str | None = Field(default=None)
     paid_at: datetime | None = Field(default=None)

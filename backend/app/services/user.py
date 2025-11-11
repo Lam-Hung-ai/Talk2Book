@@ -1,82 +1,98 @@
-from sqlmodel import select, or_, and_, col
+from typing import Optional, Dict, Any
 from sqlmodel.ext.asyncio.session import AsyncSession
-from typing import Sequence
-from fastapi import HTTPException
-from app.models.user import User, UserStatus
-from app.core.sercurity import hash_password
-from uuid import UUID
+from app.models.user import User
+from fastapi import HTTPException, status
+from app.schemas.user import UserCreate, UserRead
+from app.repositories.user import UserRepository
+from app.core.security import hash_password
 
-async def list_users(
-    session: AsyncSession, 
-    *, 
-    limit: int, 
-    offset: int, 
-    q: str | None = None, 
-    status: UserStatus | None = None
-    ) -> tuple[Sequence[User], int]:
+class UserService:
+    def __init__(self, db: AsyncSession):
+        self.repo = UserRepository(db)
     
-    statement = select(User)
-    if q:
-        pattern = f"%{q}%"
-        statement = statement.where(or_(col(User.email).contains(pattern), col(User.phone).contains(pattern)))
-    if status:
-        statement = statement.where(User.status == status)
-    users = await session.exec(statement.offset(offset).limit(limit))
-    total_items = await session.exec(statement)
-    return users.all(), len(total_items.all())
-
-async def create_user(session: AsyncSession, *, email: str, phone: str, password: str) -> User:
-
-    if (await session.exec(select(User).where(User.email == email))).first():
-        raise HTTPException(status_code=409, detail="Email already exists")
-    if (await session.exec(select(User).where(User.phone == phone))).first():
-        raise HTTPException(status_code=409, detail="Phone already exists")
-
-    user = User(email=email, phone=phone, password_hash=hash_password(password))
-    session.add(user)
-    await session.commit()
-    await session.refresh(user)
-    return user
-
-async def get_user(session: AsyncSession, user_id: UUID) -> User:
-    user = await session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-async def update_user(session: AsyncSession, 
-                user_id: UUID, 
-                *, 
-                email: str | None, 
-                phone: str | None, 
-                password: str | None, 
-                status: UserStatus | None) -> User:
-    user = await get_user(session, user_id)
-    if email and email != user.email:
-        if (await session.exec(select(User).where(User.email == email))).first():
-            raise HTTPException(status_code=409, detail="Email already exists")
-        user.email = email
-    if phone and phone != user.phone:
-        if (await session.exec(select(User).where(User.phone == phone))).first():
-            raise HTTPException(status_code=409, detail="Phone already exists")
-        user.phone = phone
-    if password:
-        user.password_hash = hash_password(password)
-    if status:
-        user.status = status
-    session.add(user)
-    await session.commit()
-    await session.refresh(user)
-    return user
-
-async def soft_delete_user(session: AsyncSession, user_id: UUID) -> None:
-    user = await get_user(session, user_id)
-    user.status = UserStatus.deleted
-    session.add(user)
-    await session.commit()
-
-async def hard_delete_user(session: AsyncSession, user_id: UUID) -> None:
-    user = get_user(session, user_id)
-    await session.delete(user)
-    await session.commit()
+    async def create_user(self, user_in: UserCreate) -> UserRead:
+        """Tạo user mới"""
+        if await self.repo.get_by_email(user_in.email):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email has existed")
+        
+        if await self.repo.get_by_phone(user_in.phone):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Phone has existed")
+        
+        password_hash = hash_password(user_in.password)
+        user_data = user_in.model_dump()
+        user_data.pop("password")
+        user_data["password_hash"] = password_hash
+        
+        db_user = self.repo.create(user_data)
+        return UserRead.model_validate(db_user)
     
+    async def get_user_by_id(self, user_id: int) -> User:
+        """Lấy user theo ID, ném 404 nếu không tồn tại"""
+        return await self.repo.get_or_404(user_id, detail="User không tồn tại")
+    
+    async def get_users_paginated(
+        self, 
+        page: int = 1, 
+        page_size: int = 20,
+        is_active: Optional[bool] = None
+    ) -> Dict[str, Any]:
+        """Lấy danh sách users có phân trang và filter"""
+        skip = (page - 1) * page_size
+        
+        filters = {}
+        if is_active is not None:
+            filters["is_active"] = is_active
+        
+        users = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
+        total = await self.repo.get_count(**filters)
+        
+        return {
+            "items": [UserRead.model_validate(u) for u in users],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
+    
+    async def delete_user(self, user_id: int) -> None:
+        """Xóa user"""
+        await self.repo.delete(user_id)
+    
+    async def search_users(
+        self,
+        q: str,
+        page: int = 1,
+        page_size: int = 20,
+        exact_match: bool = False,
+        case_sensitive: bool = False
+    ) -> Dict[str, Any]:
+        """Tìm kiếm users theo email hoặc full_name"""
+        skip = (page - 1) * page_size
+        
+        users = await self.repo.search(
+            query=q,
+            search_columns=["email", "phone"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive,
+            skip=skip,
+            limit=page_size
+        )
+        
+        total = await self.repo.count_search(
+            query=q,
+            search_columns=["email", "phone"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive
+        )
+        
+        return {
+            "items": [UserRead.model_validate(u) for u in users],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }

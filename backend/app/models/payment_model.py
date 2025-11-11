@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
+
 class Payment(SQLModel, table=True):
     __tablename__ = "payments"
 

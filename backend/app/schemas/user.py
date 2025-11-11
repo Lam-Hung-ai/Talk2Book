@@ -1,8 +1,8 @@
-from pydantic import BaseModel, EmailStr, Field
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from app.models.user import UserStatus
+from pydantic import BaseModel, EmailStr, Field
 
 class UserRead(BaseModel):
     id: UUID

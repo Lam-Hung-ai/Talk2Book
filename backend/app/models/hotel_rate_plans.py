@@ -30,9 +30,5 @@ class RoomRatePlan(SQLModel, table=True):
     )
 
     currency_code: str = Field(
-        foreign_key="currency.code",  
-        nullable=False,
-        max_length=3
+        foreign_key="currency.code", nullable=False, max_length=3
     )
-
-   

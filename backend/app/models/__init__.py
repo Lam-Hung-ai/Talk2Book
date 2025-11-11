@@ -8,12 +8,12 @@ from app.models.user_profile import UserProfile
 from app.models.user_role import UserRole
 
 __all__ = [
-	"Airport",
-	"City",
-	"Country",
-	"Currency",
-	"Role",
-	"User",
-	"UserProfile",
-	"UserRole",
+    "Airport",
+    "City",
+    "Country",
+    "Currency",
+    "Role",
+    "User",
+    "UserProfile",
+    "UserRole",
 ]

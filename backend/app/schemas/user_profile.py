@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
-from app.models.user_profile import Gender
 from datetime import date, datetime
 from uuid import UUID
+
+from app.models.user_profile import Gender
 from app.schemas.user import UserRead
+from pydantic import BaseModel, Field
+
 
 class ProfileCreate(BaseModel):
     full_name: str
