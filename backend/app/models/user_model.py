@@ -1,9 +1,13 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from enum import Enum
-from typing import List
 from uuid import UUID
+from typing import Optional, List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from app.models.payment_model import Payment
+    from app.models.review_model import Review
+    from app.models.support_ticket_model import SupportTicket
 
 class UserStatus(str, Enum):
     active = "active"
@@ -12,8 +16,6 @@ class UserStatus(str, Enum):
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "users"
-
     id: UUID | None = Field(default=None, primary_key=True)
     email: str = Field(unique=True, nullable=False)
     phone: str = Field(unique=True, nullable=False, max_length=32)

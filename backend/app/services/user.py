@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from app.schemas.user import UserCreate, UserRead
 from app.repositories.user import UserRepository
 from app.core.security import hash_password
+from uuid import UUID
 
 class UserService:
     def __init__(self, db: AsyncSession):
@@ -27,10 +28,10 @@ class UserService:
         user_data.pop("password")
         user_data["password_hash"] = password_hash
         
-        db_user = self.repo.create(user_data)
-        return UserRead.model_validate(db_user)
+        db_user = await self.repo.create(user_data)
+        return UserRead.model_validate(db_user, from_attributes=True)
     
-    async def get_user_by_id(self, user_id: int) -> User:
+    async def get_user_by_id(self, user_id: UUID) -> User:
         """Lấy user theo ID, ném 404 nếu không tồn tại"""
         return await self.repo.get_or_404(user_id, detail="User không tồn tại")
     
@@ -51,14 +52,14 @@ class UserService:
         total = await self.repo.get_count(**filters)
         
         return {
-            "items": [UserRead.model_validate(u) for u in users],
+            "items": [UserRead.model_validate(u, from_attributes=True) for u in users],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size
         }
     
-    async def delete_user(self, user_id: int) -> None:
+    async def delete_user(self, user_id: UUID) -> None:
         """Xóa user"""
         await self.repo.delete(user_id)
     
@@ -90,7 +91,7 @@ class UserService:
         )
         
         return {
-            "items": [UserRead.model_validate(u) for u in users],
+            "items": [UserRead.model_validate(u, from_attributes=True) for u in users],
             "total": total,
             "page": page,
             "page_size": page_size,
