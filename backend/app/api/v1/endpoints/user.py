@@ -1,11 +1,12 @@
 # app/api/v1/endpoints/users.py
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
-from typing import List, Optional
+from typing import Optional
+from uuid import UUID
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.services.user import UserService
 from app.api.v1.deps import get_async_session
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter()
 
 def get_user_service(db: AsyncSession = Depends(get_async_session)) -> UserService:
     return UserService(db)
@@ -32,14 +33,14 @@ async def create_user(
     summary="Lấy thông tin user theo ID"
 )
 async def get_user(
-    user_id: int,
+    user_id: UUID,
     service: UserService = Depends(get_user_service)
 ):
     """
     Lấy thông tin user theo ID. Ném 404 nếu không tồn tại
     """
     user = await service.get_user_by_id(user_id)
-    return UserRead.model_validate(user)
+    return UserRead.model_validate(user, from_attributes=True)
 
 @router.get(
     "/",
@@ -67,7 +68,7 @@ async def get_users(
     summary="Cập nhật thông tin user"
 )
 async def update_user(
-    user_id: int,
+    user_id: UUID,
     user_in: UserUpdate,
     service: UserService = Depends(get_user_service)
 ):
@@ -81,8 +82,8 @@ async def update_user(
     #     )
     
     db_user = await service.get_user_by_id(user_id)
-    updated_user = service.repo.update(db_user, user_in)
-    return UserRead.model_validate(updated_user)
+    updated_user = await service.repo.update(db_user, user_in)
+    return UserRead.model_validate(updated_user, from_attributes=True)
 
 @router.delete(
     "/{user_id}",
@@ -90,7 +91,7 @@ async def update_user(
     summary="Xóa user"
 )
 async def delete_user(
-    user_id: int,
+    user_id: UUID,
     service: UserService = Depends(get_user_service)
 ):
     """
@@ -100,11 +101,11 @@ async def delete_user(
     return None
 
 @router.get(
-    "/search",
+    "/search/mixin",
     response_model=dict,
     summary="Tìm kiếm users theo email hoặc tên"
 )
-def search_users(
+async def search_users(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -116,11 +117,11 @@ def search_users(
     Search users in both email and full_name columns
     
     Examples:
-    - `/users/search?q=john` → tìm "john" trong email hoặc tên (không phân biệt hoa/thường)
-    - `/users/search?q=John@example.com&exact_match=true` → tìm chính xác email
-    - `/users/search?q=Alice&case_sensitive=true` → chỉ tìm "Alice" (viết hoa A)
+    - `/users/search/mixin?q=john` → tìm "john" trong email hoặc tên (không phân biệt hoa/thường)
+    - `/users/search/mixin?q=John@example.com&exact_match=true` → tìm chính xác email
+    - `/users/search/mixin?q=Alice&case_sensitive=true` → chỉ tìm "Alice" (viết hoa A)
     """
-    return service.search_users(
+    return await service.search_users(
         q=q,
         page=page,
         page_size=page_size,
@@ -140,4 +141,4 @@ def search_users(
 #     """
 #     Lấy thông tin của user đang đăng nhập (từ JWT token)
 #     """
-#     return UserRead.model_validate(current_user)
+#     return UserRead.model_validate(current_user, from_attributes=True)
