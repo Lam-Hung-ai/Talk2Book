@@ -9,7 +9,7 @@ class UserRead(BaseModel):
     email: str
     phone: str
     status: UserStatus 
-    create_at: datetime
+    created_at: datetime
 
 class UserCreate(BaseModel):
     email: EmailStr
