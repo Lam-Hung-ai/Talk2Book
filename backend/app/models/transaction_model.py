@@ -1,8 +1,9 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from app.models.payment_model import Payment
+if TYPE_CHECKING:
+    from app.models.payment_model import Payment
 
 
 class PaymentTransaction(SQLModel, table=True):
