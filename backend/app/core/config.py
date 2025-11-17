@@ -35,7 +35,8 @@ class Settings(BaseSettings):
     )
 
     BACKEND_DIR: str = str(Path(__file__).resolve().parents[2])
-    
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 17
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     PROJECT_NAME: str = "Talk 2 Book"
     API_V1_STR: str = "api/v1"
 

@@ -10,6 +10,7 @@ from pydantic import EmailStr
 if TYPE_CHECKING:
     from app.models.role import Role
     from app.models.user_profile import UserProfile
+    from app.models.token import RefreshToken
 
 
 class UserStatus(str, Enum):
@@ -32,3 +33,4 @@ class User(SQLModel, table=True):
 
     user_profile: Optional["UserProfile"] = Relationship(back_populates="user")
     roles: list["Role"] = Relationship(back_populates="users", link_model=UserRole)
+    sessions: list["RefreshToken"] = Relationship(back_populates="user")

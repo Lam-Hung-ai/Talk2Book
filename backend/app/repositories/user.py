@@ -1,6 +1,6 @@
 # app/repositories/user_repository.py
 from typing import Optional
-from sqlmodel import Session, select
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate

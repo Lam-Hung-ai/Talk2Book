@@ -19,6 +19,15 @@ class ProfileRead(ProfileCreate):
     user_id: UUID
     updated_at: datetime
 
+class ProfileUpdate(BaseModel):
+    full_name: str | None
+    gender: Gender | None
+    birthday: date | None
+    nationality: str | None = Field(min_length=2, max_length=2)
+    avatar_url: str | None
+    address: str | None
+    user_id: UUID | None
+
 class RoleCreate(BaseModel):
     code: str
 

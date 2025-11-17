@@ -51,5 +51,6 @@ uv sync
 ```
 - chạy backend 
 ```cmd
+cd backend/app
 fastapi run main.py
 ```
