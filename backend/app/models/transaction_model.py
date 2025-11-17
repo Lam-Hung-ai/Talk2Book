@@ -1,13 +1,14 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from app.models.payment_model import Payment
+if TYPE_CHECKING:
+    from app.models.payment_model import Payment
 
 
 class PaymentTransaction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    payment_id: int = Field(foreign_key="payments.id")
+    payment_id: int = Field(foreign_key="payment.id")
     step: str
     status: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
