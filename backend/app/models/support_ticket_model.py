@@ -1,17 +1,16 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
+from typing import Optional, List, TYPE_CHECKING
 
-from database.models.user_model import User
 
+if TYPE_CHECKING:
+    from app.models.user_model import User
 
 class SupportTicket(SQLModel, table=True):
-    __tablename__ = "support_tickets"
-
     id: Optional[int] = Field(default=None, primary_key=True)
     booking_id: Optional[int] = Field(default=None)
-    user_id: UUID = Field(foreign_key="users.id")
+    user_id: UUID = Field(foreign_key="user.id")
     subject: str
     message: str
     status: str = "open"
