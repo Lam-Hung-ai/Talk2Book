@@ -1,9 +1,10 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID
 
+from sqlmodel import Field, SQLModel, UniqueConstraint
+
 if TYPE_CHECKING:
-    from .flight_instance import FlightInstance
+    pass
 
 
 class SeatInventory(SQLModel, table=True):
@@ -23,5 +24,5 @@ class SeatInventory(SQLModel, table=True):
     fare_bucket: str = Field(max_length=1, nullable=False)
 
     total_seats: int = Field(nullable=False)
-    held_seats: Optional[int] = Field(default=0)
-    sold_seats: Optional[int] = Field(default=0)
+    held_seats: int | None = Field(default=0)
+    sold_seats: int | None = Field(default=0)

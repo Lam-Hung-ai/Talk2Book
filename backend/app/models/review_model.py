@@ -1,17 +1,17 @@
-from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.user_model import User
 
 class Review(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     user_id: UUID = Field(foreign_key="user.id")
     service_type: str
-    service_id: Optional[int] = Field(default=None)
+    service_id: int | None = Field(default=None)
     rating: int
     title: str
     content: str

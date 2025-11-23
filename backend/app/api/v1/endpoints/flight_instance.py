@@ -1,22 +1,21 @@
-from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
-from typing import Optional
+from datetime import date
 from uuid import UUID
-from datetime import date, datetime
 
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.api.v1.deps import get_async_session
 
+from app.api.v1.deps import get_async_session
 from app.schemas.flight_instance import (
-    FlightInstanceRead,
     FlightInstanceCreate,
+    FlightInstanceRead,
     FlightInstanceUpdate,
 )
 from app.services.flight_instance import (
     create_flight_instance,
-    list_flight_instances,
-    get_flight_instance_by_id,
-    update_flight_instance_by_id,
     delete_flight_instance_by_id,
+    get_flight_instance_by_id,
+    list_flight_instances,
+    update_flight_instance_by_id,
 )
 
 router = APIRouter()
@@ -43,9 +42,9 @@ async def list_flight_instances_ep(
     session: AsyncSession = Depends(get_async_session),
     limit: int = Query(10, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    schedule_id: Optional[UUID] = Query(None),
-    flight_date: Optional[date] = Query(None),
-    status: Optional[str] = Query(None, description="Filter by flight status"),
+    schedule_id: UUID | None = Query(None),
+    flight_date: date | None = Query(None),
+    status: str | None = Query(None, description="Filter by flight status"),
 ):
     items, _ = await list_flight_instances(
         session=session,

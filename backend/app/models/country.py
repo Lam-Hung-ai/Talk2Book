@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -15,4 +15,4 @@ class Country(SQLModel, table=True):
     )
 
     currency: Optional["Currency"] = Relationship(back_populates="countries")
-    cities: List["City"] = Relationship(back_populates="country")
+    cities: list["City"] = Relationship(back_populates="country")

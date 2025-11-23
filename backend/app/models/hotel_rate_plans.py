@@ -1,13 +1,13 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import TYPE_CHECKING, Optional, List
-from uuid import UUID,uuid4
+from typing import TYPE_CHECKING
+from uuid import UUID
 
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from app.models.hotel import Hotel
-     
+    pass
+
 
 
 class RoomRatePlan(SQLModel, table=True):
@@ -19,12 +19,12 @@ class RoomRatePlan(SQLModel, table=True):
     hotel_id: UUID = Field(foreign_key="hotel.hotel_id", nullable=False)
 
     name: str = Field(nullable=False)
-    meal_plan: Optional[str] = Field(
+    meal_plan: str | None = Field(
         default=None,
         max_length=50,
     )
 
-    cancellation_policy: Optional[dict] = Field(
+    cancellation_policy: dict | None = Field(
         default=None,
         sa_column=Column(JSONB),
     )

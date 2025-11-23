@@ -1,10 +1,11 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import TYPE_CHECKING, Optional
-from uuid import UUID,uuid4
-from datetime import date, datetime  
+from datetime import date, datetime
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from app.models.flight_schedule import FlightSchedule  
+    pass
 
 class FlightInstance(SQLModel, table=True):
     __table_args__ = UniqueConstraint(
@@ -15,13 +16,13 @@ class FlightInstance(SQLModel, table=True):
     schedule_id: UUID = Field(foreign_key="flightschedule.schedule_id", nullable=False)
 
     flight_date: date = Field(nullable=False)
-    dep_datetime: Optional[datetime] = Field(
+    dep_datetime: datetime | None = Field(
         default=None, description="Departure datetime with timezone (timestamptz)"
     )
-    arr_datetime: Optional[datetime] = Field(
+    arr_datetime: datetime | None = Field(
         default=None, description="Arrival datetime with timezone (timestamptz)"
     )
-    status: Optional[str] = Field(
+    status: str | None = Field(
         default="scheduled",
         description="VD: scheduled, departed, arrived, cancelled, delayed...",
     )

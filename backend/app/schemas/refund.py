@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Optional, Sequence
+
+from pydantic import BaseModel, Field
 
 
 class RefundBase(BaseModel):
@@ -18,9 +19,9 @@ class RefundCreate(RefundBase):
 
 class RefundUpdate(BaseModel):
     """Schema để cập nhật Refund"""
-    amount: Optional[float] = Field(None, gt=0)
-    reason: Optional[str] = Field(None, min_length=1)
-    status: Optional[str] = None
+    amount: float | None = Field(None, gt=0)
+    reason: str | None = Field(None, min_length=1)
+    status: str | None = None
 
 
 class RefundResponse(RefundBase):

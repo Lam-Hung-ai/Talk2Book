@@ -1,13 +1,12 @@
-from typing import TYPE_CHECKING, Optional, Any
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
+from uuid import UUID, uuid4
 
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
-from sqlalchemy import Column, JSON
 
 if TYPE_CHECKING:
-    from .bookings import Booking
-    from .user import User
+    pass
 
 
 class ActorType(str):

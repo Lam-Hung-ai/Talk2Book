@@ -1,13 +1,15 @@
-from typing import Optional, Sequence
+from collections.abc import Sequence
+
 from fastapi import HTTPException
-from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.airport import Airport
 from app.models.city import City
 
+
 # Airports
-async def create_airport(session: AsyncSession, iata: str, icao: Optional[str], city_id, name: str, timezone: str) -> Airport:
+async def create_airport(session: AsyncSession, iata: str, icao: str | None, city_id, name: str, timezone: str) -> Airport:
     if not await session.get(City, city_id):
         raise HTTPException(status_code=400, detail="Invalid city_id")
     if icao:
@@ -23,7 +25,7 @@ async def create_airport(session: AsyncSession, iata: str, icao: Optional[str], 
     await session.refresh(item)
     return item
 
-async def list_airports(session: AsyncSession, limit: int, offset: int, city_id=None, country_code: Optional[str]=None, q: Optional[str]=None) -> tuple[Sequence[Airport], int]:
+async def list_airports(session: AsyncSession, limit: int, offset: int, city_id=None, country_code: str | None=None, q: str | None=None) -> tuple[Sequence[Airport], int]:
     query = select(Airport)
     if city_id:
         query = query.where(Airport.city_id == city_id)
@@ -37,7 +39,7 @@ async def list_airports(session: AsyncSession, limit: int, offset: int, city_id=
     total = (await session.exec(select(Airport))).all()
     return items, len(total)
 
-async def update_airport(session: AsyncSession, iata: str, icao: Optional[str]=None, name: Optional[str]=None, timezone: Optional[str]=None) -> Airport:
+async def update_airport(session: AsyncSession, iata: str, icao: str | None=None, name: str | None=None, timezone: str | None=None) -> Airport:
     item = await session.get(Airport, iata.upper())
     if not item:
         raise HTTPException(status_code=404, detail="Airport not found")

@@ -1,24 +1,31 @@
 from fastapi import APIRouter, Depends, Query
-from app.api.v1.deps import get_async_session
-from app.schemas.hotel import HotelRead, HotelCreate
-from app.service.hotel import list_hotel, create_hotel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.api.v1.deps import get_async_session
+from app.schemas.hotel import HotelCreate, HotelRead
+from app.service.hotel import create_hotel
 
 router = APIRouter()
 
-@router.post("",response_model=HotelRead,status_code=status.HTTP_201_CREATED,)
+
+@router.post(
+    "",
+    response_model=HotelRead,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_hotel_ep(
-    payload: HotelCreate, session: AsyncSession = Depends(get_async_session)):
+    payload: HotelCreate, session: AsyncSession = Depends(get_async_session)
+):
     hotel = await create_hotel(session=session, data=payload)
     return hotel
 
 
 @router.get("/", response_model=list[HotelRead])
-async def list_hotels_ep(session: AsyncSession = Depends(get_async_session),
+async def list_hotels_ep(
+    session: AsyncSession = Depends(get_async_session),
     limit: int = Query(10, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    q: Optional[str] = Query( None, description="Search by name/address "),
+    q: Optional[str] = Query(None, description="Search by name/address "),
     city_id: Optional[UUID] = Query(None),
     provider_id: Optional[UUID] = Query(None),
     min_star: Optional[float] = Query(None, ge=0, le=5),

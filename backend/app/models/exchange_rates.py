@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING
 from datetime import date, datetime
-from sqlmodel import Field, SQLModel, UniqueConstraint
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
+from sqlmodel import Field, SQLModel, UniqueConstraint
+
 if TYPE_CHECKING:
-    from .currency import Currency
+    pass
 
 
 class ExchangeRate(SQLModel, table=True):

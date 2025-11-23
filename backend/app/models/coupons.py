@@ -1,11 +1,11 @@
-from typing import TYPE_CHECKING, Optional
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
-    from .currency import Currency
+    pass
 
 
 class Coupon(SQLModel, table=True):

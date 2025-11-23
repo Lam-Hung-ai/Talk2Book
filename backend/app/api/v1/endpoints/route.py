@@ -1,24 +1,24 @@
-from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
-from typing import Optional
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.api.v1.deps import get_async_session
 
+from app.api.v1.deps import get_async_session
 from app.schemas.route import (
-    RouteRead,
     RouteCreate,
+    RouteRead,
     RouteUpdate,
 )
 from app.services.route import (
     create_route,
-    list_routes,
-    get_route_by_id,
-    update_route_by_id,
     delete_route_by_id,
+    get_route_by_id,
+    list_routes,
+    update_route_by_id,
 )
 
 router = APIRouter()
+
 
 @router.post(
     "",
@@ -41,9 +41,9 @@ async def list_routes_ep(
     session: AsyncSession = Depends(get_async_session),
     limit: int = Query(10, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    q: Optional[str] = Query(None, description="Search by origin/destination IATA"),
-    origin: Optional[str] = Query(None, max_length=3),
-    destination: Optional[str] = Query(None, max_length=3),
+    q: str | None = Query(None, description="Search by origin/destination IATA"),
+    origin: str | None = Query(None, max_length=3),
+    destination: str | None = Query(None, max_length=3),
 ):
     items, _ = await list_routes(
         session=session,

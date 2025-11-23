@@ -1,14 +1,12 @@
-from typing import TYPE_CHECKING, Optional, Any
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
+from uuid import UUID, uuid4
 
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import Column, JSON
 
 if TYPE_CHECKING:
     from .bookings import Booking
-    from .products import Product
-    from .time_slots import TimeSlot
 
 
 class BookingItem(SQLModel, table=True):

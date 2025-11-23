@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
@@ -20,4 +20,4 @@ class City(SQLModel, table=True):
     name: str = Field(nullable=False)
 
     country: Optional["Country"] = Relationship(back_populates="cities")
-    airports: List["Airport"] = Relationship(back_populates="city")
+    airports: list["Airport"] = Relationship(back_populates="city")

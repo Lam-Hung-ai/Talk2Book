@@ -1,12 +1,11 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
-from datetime import datetime
 
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .time_slots import TimeSlot
-    from .currency import Currency
 
 
 class SlotInventory(SQLModel, table=True):

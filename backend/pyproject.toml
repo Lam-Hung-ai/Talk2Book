@@ -18,6 +18,29 @@ dev = [
     "ruff>=0.14.4",
 ]
 
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+extend-include = ["*.ipynb"]
+fix = true
+unsafe-fixes = false
+
 [tool.ruff.lint]
-extend-select = ["I"]
+select = [
+    "E",
+    "F",
+    "W",
+    "C",
+    "I",
+    "UP",
+]
+
+ignore = [
+    "E501",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
 

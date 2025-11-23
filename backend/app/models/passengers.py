@@ -1,11 +1,11 @@
-from typing import TYPE_CHECKING, Optional
-from uuid import UUID, uuid4
 from datetime import date
+from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
-    from .bookings import Booking
+    pass
 
 
 class PassengerType(str):

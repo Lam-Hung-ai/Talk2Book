@@ -1,10 +1,11 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import TYPE_CHECKING, Optional
-from uuid import UUID
 from datetime import date
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from .hotel_room import HotelRoom
+    pass
 
 
 class RoomInventoryDaily(SQLModel, table=True):
@@ -20,13 +21,13 @@ class RoomInventoryDaily(SQLModel, table=True):
     )
 
     stay_date: date = Field(primary_key=True)
-    allotment: Optional[int] = Field(default=0)
-    sold: Optional[int] = Field(default=0)
-    stop_sell: Optional[bool] = Field(default=False)
+    allotment: int | None = Field(default=0)
+    sold: int | None = Field(default=0)
+    stop_sell: bool | None = Field(default=False)
 
-    min_length_of_stay: Optional[int] = Field(default=1)
-    max_length_of_stay: Optional[int] = Field(default=None)
-    cutoff_hours: Optional[int] = Field(default=None)
+    min_length_of_stay: int | None = Field(default=1)
+    max_length_of_stay: int | None = Field(default=None)
+    cutoff_hours: int | None = Field(default=None)
 
-    base_price: Optional[float] = Field(default=None)
-    tax_inclusive: Optional[bool] = Field(default=True)
+    base_price: float | None = Field(default=None)
+    tax_inclusive: bool | None = Field(default=True)
