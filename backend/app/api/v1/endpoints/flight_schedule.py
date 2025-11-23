@@ -1,22 +1,20 @@
-from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
-from typing import Optional
 from uuid import UUID
-from datetime import time
 
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.api.v1.deps import get_async_session
 
+from app.api.v1.deps import get_async_session
 from app.schemas.flight_schedule import (
-    FlightScheduleRead,
     FlightScheduleCreate,
+    FlightScheduleRead,
     FlightScheduleUpdate,
 )
 from app.services.flight_schedule import (
     create_flight_schedule,
-    list_flight_schedules,
-    get_flight_schedule_by_id,
-    update_flight_schedule_by_id,
     delete_flight_schedule_by_id,
+    get_flight_schedule_by_id,
+    list_flight_schedules,
+    update_flight_schedule_by_id,
 )
 
 router = APIRouter()
@@ -43,10 +41,10 @@ async def list_flight_schedules_ep(
     session: AsyncSession = Depends(get_async_session),
     limit: int = Query(10, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    q: Optional[str] = Query(None, description="Search by flight_number or aircraft_code"),
-    provider_id: Optional[UUID] = Query(None),
-    route_id: Optional[UUID] = Query(None),
-    dow: Optional[int] = Query(None, ge=0, le=6, description="Day of week (0=Mon)"),
+    q: str | None = Query(None, description="Search by flight_number or aircraft_code"),
+    provider_id: UUID | None = Query(None),
+    route_id: UUID | None = Query(None),
+    dow: int | None = Query(None, ge=0, le=6, description="Day of week (0=Mon)"),
 ):
     items, _ = await list_flight_schedules(
         session=session,

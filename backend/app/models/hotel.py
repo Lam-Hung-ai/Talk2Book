@@ -1,10 +1,11 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import TYPE_CHECKING, Optional
-from uuid import UUID,uuid4
 from datetime import time
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from app.models.city import City
+    pass
 
 
 class Hotel(SQLModel, table=True):
@@ -15,11 +16,11 @@ class Hotel(SQLModel, table=True):
     city_id: UUID = Field(foreign_key="city.id", nullable=False)
 
     name: str = Field(nullable=False)
-    star_rating: Optional[float] = Field(default=None)
-    address: Optional[str] = Field(default=None)
+    star_rating: float | None = Field(default=None)
+    address: str | None = Field(default=None)
 
-    checkin_time: Optional[time] = Field(default=None)
-    checkout_time: Optional[time] = Field(default=None)
+    checkin_time: time | None = Field(default=None)
+    checkout_time: time | None = Field(default=None)
 
-    lat: Optional[float] = Field(default=None)
-    lng: Optional[float] = Field(default=None)
+    lat: float | None = Field(default=None)
+    lng: float | None = Field(default=None)

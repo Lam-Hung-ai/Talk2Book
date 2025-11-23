@@ -1,22 +1,23 @@
-from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
-from typing import Optional
 from uuid import UUID
-from app.api.v1.deps import get_async_session
 
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+
+from app.api.v1.deps import get_async_session
 from app.schemas.hotel_room import (
-    HotelRoomRead,
     HotelRoomCreate,
+    HotelRoomRead,
     HotelRoomUpdate,
 )
 from app.services.hotel_room import (
     create_hotel_room,
-    list_hotel_rooms,
-    get_hotel_room_by_id,
-    update_hotel_room_by_id,
     delete_hotel_room_by_id,
+    get_hotel_room_by_id,
+    list_hotel_rooms,
+    update_hotel_room_by_id,
 )
 
 router = APIRouter()
+
 
 @router.post(
     "",
@@ -39,10 +40,10 @@ async def list_hotel_rooms_ep(
     session: AsyncSession = Depends(get_async_session),
     limit: int = Query(10, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    q: Optional[str] = Query(None, description="Search by code / bed_config"),
-    hotel_id: Optional[UUID] = Query(None),
-    min_capacity: Optional[int] = Query(None, ge=0),
-    max_capacity: Optional[int] = Query(None, ge=0),
+    q: str | None = Query(None, description="Search by code / bed_config"),
+    hotel_id: UUID | None = Query(None),
+    min_capacity: int | None = Query(None, ge=0),
+    max_capacity: int | None = Query(None, ge=0),
 ):
     items, _total = await list_hotel_rooms(
         session=session,

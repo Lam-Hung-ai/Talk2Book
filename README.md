@@ -7,6 +7,7 @@
 - Nguyễn Tiến Đạt
 
 ## 2. Hướng dẫn làm việc
+- Khuyến nghị mọi người cài đặt Ruff extention trên VSCode để điều chỉnh định dạng chuẩn (chi cần lưu là Ruff extention sẽ định dạng lại file chuẩn quốc tế)
 - Nếu chưa tải repo về máy thì chạy:
 ```cmd
 git clone https://github.com/Lam-Hung-ai/Talk2Book.git
@@ -51,5 +52,6 @@ uv sync
 ```
 - chạy backend 
 ```cmd
+cd backend/app
 fastapi run main.py
 ```

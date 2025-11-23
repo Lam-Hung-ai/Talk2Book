@@ -1,13 +1,11 @@
-from typing import TYPE_CHECKING, List, Optional, Any
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
+from uuid import UUID, uuid4
 
+from sqlalchemy import JSON, Column
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import Column, JSON
 
 if TYPE_CHECKING:
-    from .user import User
-    from .price_quotes import PriceQuote
     from .booking_items import BookingItem
 
 
@@ -34,4 +32,4 @@ class Booking(SQLModel, table=True):
     paid_at: datetime | None = Field(default=None)
     meta: Any | None = Field(default=None, sa_column=Column(JSON))
 
-    items: List["BookingItem"] = Relationship(back_populates="booking")
+    items: list["BookingItem"] = Relationship(back_populates="booking")

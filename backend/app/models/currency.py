@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -10,4 +10,4 @@ class Currency(SQLModel, table=True):
     code: str = Field(nullable=False, max_length=3, primary_key=True)
     name: str = Field(nullable=False)
 
-    countries: List["Country"] = Relationship(back_populates="currency")
+    countries: list["Country"] = Relationship(back_populates="currency")

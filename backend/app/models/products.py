@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
 
 from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 
@@ -22,4 +22,4 @@ class Product(SQLModel, table=True):
     active: bool = Field(default=True)
     created_at: datetime | None = Field(default=datetime.now())
 
-    time_slots: List["TimeSlot"] = Relationship(back_populates="product")
+    time_slots: list["TimeSlot"] = Relationship(back_populates="product")

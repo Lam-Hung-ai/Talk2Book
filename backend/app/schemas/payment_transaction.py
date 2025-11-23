@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Optional, Sequence
+
+from pydantic import BaseModel, Field
 
 
 class PaymentTransactionBase(BaseModel):
@@ -17,8 +18,8 @@ class PaymentTransactionCreate(PaymentTransactionBase):
 
 class PaymentTransactionUpdate(BaseModel):
     """Schema để cập nhật PaymentTransaction"""
-    step: Optional[str] = None
-    status: Optional[str] = None
+    step: str | None = None
+    status: str | None = None
 
 
 class PaymentTransactionResponse(PaymentTransactionBase):

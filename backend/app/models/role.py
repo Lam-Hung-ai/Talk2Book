@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from app.models.user_role import UserRole
 from sqlmodel import Field, Relationship, SQLModel
+
+from app.models.user_role import UserRole
 
 if TYPE_CHECKING:
     from app.models.user import User

@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -34,9 +33,9 @@ async def create_airport_ep(
 async def list_airports_ep(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    city_id: Optional[UUID] = None,
-    country_code: Optional[str] = None,
-    q: Optional[str] = None,
+    city_id: UUID | None = None,
+    country_code: str | None = None,
+    q: str | None = None,
     session: AsyncSession = Depends(get_async_session),
 ):
     items, total = await list_airports(

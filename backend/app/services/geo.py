@@ -1,19 +1,20 @@
-from typing import Sequence, Optional
-from uuid import UUID
+from collections.abc import Sequence
+
 from fastapi import HTTPException
-from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from app.models.country import Country
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.models.city import City
+from app.models.country import Country
 from app.models.currency import Currency
-from app.models.airport import Airport
+
 
 # Currencies
 async def create_currency(session: AsyncSession, code: str, name: str) -> Currency:
 
     if await session.get(Currency, code):
         raise HTTPException(status_code=409, detail="Currency exists")
-    
+
     item = Currency(code=code.upper(), name=name)
     session.add(item)
     await session.commit()
@@ -65,7 +66,7 @@ async def list_countries(session: AsyncSession, limit: int, offset: int) -> tupl
     total = (await session.exec(select(Country))).all()
     return items, len(total)
 
-async def update_country(session: AsyncSession, code: str, name: Optional[str], currency_code: Optional[str]) -> Country:
+async def update_country(session: AsyncSession, code: str, name: str | None, currency_code: str | None) -> Country:
 
     item = await session.get(Country, code)
     if not item:

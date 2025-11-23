@@ -1,8 +1,9 @@
-from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import UUID
-from typing import Optional, List, TYPE_CHECKING
+
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.payment_model import Payment
@@ -24,6 +25,6 @@ class User(SQLModel, table=True):
     create_at: datetime | None = Field(default_factory=datetime.now)
 
     # 👇 Không import các model khác, chỉ dùng tên chuỗi để tránh vòng lặp import
-    payments: List["Payment"] = Relationship(back_populates="user")
-    reviews: List["Review"] = Relationship(back_populates="user")
-    support_tickets: List["SupportTicket"] = Relationship(back_populates="user")
+    payments: list["Payment"] = Relationship(back_populates="user")
+    reviews: list["Review"] = Relationship(back_populates="user")
+    support_tickets: list["SupportTicket"] = Relationship(back_populates="user")

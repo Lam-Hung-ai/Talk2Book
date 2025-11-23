@@ -1,31 +1,32 @@
 # app/repositories/review.py
-from typing import Optional, Sequence
+from collections.abc import Sequence
 from uuid import UUID
-from sqlmodel import select, func
+
+from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.review_model import Review
-from app.schemas.review import ReviewCreate, ReviewUpdate
 from app.repositories.base import BaseCRUD
 from app.repositories.searchable import SearchableRepository
+from app.schemas.review import ReviewCreate, ReviewUpdate
 
 
 class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableRepository[Review]):
     """Repository cho Review với đầy đủ CRUD và tính năng tìm kiếm"""
-    
+
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, Review, db)
         SearchableRepository.__init__(self, Review, db)
-    
+
     async def get_by_user_id(
-        self, 
-        user_id: UUID, 
-        skip: int = 0, 
+        self,
+        user_id: UUID,
+        skip: int = 0,
         limit: int = 100
     ) -> Sequence[Review]:
         """Lấy danh sách reviews của một user"""
         return await self.get_multi(skip=skip, limit=limit, user_id=user_id)
-    
+
     async def get_by_service(
         self,
         service_type: str,
@@ -40,7 +41,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         ).offset(skip).limit(limit)
         result = await self.db.exec(statement)
         return result.all()
-    
+
     async def get_by_service_type(
         self,
         service_type: str,
@@ -49,7 +50,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
     ) -> Sequence[Review]:
         """Lấy reviews theo loại dịch vụ"""
         return await self.get_multi(skip=skip, limit=limit, service_type=service_type)
-    
+
     async def get_by_rating(
         self,
         rating: int,
@@ -58,7 +59,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
     ) -> Sequence[Review]:
         """Lấy reviews theo rating"""
         return await self.get_multi(skip=skip, limit=limit, rating=rating)
-    
+
     async def get_by_rating_range(
         self,
         min_rating: int,
@@ -73,11 +74,11 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         ).offset(skip).limit(limit)
         result = await self.db.exec(statement)
         return result.all()
-    
+
     async def count_by_user_id(self, user_id: UUID) -> int:
         """Đếm số lượng reviews của user"""
         return await self.get_count(user_id=user_id)
-    
+
     async def count_by_service(self, service_type: str, service_id: int) -> int:
         """Đếm số reviews của một dịch vụ"""
         statement = select(func.count()).select_from(Review).where(
@@ -86,7 +87,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         )
         result = await self.db.exec(statement)
         return result.one()
-    
+
     async def get_average_rating_by_service(
         self,
         service_type: str,
@@ -100,7 +101,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         result = await self.db.exec(statement)
         avg = result.one()
         return float(avg) if avg else 0.0
-    
+
     async def get_rating_distribution_by_service(
         self,
         service_type: str,
@@ -117,19 +118,19 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
             result = await self.db.exec(count_statement)
             distribution[f"{rating}_star"] = result.one()
         return distribution
-    
+
     async def get_recent_reviews(
         self,
-        service_type: Optional[str] = None,
+        service_type: str | None = None,
         limit: int = 10
     ) -> Sequence[Review]:
         """Lấy reviews mới nhất"""
         from sqlmodel import desc
-        
+
         statement = select(Review).order_by(desc(Review.created_at)).limit(limit)
-        
+
         if service_type:
             statement = statement.where(Review.service_type == service_type)
-        
+
         result = await self.db.exec(statement)
         return result.all()
