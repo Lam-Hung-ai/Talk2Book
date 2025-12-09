@@ -185,20 +185,6 @@ CREATE TABLE IF NOT EXISTS contracts (
   currency_code  CHAR(3) NOT NULL REFERENCES currencies(code) ON DELETE RESTRICT,
   CHECK (commission_pct IS NULL OR (commission_pct >= 0 AND commission_pct <= 100))
 );
--- Không chồng lấn thời gian theo provider
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'contracts_no_overlap'
-  ) THEN
-    ALTER TABLE contracts
-      ADD CONSTRAINT contracts_no_overlap
-      EXCLUDE USING GIST (
-        provider_id WITH =,
-        daterange(effective_from, COALESCE(effective_to, 'infinity'::date), '[]') WITH &&
-      );
-  END IF;
-END$$;
 
 -- =========================================================
 -- 4) Flights

@@ -1,25 +1,21 @@
+# app/models/user_profile.py
 from datetime import UTC, date, datetime
-from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlmodel import DateTime, Field, Relationship, SQLModel
 
+from app.models.enums import GenderType
+
 if TYPE_CHECKING:
     from app.models.user import User
-
-
-class Gender(str, Enum):
-    male = "M"
-    female = "F"
-    other = "O"
 
 
 class UserProfile(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     full_name: str = Field(nullable=False)
-    gender: Gender | None = Field(default=None)
+    gender: GenderType | None = Field(default=None)
     birthday: date | None = Field(default=None)
     nationality: str | None = Field(
         default=None, foreign_key="country.code", ondelete="RESTRICT", max_length=2

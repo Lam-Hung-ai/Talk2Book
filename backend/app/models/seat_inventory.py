@@ -1,28 +1,29 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlmodel import Field, SQLModel, UniqueConstraint
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
+
+from app.models.enums import CabinType, FareBucketType
 
 if TYPE_CHECKING:
-    pass
+    from app.models.flight_instance import FlightInstance
 
 
 class SeatInventory(SQLModel, table=True):
+    __tablename__ = "seat_inventory"  # type: ignore
     __table_args__ = (
         UniqueConstraint(
             "instance_id", "cabin", "fare_bucket", name="uq_instance_cabin_bucket"
         ),
     )
 
-    instance_id: UUID = Field(
-        foreign_key="flightinstance.instance_id",
-        nullable=False,
-        primary_key=True,
-    )
-
-    cabin: str = Field(nullable=False)
-    fare_bucket: str = Field(max_length=1, nullable=False)
+    instance_id: UUID = Field(foreign_key="flight_instance.id", primary_key=True, ondelete="CASCADE")
+    cabin: CabinType = Field(primary_key=True)
+    fare_bucket: FareBucketType = Field(primary_key=True)
 
     total_seats: int = Field(nullable=False)
-    held_seats: int | None = Field(default=0)
-    sold_seats: int | None = Field(default=0)
+    held_seats: int = Field(default=0, nullable=False)
+    sold_seats: int = Field(default=0, nullable=False)
+
+    # Relationships
+    flight_instance: "FlightInstance" = Relationship(back_populates="seat_inventory")
