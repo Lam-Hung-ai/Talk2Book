@@ -1,27 +1,36 @@
-from datetime import time
-from typing import TYPE_CHECKING, Optional
+from datetime import UTC, datetime, time
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.flight_instance import FlightInstance
+    from app.models.provider import Provider
     from app.models.route import Route
 
-class FlightSchedule(SQLModel, table = True):
-    _table_args_ = UniqueConstraint ("route_id", "flight_number", name = "uq_schedules_route_flight")
 
-    schedule_id: UUID = Field(primary_key=True, index=True, default_factory=uuid4)
-    provider_id: UUID = Field(foreign_key="provider.provider_id", nullable=False)
-    route_id: UUID = Field(foreign_key="route.route_id", nullable=False)
+class FlightSchedule(SQLModel, table=True):
+    __tablename__ = "flight_schedule"  # type: ignore
+    __table_args__ = (
+        UniqueConstraint("provider_id", "route_id", "flight_number", "dow", "dep_time", name="uq_fs_provider_route_flt_dow_time"),
+    )
 
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    provider_id: UUID = Field(foreign_key="provider.id", nullable=False)
+    route_id: UUID = Field(foreign_key="route.id", nullable=False, ondelete="CASCADE")
     flight_number: str = Field(nullable=False)
-    dow: int | None = Field(default=None)
-    dep_time: time | None = Field(default=None)
-    arr_time: time | None = Field(default=None)
-    arrival_day_offset: int | None = Field(default=0)
-    aircraft_code: str | None = Field(default=None)
+    dow: str = Field(nullable=False, description="Bitstring representing Days of Week (e.g., 1000000)")
+    dep_time: time = Field(nullable=False)
+    arr_time: time = Field(nullable=False)
+    arrival_day_offset: int = Field(default=0, nullable=False)
+    aircraft_code: str | None = None
 
-    route: Optional["Route"] = Relationship(back_populates="schedules")
-    flight_instances: list["FlightInstance"] = Relationship(back_populates="schedule")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    route: "Route" = Relationship(back_populates="flight_schedules")
+    provider: "Provider" = Relationship(back_populates="flight_schedules")
+    instances: list["FlightInstance"] = Relationship(back_populates="schedule")

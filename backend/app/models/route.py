@@ -1,17 +1,30 @@
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
+from sqlalchemy import DateTime, UniqueConstraint
+from sqlmodel import CheckConstraint, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
+    from app.models.airport import Airport
     from app.models.flight_schedule import FlightSchedule
 
-class Route (SQLModel, table=True):
-    _table_args_ =  UniqueConstraint ("origin_iata", "destination_iata", name = "uq_routes_od")
+class Route(SQLModel, table=True):
+    __table_args__ = (
+        CheckConstraint("origin != destination", name="chk_routes_origin_dest"),
+        CheckConstraint("distance_km > 0", name="chk_routes_distance"),
+        UniqueConstraint("origin", "destination", name="uq_routes_od"),
+    )
 
-route_id: UUID = Field (primary_key = True, index = True)
-origin: str = Field (foreign_key = "airport.iata", nullable = False, max_length = 3)
-destination: str = Field (foreign_key = "airport.iata", nullable = False, max_length = 3)
-distance_km: float = Field (nullable = False)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    origin: str = Field(foreign_key="airport.iata", max_length=3, nullable=False)
+    destination: str = Field(foreign_key="airport.iata", max_length=3, nullable=False)
+    distance_km: int | None = Field(default=None)
 
-schedules: list["FlightSchedule"] = Relationship(back_populates="route")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+
+    # Relationships
+    flight_schedules: list["FlightSchedule"] = Relationship(back_populates="route")
+    origin_airport: "Airport" = Relationship(back_populates="depart_routes", sa_relationship_kwargs={"foreign_keys": "[Route.origin]"})
+    destination_airport: "Airport" = Relationship(back_populates="arrive_routes", sa_relationship_kwargs={"foreign_keys": "[Route.destination]"})
