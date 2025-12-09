@@ -1,9 +1,151 @@
-2025-11-08 23:40:57,706 | INFO | uvicorn.error | Shutting down
-2025-11-08 23:40:57,808 | INFO | uvicorn.error | Waiting for application shutdown.
-2025-11-08 23:40:57,810 | INFO | uvicorn.error | Application shutdown complete.
-2025-11-08 23:40:57,811 | INFO | uvicorn.error | Finished server process [12690]
-2025-11-08 23:40:59,229 | INFO | app.core.logging | Logging ready: level=20, output=/home/lamhung/code/Talk2Book/backend/log/backend.log
-2025-11-08 23:40:59,299 | INFO | uvicorn.error | Started server process [13001]
-2025-11-08 23:40:59,300 | INFO | uvicorn.error | Waiting for application startup.
-2025-11-08 23:40:59,300 | INFO | uvicorn.error | Application startup complete.
-2025-11-08 23:40:59,301 | INFO | uvicorn.error | Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-12-09 22:28:06,804 | INFO | sqlalchemy.engine.Engine | select pg_catalog.version()
+2025-12-09 22:28:06,804 | INFO | sqlalchemy.engine.Engine | [raw sql] ()
+2025-12-09 22:28:06,811 | INFO | sqlalchemy.engine.Engine | select current_schema()
+2025-12-09 22:28:06,811 | INFO | sqlalchemy.engine.Engine | [raw sql] ()
+2025-12-09 22:28:06,816 | INFO | sqlalchemy.engine.Engine | show standard_conforming_strings
+2025-12-09 22:28:06,816 | INFO | sqlalchemy.engine.Engine | [raw sql] ()
+2025-12-09 22:28:06,821 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:07,220 | INFO | sqlalchemy.engine.Engine | SELECT airport.iata AS airport_iata, airport.icao AS airport_icao, airport.city_id AS airport_city_id, airport.name AS airport_name, airport.timezone AS airport_timezone 
+FROM airport 
+WHERE airport.iata = $1::VARCHAR
+2025-12-09 22:28:07,220 | INFO | sqlalchemy.engine.Engine | [generated in 0.00129s] ('SFO',)
+2025-12-09 22:28:07,232 | INFO | sqlalchemy.engine.Engine | SELECT airport.iata AS airport_iata, airport.icao AS airport_icao, airport.city_id AS airport_city_id, airport.name AS airport_name, airport.timezone AS airport_timezone 
+FROM airport 
+WHERE airport.iata = $1::VARCHAR
+2025-12-09 22:28:07,232 | INFO | sqlalchemy.engine.Engine | [cached since 0.01308s ago] ('LAX',)
+2025-12-09 22:28:07,247 | INFO | sqlalchemy.engine.Engine | INSERT INTO route (id, origin, destination, distance_km, created_at, updated_at) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::INTEGER, $5::TIMESTAMP WITH TIME ZONE, $6::TIMESTAMP WITH TIME ZONE)
+2025-12-09 22:28:07,247 | INFO | sqlalchemy.engine.Engine | [generated in 0.00108s] (UUID('1c7a1106-3ab4-40e6-a536-788a62821831'), 'SFO', 'LAX', 543, datetime.datetime(2025, 12, 9, 15, 28, 7, 236027, tzinfo=datetime.timezone.utc), datetime.datetime(2025, 12, 9, 15, 28, 7, 236038, tzinfo=datetime.timezone.utc))
+2025-12-09 22:28:07,257 | INFO | sqlalchemy.engine.Engine | COMMIT
+2025-12-09 22:28:07,262 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:07,269 | INFO | sqlalchemy.engine.Engine | SELECT route.id, route.origin, route.destination, route.distance_km, route.created_at, route.updated_at 
+FROM route 
+WHERE route.id = $1::UUID
+2025-12-09 22:28:07,269 | INFO | sqlalchemy.engine.Engine | [generated in 0.00077s] (UUID('1c7a1106-3ab4-40e6-a536-788a62821831'),)
+2025-12-09 22:28:07,280 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:14,368 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:14,370 | INFO | sqlalchemy.engine.Engine | SELECT provider.id AS provider_id, provider.type AS provider_type, provider.legal_name AS provider_legal_name, provider.display_name AS provider_display_name, provider.country_code AS provider_country_code, provider.status AS provider_status, provider.created_at AS provider_created_at, provider.updated_at AS provider_updated_at 
+FROM provider 
+WHERE provider.id = $1::UUID
+2025-12-09 22:28:14,371 | INFO | sqlalchemy.engine.Engine | [generated in 0.00036s] (UUID('ce37a5ce-a016-4197-832e-c266b0083d47'),)
+2025-12-09 22:28:14,383 | INFO | sqlalchemy.engine.Engine | SELECT route.id AS route_id, route.origin AS route_origin, route.destination AS route_destination, route.distance_km AS route_distance_km, route.created_at AS route_created_at, route.updated_at AS route_updated_at 
+FROM route 
+WHERE route.id = $1::UUID
+2025-12-09 22:28:14,383 | INFO | sqlalchemy.engine.Engine | [generated in 0.00038s] (UUID('1c7a1106-3ab4-40e6-a536-788a62821831'),)
+2025-12-09 22:28:14,386 | INFO | sqlalchemy.engine.Engine | INSERT INTO flight_schedule (id, provider_id, route_id, flight_number, dow, dep_time, arr_time, arrival_day_offset, aircraft_code, created_at, updated_at) VALUES ($1::UUID, $2::UUID, $3::UUID, $4::VARCHAR, $5::VARCHAR, $6::TIME WITHOUT TIME ZONE, $7::TIME WITHOUT TIME ZONE, $8::INTEGER, $9::VARCHAR, $10::TIMESTAMP WITH TIME ZONE, $11::TIMESTAMP WITH TIME ZONE)
+2025-12-09 22:28:14,386 | INFO | sqlalchemy.engine.Engine | [generated in 0.00038s] (UUID('f072bdb1-f204-49ba-97a2-0859969f7f9a'), UUID('ce37a5ce-a016-4197-832e-c266b0083d47'), UUID('1c7a1106-3ab4-40e6-a536-788a62821831'), 'AC100', '1111100', datetime.time(8, 30), datetime.time(10, 0), 0, 'A320', datetime.datetime(2025, 12, 9, 15, 28, 14, 384818, tzinfo=datetime.timezone.utc), datetime.datetime(2025, 12, 9, 15, 28, 14, 384825, tzinfo=datetime.timezone.utc))
+2025-12-09 22:28:14,389 | INFO | sqlalchemy.engine.Engine | COMMIT
+2025-12-09 22:28:14,402 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:14,404 | INFO | sqlalchemy.engine.Engine | SELECT flight_schedule.id, flight_schedule.provider_id, flight_schedule.route_id, flight_schedule.flight_number, flight_schedule.dow, flight_schedule.dep_time, flight_schedule.arr_time, flight_schedule.arrival_day_offset, flight_schedule.aircraft_code, flight_schedule.created_at, flight_schedule.updated_at 
+FROM flight_schedule 
+WHERE flight_schedule.id = $1::UUID
+2025-12-09 22:28:14,404 | INFO | sqlalchemy.engine.Engine | [generated in 0.00054s] (UUID('f072bdb1-f204-49ba-97a2-0859969f7f9a'),)
+2025-12-09 22:28:14,408 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:20,583 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:20,584 | INFO | sqlalchemy.engine.Engine | SELECT flight_schedule.id AS flight_schedule_id, flight_schedule.provider_id AS flight_schedule_provider_id, flight_schedule.route_id AS flight_schedule_route_id, flight_schedule.flight_number AS flight_schedule_flight_number, flight_schedule.dow AS flight_schedule_dow, flight_schedule.dep_time AS flight_schedule_dep_time, flight_schedule.arr_time AS flight_schedule_arr_time, flight_schedule.arrival_day_offset AS flight_schedule_arrival_day_offset, flight_schedule.aircraft_code AS flight_schedule_aircraft_code, flight_schedule.created_at AS flight_schedule_created_at, flight_schedule.updated_at AS flight_schedule_updated_at 
+FROM flight_schedule 
+WHERE flight_schedule.id = $1::UUID
+2025-12-09 22:28:20,584 | INFO | sqlalchemy.engine.Engine | [generated in 0.00012s] (UUID('f072bdb1-f204-49ba-97a2-0859969f7f9a'),)
+2025-12-09 22:28:20,587 | INFO | sqlalchemy.engine.Engine | INSERT INTO flight_instance (id, schedule_id, flight_date, dep_datetime, arr_datetime, status, created_at, updated_at) VALUES ($1::UUID, $2::UUID, $3::DATE, $4::TIMESTAMP WITH TIME ZONE, $5::TIMESTAMP WITH TIME ZONE, $6::VARCHAR, $7::TIMESTAMP WITH TIME ZONE, $8::TIMESTAMP WITH TIME ZONE)
+2025-12-09 22:28:20,587 | INFO | sqlalchemy.engine.Engine | [generated in 0.00031s] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), UUID('f072bdb1-f204-49ba-97a2-0859969f7f9a'), datetime.date(2025, 12, 15), datetime.datetime(2025, 12, 15, 8, 30, tzinfo=TzInfo(0)), datetime.datetime(2025, 12, 15, 10, 0, tzinfo=TzInfo(0)), 'scheduled', datetime.datetime(2025, 12, 9, 15, 28, 20, 585797, tzinfo=datetime.timezone.utc), datetime.datetime(2025, 12, 9, 15, 28, 20, 585802, tzinfo=datetime.timezone.utc))
+2025-12-09 22:28:20,599 | INFO | sqlalchemy.engine.Engine | COMMIT
+2025-12-09 22:28:20,602 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:20,603 | INFO | sqlalchemy.engine.Engine | SELECT flight_instance.id, flight_instance.schedule_id, flight_instance.flight_date, flight_instance.dep_datetime, flight_instance.arr_datetime, flight_instance.status, flight_instance.created_at, flight_instance.updated_at 
+FROM flight_instance 
+WHERE flight_instance.id = $1::UUID
+2025-12-09 22:28:20,603 | INFO | sqlalchemy.engine.Engine | [generated in 0.00014s] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'),)
+2025-12-09 22:28:20,605 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:29,360 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:29,361 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory 
+WHERE seat_inventory.instance_id = $1::UUID AND seat_inventory.cabin = $2::cabintype AND seat_inventory.fare_bucket = $3::farebuckettype
+2025-12-09 22:28:29,362 | INFO | sqlalchemy.engine.Engine | [generated in 0.00021s] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y')
+2025-12-09 22:28:29,381 | INFO | sqlalchemy.engine.Engine | INSERT INTO seat_inventory (instance_id, cabin, fare_bucket, total_seats, held_seats, sold_seats) VALUES ($1::UUID, $2::cabintype, $3::farebuckettype, $4::INTEGER, $5::INTEGER, $6::INTEGER)
+2025-12-09 22:28:29,381 | INFO | sqlalchemy.engine.Engine | [generated in 0.00020s] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y', 150, 0, 0)
+2025-12-09 22:28:29,382 | INFO | sqlalchemy.engine.Engine | COMMIT
+2025-12-09 22:28:29,385 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:29,386 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory 
+WHERE seat_inventory.instance_id = $1::UUID AND seat_inventory.cabin = $2::cabintype AND seat_inventory.fare_bucket = $3::farebuckettype
+2025-12-09 22:28:29,386 | INFO | sqlalchemy.engine.Engine | [generated in 0.00034s] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y')
+2025-12-09 22:28:29,388 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:35,894 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:35,895 | INFO | sqlalchemy.engine.Engine | SELECT route.id, route.origin, route.destination, route.distance_km, route.created_at, route.updated_at 
+FROM route 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2025-12-09 22:28:35,895 | INFO | sqlalchemy.engine.Engine | [generated in 0.00014s] (10, 0)
+2025-12-09 22:28:35,896 | INFO | sqlalchemy.engine.Engine | SELECT route.id, route.origin, route.destination, route.distance_km, route.created_at, route.updated_at 
+FROM route
+2025-12-09 22:28:35,896 | INFO | sqlalchemy.engine.Engine | [generated in 0.00017s] ()
+2025-12-09 22:28:35,898 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:39,038 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:39,039 | INFO | sqlalchemy.engine.Engine | SELECT flight_schedule.id, flight_schedule.provider_id, flight_schedule.route_id, flight_schedule.flight_number, flight_schedule.dow, flight_schedule.dep_time, flight_schedule.arr_time, flight_schedule.arrival_day_offset, flight_schedule.aircraft_code, flight_schedule.created_at, flight_schedule.updated_at 
+FROM flight_schedule 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2025-12-09 22:28:39,039 | INFO | sqlalchemy.engine.Engine | [generated in 0.00020s] (10, 0)
+2025-12-09 22:28:39,041 | INFO | sqlalchemy.engine.Engine | SELECT flight_schedule.id, flight_schedule.provider_id, flight_schedule.route_id, flight_schedule.flight_number, flight_schedule.dow, flight_schedule.dep_time, flight_schedule.arr_time, flight_schedule.arrival_day_offset, flight_schedule.aircraft_code, flight_schedule.created_at, flight_schedule.updated_at 
+FROM flight_schedule
+2025-12-09 22:28:39,041 | INFO | sqlalchemy.engine.Engine | [generated in 0.00016s] ()
+2025-12-09 22:28:39,044 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:42,001 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:42,002 | INFO | sqlalchemy.engine.Engine | SELECT flight_instance.id, flight_instance.schedule_id, flight_instance.flight_date, flight_instance.dep_datetime, flight_instance.arr_datetime, flight_instance.status, flight_instance.created_at, flight_instance.updated_at 
+FROM flight_instance 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2025-12-09 22:28:42,002 | INFO | sqlalchemy.engine.Engine | [generated in 0.00027s] (10, 0)
+2025-12-09 22:28:42,005 | INFO | sqlalchemy.engine.Engine | SELECT flight_instance.id, flight_instance.schedule_id, flight_instance.flight_date, flight_instance.dep_datetime, flight_instance.arr_datetime, flight_instance.status, flight_instance.created_at, flight_instance.updated_at 
+FROM flight_instance
+2025-12-09 22:28:42,005 | INFO | sqlalchemy.engine.Engine | [generated in 0.00016s] ()
+2025-12-09 22:28:42,007 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:44,198 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:44,199 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2025-12-09 22:28:44,199 | INFO | sqlalchemy.engine.Engine | [generated in 0.00018s] (10, 0)
+2025-12-09 22:28:44,201 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory
+2025-12-09 22:28:44,201 | INFO | sqlalchemy.engine.Engine | [generated in 0.00012s] ()
+2025-12-09 22:28:44,202 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:28:49,822 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:49,823 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory 
+WHERE seat_inventory.instance_id = $1::UUID AND seat_inventory.cabin = $2::cabintype AND seat_inventory.fare_bucket = $3::farebuckettype
+2025-12-09 22:28:49,823 | INFO | sqlalchemy.engine.Engine | [cached since 20.46s ago] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y')
+2025-12-09 22:28:49,826 | INFO | sqlalchemy.engine.Engine | UPDATE seat_inventory SET held_seats=$1::INTEGER, sold_seats=$2::INTEGER WHERE seat_inventory.instance_id = $3::UUID AND seat_inventory.cabin = $4::cabintype AND seat_inventory.fare_bucket = $5::farebuckettype
+2025-12-09 22:28:49,826 | INFO | sqlalchemy.engine.Engine | [generated in 0.00021s] (5, 10, UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y')
+2025-12-09 22:28:49,828 | INFO | sqlalchemy.engine.Engine | COMMIT
+2025-12-09 22:28:49,831 | INFO | sqlalchemy.engine.Engine | BEGIN (implicit)
+2025-12-09 22:28:49,831 | INFO | sqlalchemy.engine.Engine | SELECT seat_inventory.instance_id, seat_inventory.cabin, seat_inventory.fare_bucket, seat_inventory.total_seats, seat_inventory.held_seats, seat_inventory.sold_seats 
+FROM seat_inventory 
+WHERE seat_inventory.instance_id = $1::UUID AND seat_inventory.cabin = $2::cabintype AND seat_inventory.fare_bucket = $3::farebuckettype
+2025-12-09 22:28:49,831 | INFO | sqlalchemy.engine.Engine | [cached since 20.45s ago] (UUID('ba866c89-856d-4903-b7e3-c0a63a0f4ebc'), 'economy', 'Y')
+2025-12-09 22:28:49,833 | INFO | sqlalchemy.engine.Engine | ROLLBACK
+2025-12-09 22:29:21,701 | INFO | watchfiles.main | 14 changes detected
+2025-12-09 22:29:21,702 | WARNING | uvicorn.error | WatchFiles detected changes in 'services/seat_inventory.py', 'repositories/seat_inventory.py', 'services/flight_schedule.py', 'schemas/route.py', 'repositories/flight_schedule.py', 'repositories/flight_instance.py', 'repositories/route.py', 'schemas/seat_inventory.py', 'schemas/flight_instance.py', 'schemas/flight_schedule.py', 'services/flight_instance.py', 'api/v1/router.py', 'services/route.py', 'api/v1/endpoints/seat_inventory.py'. Reloading...
+2025-12-09 22:29:21,797 | INFO | uvicorn.error | Shutting down
+2025-12-09 22:29:21,898 | INFO | uvicorn.error | Waiting for application shutdown.
+2025-12-09 22:29:21,899 | INFO | app.main | Server shutting down...
+2025-12-09 22:29:21,899 | INFO | uvicorn.error | Application shutdown complete.
+2025-12-09 22:29:21,899 | INFO | uvicorn.error | Finished server process [41097]
+2025-12-09 22:29:23,111 | INFO | watchfiles.main | 3 changes detected
+2025-12-09 22:29:23,512 | INFO | watchfiles.main | 39 changes detected
+2025-12-09 22:29:23,519 | INFO | app.core.logging | Logging ready: level=20, output=/home/lamhung/code/Talk2Book/backend/log/backend.log
+2025-12-09 22:29:23,726 | INFO | fastapi_mcp.server | No auth config provided, skipping auth setup
+2025-12-09 22:29:23,726 | INFO | fastapi_mcp.server | MCP HTTP server listening at /mcp
+2025-12-09 22:29:23,726 | INFO | uvicorn.error | Started server process [44703]
+2025-12-09 22:29:23,727 | INFO | uvicorn.error | Waiting for application startup.
+2025-12-09 22:29:23,728 | INFO | app.main | Server starting up...
+2025-12-09 22:29:23,728 | INFO | uvicorn.error | Application startup complete.
+2025-12-09 22:29:26,518 | INFO | watchfiles.main | 1 change detected
+2025-12-09 22:29:26,518 | WARNING | uvicorn.error | WatchFiles detected changes in 'repositories/seat_inventory.py'. Reloading...
+2025-12-09 22:29:26,534 | INFO | uvicorn.error | Shutting down
+2025-12-09 22:29:26,636 | INFO | uvicorn.error | Waiting for application shutdown.
+2025-12-09 22:29:26,637 | INFO | app.main | Server shutting down...
+2025-12-09 22:29:26,637 | INFO | uvicorn.error | Application shutdown complete.
+2025-12-09 22:29:26,637 | INFO | uvicorn.error | Finished server process [44703]
+2025-12-09 22:29:28,122 | INFO | app.core.logging | Logging ready: level=20, output=/home/lamhung/code/Talk2Book/backend/log/backend.log
+2025-12-09 22:29:28,148 | INFO | watchfiles.main | 3 changes detected
+2025-12-09 22:29:28,323 | INFO | fastapi_mcp.server | No auth config provided, skipping auth setup
+2025-12-09 22:29:28,323 | INFO | fastapi_mcp.server | MCP HTTP server listening at /mcp
+2025-12-09 22:29:28,323 | INFO | uvicorn.error | Started server process [44832]
+2025-12-09 22:29:28,324 | INFO | uvicorn.error | Waiting for application startup.
+2025-12-09 22:29:28,325 | INFO | app.main | Server starting up...
+2025-12-09 22:29:28,325 | INFO | uvicorn.error | Application startup complete.
