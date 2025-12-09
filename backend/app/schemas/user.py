@@ -4,8 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.models.user import UserStatus
-from app.models.user_profile import Gender
+from app.models.enums import UserStatus, GenderType
 
 
 class UserRead(BaseModel):
@@ -34,7 +33,7 @@ class AllUserInfor(BaseModel):
     created_at: datetime
 
     full_name: str | None = None
-    gender: Gender | None = None
+    gender: GenderType | None = None
     birthday: date | None = None
     nationality: str | None = None
     avatar_url: str | None = None

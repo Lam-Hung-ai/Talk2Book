@@ -5,6 +5,7 @@ from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
     from app.models.city import City
+    from app.models.route import Route
 
 
 class Airport(SQLModel, table=True):
@@ -19,3 +20,5 @@ class Airport(SQLModel, table=True):
     timezone: str = Field(nullable=False)
 
     city: Optional["City"] = Relationship(back_populates="airports")
+    depart_routes: list["Route"] = Relationship(back_populates="origin_airport", sa_relationship_kwargs={"foreign_keys": "[Route.origin]"})
+    arrive_routes: list['Route'] = Relationship(back_populates="destination_airport", sa_relationship_kwargs={"foreign_keys": "[Route.destination]"})

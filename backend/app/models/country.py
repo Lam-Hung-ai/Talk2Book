@@ -5,6 +5,7 @@ from sqlmodel import Field, Relationship, SQLModel
 if TYPE_CHECKING:
     from app.models.city import City
     from app.models.currency import Currency
+    from app.models.provider import Provider
 
 
 class Country(SQLModel, table=True):
@@ -16,3 +17,4 @@ class Country(SQLModel, table=True):
 
     currency: Optional["Currency"] = Relationship(back_populates="countries")
     cities: list["City"] = Relationship(back_populates="country")
+    providers: list['Provider'] = Relationship(back_populates="country")
