@@ -3,7 +3,9 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
+    city,
     contract,
+    country,
     flight_instance,
     flight_schedule,
     refresh_token,
@@ -30,3 +32,5 @@ api_router.include_router(route_ep.router, prefix="/route", tags=["Route"])
 api_router.include_router(flight_schedule.router, prefix="/flight-schedule", tags=["Flight Schedule"])
 api_router.include_router(flight_instance.router, prefix="/flight-instance", tags=["Flight Instance"])
 api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])
+api_router.include_router(country.router, prefix="/country", tags=["Country"])
+api_router.include_router(city.router, prefix="/city", tags=["City"])
