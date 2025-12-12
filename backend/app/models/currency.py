@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from app.models.coupon import Coupon
     from app.models.coupon_redemption import CouponRedemption
     from app.models.exchange_rate import ExchangeRate
-    from app.models.payment_model import Payment
+    from app.models.payment import Payment
     from app.models.price_quote import PriceQuote
     from app.models.room_rate_plan import RoomRatePlan
     from app.models.tax import Tax

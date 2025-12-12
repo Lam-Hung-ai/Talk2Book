@@ -15,9 +15,9 @@ if TYPE_CHECKING:
     from app.models.coupon_redemption import CouponRedemption
     from app.models.price_quote import PriceQuote
     from app.models.refresh_token import RefreshToken
-    from app.models.review_model import Review
+    from app.models.review import Review
     from app.models.role import Role
-    from app.models.support_ticket_model import SupportTicket
+    from app.models.support_ticket import SupportTicket
     from app.models.user_profile import UserProfile
 
 

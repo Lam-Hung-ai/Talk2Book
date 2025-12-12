@@ -16,10 +16,10 @@ if TYPE_CHECKING:
     from app.models.coupon_redemption import CouponRedemption
     from app.models.currency import Currency
     from app.models.passenger import Passenger
-    from app.models.payment_model import Payment
+    from app.models.payment import Payment
     from app.models.price_quote import PriceQuote
-    from app.models.refund_model import Refund
-    from app.models.support_ticket_model import SupportTicket
+    from app.models.refund import Refund
+    from app.models.support_ticket import SupportTicket
     from app.models.user import User
 
 

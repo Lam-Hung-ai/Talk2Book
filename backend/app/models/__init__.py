@@ -14,16 +14,20 @@ from app.models.flight_schedule import FlightSchedule
 from app.models.hotel import Hotel
 from app.models.hotel_room import HotelRoom
 from app.models.passenger import Passenger
+from app.models.payment import Payment
 from app.models.price_quote import PriceQuote
 from app.models.product import Product
 from app.models.provider import Provider
 from app.models.refresh_token import RefreshToken
+from app.models.refund import Refund
+from app.models.review import Review
 from app.models.role import Role
 from app.models.room_inventory_daily import RoomInventoryDaily
 from app.models.room_rate_plan import RoomRatePlan
 from app.models.route import Route
 from app.models.seat_inventory import SeatInventory
 from app.models.slot_inventory import SlotInventory
+from app.models.support_ticket import SupportTicket
 from app.models.tax import Tax
 from app.models.ticket import Ticket
 from app.models.time_slot import TimeSlot
@@ -64,4 +68,8 @@ __all__ = [
     "Tax",
     "ExchangeRate",
     "PriceQuote",
+    "Payment",
+    "Refund",
+    "Review",
+    "SupportTicket",
 ]
