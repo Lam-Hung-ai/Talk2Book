@@ -7,11 +7,13 @@ from app.api.v1.endpoints import (
     city,
     contract,
     country,
+    exchange_rate,
     flight_instance,
     flight_schedule,
     geo,
     hotel,
     hotel_room,
+    price_quote,
     product,
     provider,
     refresh_token,
@@ -21,6 +23,7 @@ from app.api.v1.endpoints import (
     route,
     seat_inventory,
     slot_inventory,
+    tax,
     time_slot,
     user,
     user_profile,
@@ -28,15 +31,10 @@ from app.api.v1.endpoints import (
 
 api_router = APIRouter()
 api_router.include_router(user.router, prefix="/user", tags=["User"])
-api_router.include_router(
-    refresh_token.router, prefix="/refresh-token", tags=["Refresh Token"]
-)
+api_router.include_router(refresh_token.router, prefix="/refresh-token", tags=["Refresh Token"])
 api_router.include_router(role.router, prefix="/role", tags=["Role"])
-
 api_router.include_router(contract.router, prefix="/contract", tags=["Contract"])
-
 api_router.include_router(user_profile.router, prefix="/profile", tags=["User Profile"])
-
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(geo.router, tags=["Geo"])
 api_router.include_router(country.router, prefix="/country", tags=["Country"])
@@ -54,3 +52,6 @@ api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-d
 api_router.include_router(product.router, prefix="/product", tags=["Product"])
 api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
 api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])
+api_router.include_router(tax.router, prefix="/tax", tags=["Tax"])
+api_router.include_router(exchange_rate.router, prefix="/exchange-rate", tags=["Exchange Rate"])
+api_router.include_router(price_quote.router, prefix="/price-quote", tags=["Price Quote"])
