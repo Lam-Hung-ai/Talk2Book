@@ -149,3 +149,10 @@ WHERE seat_inventory.instance_id = $1::UUID AND seat_inventory.cabin = $2::cabin
 2025-12-09 22:29:28,324 | INFO | uvicorn.error | Waiting for application startup.
 2025-12-09 22:29:28,325 | INFO | app.main | Server starting up...
 2025-12-09 22:29:28,325 | INFO | uvicorn.error | Application startup complete.
+2025-12-09 23:16:38,709 | INFO | app.core.logging | Logging ready: level=20, output=/home/lamhung/code/Talk2Book/backend/log/backend.log
+2025-12-09 23:16:38,990 | INFO | fastapi_mcp.server | No auth config provided, skipping auth setup
+2025-12-09 23:16:38,990 | INFO | fastapi_mcp.server | MCP HTTP server listening at /mcp
+2025-12-09 23:16:38,990 | INFO | uvicorn.error | Started server process [80611]
+2025-12-09 23:16:38,991 | INFO | uvicorn.error | Waiting for application startup.
+2025-12-09 23:16:38,992 | INFO | app.main | Server starting up...
+2025-12-09 23:16:38,992 | INFO | uvicorn.error | Application startup complete.
