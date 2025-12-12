@@ -14,7 +14,9 @@ class ExchangeRate(SQLModel, table=True):
     __tablename__ = "exchange_rate"  # type: ignore
 
     __table_args__ = (
-        UniqueConstraint("rate_date", "base", "quote", name="uq_exrates_date_base_quote"),
+        UniqueConstraint(
+            "rate_date", "base", "quote", name="uq_exrates_date_base_quote"
+        ),
         CheckConstraint("base <> quote", name="check_exrates_base_neq_quote"),
         CheckConstraint("rate > 0", name="check_exrates_rate_positive"),
     )
@@ -26,7 +28,7 @@ class ExchangeRate(SQLModel, table=True):
         nullable=False,
         foreign_key="currency.code",
         max_length=3,
-        ondelete="RESTRICT"
+        ondelete="RESTRICT",
     )
 
     quote: str = Field(
@@ -34,19 +36,17 @@ class ExchangeRate(SQLModel, table=True):
         nullable=False,
         foreign_key="currency.code",
         max_length=3,
-        ondelete="RESTRICT"
+        ondelete="RESTRICT",
     )
 
-    rate: Decimal = Field(
-        sa_column=Column(Numeric(18, 8), nullable=False)
-    )
+    rate: Decimal = Field(sa_column=Column(Numeric(18, 8), nullable=False))
 
     # Relationships
     base_currency: "Currency" = Relationship(
         back_populates="base_exchange_rates",
-        sa_relationship_kwargs={"foreign_keys": "[ExchangeRate.base]"}
+        sa_relationship_kwargs={"foreign_keys": "[ExchangeRate.base]"},
     )
     quote_currency: "Currency" = Relationship(
         back_populates="quote_exchange_rates",
-        sa_relationship_kwargs={"foreign_keys": "[ExchangeRate.quote]"}
+        sa_relationship_kwargs={"foreign_keys": "[ExchangeRate.quote]"},
     )

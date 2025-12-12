@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class HotelRoomBase(BaseModel):
     hotel_id: UUID
     code: str | None = None
-    capacity: int = Field(gt=0, description="Số người tối đa")
+    capacity: int = Field(gt=0)
     bed_config: str | None = None
 
 

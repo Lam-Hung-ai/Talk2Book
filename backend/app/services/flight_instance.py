@@ -3,7 +3,6 @@ from datetime import date
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.flight_instance import FlightInstance
@@ -16,88 +15,82 @@ from app.schemas.flight_instance import (
 )
 
 
-async def _ensure_schedule(session: AsyncSession, schedule_id: UUID) -> None:
-    schedule = await session.get(FlightSchedule, schedule_id)
-    if not schedule:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Schedule {schedule_id} does not exist",
+class FlightInstanceService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.repo = FlightInstanceRepository(db)
+
+    async def _ensure_schedule(self, schedule_id: UUID) -> None:
+        schedule = await self.db.get(FlightSchedule, schedule_id)
+        if not schedule:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Schedule {schedule_id} does not exist",
+            )
+
+    @staticmethod
+    def _validate_datetimes(dep, arr):
+        if dep and arr and dep >= arr:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="dep_datetime must be earlier than arr_datetime",
+            )
+
+    async def create_instance(
+        self, payload: FlightInstanceCreate
+    ) -> FlightInstanceRead:
+        await self._ensure_schedule(payload.schedule_id)
+        self._validate_datetimes(payload.dep_datetime, payload.arr_datetime)
+
+        instance = await self.repo.create(payload)
+        return FlightInstanceRead.model_validate(instance, from_attributes=True)
+
+    async def list_instances(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        schedule_id: UUID | None = None,
+        flight_date: date | None = None,
+        status: str | None = None,
+    ) -> dict[str, object]:
+        skip = (page - 1) * page_size
+        items = await self.repo.list_filtered(
+            limit=page_size,
+            offset=skip,
+            schedule_id=schedule_id,
+            flight_date=flight_date,
+            status=status,
+        )
+        total = await self.repo.get_count()
+
+        return {
+            "items": [FlightInstanceRead.model_validate(i, from_attributes=True) for i in items],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size,
+        }
+
+    async def get_instance(self, instance_id: UUID) -> FlightInstanceRead:
+        instance = await self.repo.get_or_404(instance_id, detail="Flight instance not found")
+        return FlightInstanceRead.model_validate(instance, from_attributes=True)
+
+    async def update_instance(
+        self, instance_id: UUID, payload: FlightInstanceUpdate
+    ) -> FlightInstanceRead:
+        instance = await self.repo.get_or_404(instance_id, detail="Flight instance not found")
+
+        data = payload.model_dump(exclude_unset=True)
+        if "schedule_id" in data:
+            await self._ensure_schedule(data["schedule_id"])
+        self._validate_datetimes(
+            data.get("dep_datetime", instance.dep_datetime),
+            data.get("arr_datetime", instance.arr_datetime),
         )
 
+        updated = await self.repo.update(instance, data)
+        return FlightInstanceRead.model_validate(updated, from_attributes=True)
 
-def _validate_datetimes(dep, arr):
-    if dep and arr and dep >= arr:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="dep_datetime must be earlier than arr_datetime",
-        )
-
-
-async def create_flight_instance(
-    session: AsyncSession, payload: FlightInstanceCreate
-) -> FlightInstanceRead:
-    await _ensure_schedule(session, payload.schedule_id)
-    _validate_datetimes(payload.dep_datetime, payload.arr_datetime)
-
-    repo = FlightInstanceRepository(session)
-    instance = await repo.create(payload)
-    return FlightInstanceRead.model_validate(instance, from_attributes=True)
-
-
-async def list_flight_instances(
-    session: AsyncSession,
-    limit: int,
-    offset: int,
-    schedule_id: UUID | None = None,
-    flight_date: date | None = None,
-    status: str | None = None,
-) -> tuple[Sequence[FlightInstance], int]:
-    repo = FlightInstanceRepository(session)
-    items = await repo.list_filtered(
-        limit=limit,
-        offset=offset,
-        schedule_id=schedule_id,
-        flight_date=flight_date,
-        status=status,
-    )
-    total = (await session.exec(select(FlightInstance))).all()
-    return items, len(total)
-
-
-async def get_flight_instance_by_id(
-    session: AsyncSession, instance_id: UUID
-) -> FlightInstanceRead | None:
-    repo = FlightInstanceRepository(session)
-    instance = await repo.get(instance_id)
-    return (
-        FlightInstanceRead.model_validate(instance, from_attributes=True)
-        if instance
-        else None
-    )
-
-
-async def update_flight_instance_by_id(
-    session: AsyncSession, instance_id: UUID, payload: FlightInstanceUpdate
-) -> FlightInstanceRead | None:
-    repo = FlightInstanceRepository(session)
-    instance = await repo.get(instance_id)
-    if not instance:
-        return None
-
-    data = payload.model_dump(exclude_unset=True)
-    if "schedule_id" in data:
-        await _ensure_schedule(session, data["schedule_id"])
-    _validate_datetimes(data.get("dep_datetime", instance.dep_datetime), data.get("arr_datetime", instance.arr_datetime))
-
-    updated = await repo.update(instance, data)
-    return FlightInstanceRead.model_validate(updated, from_attributes=True)
-
-
-async def delete_flight_instance_by_id(session: AsyncSession, instance_id: UUID) -> bool:
-    repo = FlightInstanceRepository(session)
-    instance = await repo.get(instance_id)
-    if not instance:
-        return False
-    await repo.delete(instance_id)
-    return True
+    async def delete_instance(self, instance_id: UUID) -> None:
+        await self.repo.delete(instance_id)
 

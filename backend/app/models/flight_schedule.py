@@ -14,21 +14,41 @@ if TYPE_CHECKING:
 class FlightSchedule(SQLModel, table=True):
     __tablename__ = "flight_schedule"  # type: ignore
     __table_args__ = (
-        UniqueConstraint("provider_id", "route_id", "flight_number", "dow", "dep_time", name="uq_fs_provider_route_flt_dow_time"),
+        UniqueConstraint(
+            "provider_id",
+            "route_id",
+            "flight_number",
+            "dow",
+            "dep_time",
+            name="uq_fs_provider_route_flt_dow_time",
+        ),
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    provider_id: UUID = Field(foreign_key="provider.id", nullable=False, ondelete="RESTRICT")
+    provider_id: UUID = Field(
+        foreign_key="provider.id", nullable=False, ondelete="RESTRICT"
+    )
     route_id: UUID = Field(foreign_key="route.id", nullable=False, ondelete="CASCADE")
     flight_number: str = Field(nullable=False)
-    dow: str = Field(nullable=False, description="Bitstring representing Days of Week (e.g., 1000000)")
+    dow: str = Field(
+        nullable=False,
+        description="Bitstring representing Days of Week (e.g., 1000000)",
+    )
     dep_time: time = Field(nullable=False)
     arr_time: time = Field(nullable=False)
     arrival_day_offset: int = Field(default=0, nullable=False)
     aircraft_code: str | None = None
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_type=DateTime(timezone=True),
+        nullable=False,
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_type=DateTime(timezone=True),
+        nullable=False,
+    )
 
     # Relationships
     route: "Route" = Relationship(back_populates="flight_schedules")

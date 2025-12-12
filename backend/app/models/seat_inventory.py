@@ -18,7 +18,9 @@ class SeatInventory(SQLModel, table=True):
         CheckConstraint("held_seats + sold_seats <= total_seats", name="chk_si_seats"),
     )
 
-    instance_id: UUID = Field(foreign_key="flight_instance.id", primary_key=True, ondelete="CASCADE")
+    instance_id: UUID = Field(
+        foreign_key="flight_instance.id", primary_key=True, ondelete="CASCADE"
+    )
     cabin: CabinType = Field(primary_key=True)
     fare_bucket: FareBucketType = Field(primary_key=True)
 

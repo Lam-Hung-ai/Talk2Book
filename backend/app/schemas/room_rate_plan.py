@@ -8,10 +8,10 @@ from pydantic import BaseModel, Field
 
 class RoomRatePlanBase(BaseModel):
     hotel_id: UUID
-    name: str = Field(min_length=1, max_length=255)
+    name: str = Field(min_length=1)
     meal_plan: str | None = Field(default=None, max_length=20)
     cancellation_policy: dict[str, Any] | None = None
-    currency_code: str = Field(max_length=3)
+    currency_code: str = Field(max_length=3, min_length=3)
 
 
 class RoomRatePlanCreate(RoomRatePlanBase):
@@ -20,10 +20,10 @@ class RoomRatePlanCreate(RoomRatePlanBase):
 
 class RoomRatePlanUpdate(BaseModel):
     hotel_id: UUID | None = None
-    name: str | None = Field(default=None, min_length=1, max_length=255)
+    name: str | None = Field(default=None, min_length=1)
     meal_plan: str | None = Field(default=None, max_length=20)
     cancellation_policy: dict[str, Any] | None = None
-    currency_code: str | None = Field(default=None, max_length=3)
+    currency_code: str | None = Field(default=None, max_length=3, min_length=3)
 
 
 class RoomRatePlanRead(RoomRatePlanBase):

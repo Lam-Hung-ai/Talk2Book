@@ -24,9 +24,7 @@ class BookingItem(SQLModel, table=True):
     )
     vertical: str = Field(max_length=20, nullable=False)
     supplier_ref: str | None = Field(default=None)
-    details: dict[str, Any] = Field(
-        sa_column=Column(JSONB, nullable=False)
-    )
+    details: dict[str, Any] = Field(sa_column=Column(JSONB, nullable=False))
     price_amount: Decimal = Field(max_digits=12, decimal_places=2, nullable=False)
 
     # Relationships

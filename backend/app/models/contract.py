@@ -10,13 +10,14 @@ if TYPE_CHECKING:
     from app.models.currency import Currency
     from app.models.provider import Provider
 
+
 class Contract(SQLModel, table=True):
     __tablename__ = "contract"  # type: ignore
 
     __table_args__ = (
         CheckConstraint(
             "(commission_pct IS NULL) OR (commission_pct >= 0 AND commission_pct <= 100)",
-            name="check_commission_pct"
+            name="check_commission_pct",
         ),
     )
 
@@ -30,15 +31,11 @@ class Contract(SQLModel, table=True):
     effective_to: date | None = Field(default=None)
 
     commission_pct: Decimal | None = Field(
-        default=None,
-        sa_column=Column(Numeric(5, 2))
+        default=None, sa_column=Column(Numeric(5, 2))
     )
 
     currency_code: str = Field(
-        foreign_key="currency.code",
-        nullable=False,
-        max_length=3,
-        ondelete="RESTRICT"
+        foreign_key="currency.code", nullable=False, max_length=3, ondelete="RESTRICT"
     )
 
     provider: "Provider" = Relationship(back_populates="contracts")

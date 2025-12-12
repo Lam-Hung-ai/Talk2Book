@@ -5,19 +5,17 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import UserStatus
-
 
 class HotelBase(BaseModel):
     provider_id: UUID
     city_id: UUID
-    name: str = Field(min_length=1, max_length=255)
-    star_rating: Decimal | None = Field(default=None, ge=0, le=5, decimal_places=1)
+    name: str = Field(min_length=1)
+    star_rating: Decimal | None = Field(default=None, max_digits=2, decimal_places=1, ge=0, le=5)
     address: str | None = None
     checkin_time: time | None = None
     checkout_time: time | None = None
-    lat: Decimal | None = Field(default=None, ge=-90, le=90, decimal_places=6)
-    lng: Decimal | None = Field(default=None, ge=-180, le=180, decimal_places=6)
+    lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-90, le=90)
+    lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
 
 
 class HotelCreate(HotelBase):
@@ -27,13 +25,13 @@ class HotelCreate(HotelBase):
 class HotelUpdate(BaseModel):
     provider_id: UUID | None = None
     city_id: UUID | None = None
-    name: str | None = Field(default=None, min_length=1, max_length=255)
-    star_rating: Decimal | None = Field(default=None, ge=0, le=5, decimal_places=1)
+    name: str | None = Field(default=None, min_length=1)
+    star_rating: Decimal | None = Field(default=None, max_digits=2, decimal_places=1, ge=0, le=5)
     address: str | None = None
     checkin_time: time | None = None
     checkout_time: time | None = None
-    lat: Decimal | None = Field(default=None, ge=-90, le=90, decimal_places=6)
-    lng: Decimal | None = Field(default=None, ge=-180, le=180, decimal_places=6)
+    lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-90, le=90)
+    lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
 
 
 class HotelRead(HotelBase):

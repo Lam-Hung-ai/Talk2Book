@@ -4,15 +4,16 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.models.enums import ReviewTargetType
+
 
 class ReviewBase(BaseModel):
     """Base schema cho Review"""
     user_id: UUID
-    service_type: str = Field(..., description="Loại dịch vụ: flight, hotel, tour, etc.")
-    service_id: int | None = Field(None, description="ID của dịch vụ được đánh giá")
+    target_type: ReviewTargetType = Field(..., description="Loại đối tượng: hotel, product, flight, airport")
+    target_key: str = Field(..., description="Key của đối tượng được đánh giá")
     rating: int = Field(..., ge=1, le=5, description="Đánh giá từ 1-5 sao")
-    title: str = Field(..., min_length=1, max_length=200, description="Tiêu đề đánh giá")
-    content: str = Field(..., min_length=1, description="Nội dung đánh giá")
+    comment: str | None = Field(None, description="Bình luận đánh giá")
 
 
 class ReviewCreate(ReviewBase):
@@ -22,16 +23,15 @@ class ReviewCreate(ReviewBase):
 
 class ReviewUpdate(BaseModel):
     """Schema để cập nhật Review"""
-    service_type: str | None = None
-    service_id: int | None = None
+    target_type: ReviewTargetType | None = None
+    target_key: str | None = None
     rating: int | None = Field(None, ge=1, le=5)
-    title: str | None = Field(None, min_length=1, max_length=200)
-    content: str | None = Field(None, min_length=1)
+    comment: str | None = None
 
 
-class ReviewResponse(ReviewBase):
+class ReviewRead(ReviewBase):
     """Schema response cho Review"""
-    id: int
+    id: UUID
     created_at: datetime
 
     class Config:
@@ -41,7 +41,7 @@ class ReviewResponse(ReviewBase):
 class ReviewListResponse(BaseModel):
     """Schema cho danh sách Review với pagination"""
     total: int
-    items: Sequence[ReviewResponse]
+    items: Sequence[ReviewRead]
     skip: int
     limit: int
     average_rating: float | None = None

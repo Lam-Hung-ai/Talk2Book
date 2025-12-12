@@ -7,8 +7,12 @@ from pydantic import BaseModel, Field
 class FlightScheduleBase(BaseModel):
     provider_id: UUID
     route_id: UUID
-    flight_number: str = Field(min_length=1, max_length=50)
-    dow: str = Field(description="Bitstring representing Days of Week (e.g., 1000000)")
+    flight_number: str = Field(min_length=1)
+    dow: str = Field(
+        min_length=7,
+        max_length=7,
+        description="Bitstring for days of week, e.g. 1000000 for Monday",
+    )
     dep_time: time
     arr_time: time
     arrival_day_offset: int = Field(default=0)
@@ -22,8 +26,8 @@ class FlightScheduleCreate(FlightScheduleBase):
 class FlightScheduleUpdate(BaseModel):
     provider_id: UUID | None = None
     route_id: UUID | None = None
-    flight_number: str | None = Field(default=None, min_length=1, max_length=50)
-    dow: str | None = None
+    flight_number: str | None = Field(default=None, min_length=1)
+    dow: str | None = Field(default=None, min_length=7, max_length=7)
     dep_time: time | None = None
     arr_time: time | None = None
     arrival_day_offset: int | None = None

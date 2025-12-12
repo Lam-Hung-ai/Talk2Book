@@ -10,10 +10,8 @@ if TYPE_CHECKING:
 
 class Airport(SQLModel, table=True):
     __tablename__ = "airport"  # type: ignore
-    
-    __table_args__ = (
-        UniqueConstraint("city_id", "name", name="uq_airport_city_name"),
-    )
+
+    __table_args__ = (UniqueConstraint("city_id", "name", name="uq_airport_city_name"),)
 
     iata: str = Field(primary_key=True, max_length=3)
     icao: str | None = Field(max_length=4, unique=True)
@@ -22,5 +20,11 @@ class Airport(SQLModel, table=True):
     timezone: str = Field(nullable=False)
 
     city: Optional["City"] = Relationship(back_populates="airports")
-    depart_routes: list["Route"] = Relationship(back_populates="origin_airport", sa_relationship_kwargs={"foreign_keys": "[Route.origin]"})
-    arrive_routes: list['Route'] = Relationship(back_populates="destination_airport", sa_relationship_kwargs={"foreign_keys": "[Route.destination]"})
+    depart_routes: list["Route"] = Relationship(
+        back_populates="origin_airport",
+        sa_relationship_kwargs={"foreign_keys": "[Route.origin]"},
+    )
+    arrive_routes: list["Route"] = Relationship(
+        back_populates="destination_airport",
+        sa_relationship_kwargs={"foreign_keys": "[Route.destination]"},
+    )

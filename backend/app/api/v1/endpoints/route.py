@@ -1,99 +1,73 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
-from app.schemas.route import (
-    RouteCreate,
-    RouteRead,
-    RouteUpdate,
-)
-from app.services.route import (
-    create_route,
-    delete_route_by_id,
-    get_route_by_id,
-    list_routes,
-    update_route_by_id,
-)
+from app.schemas.route import RouteCreate, RouteRead, RouteUpdate
+from app.services.route import RouteService
 
 router = APIRouter()
 
 
+def get_route_service(db: AsyncSession = Depends(get_async_session)) -> RouteService:
+    return RouteService(db)
+
+
 @router.post(
-    "",
+    "/",
     response_model=RouteRead,
     status_code=status.HTTP_201_CREATED,
+    summary="Tạo route",
 )
-async def create_route_ep(
-    payload: RouteCreate,
-    session: AsyncSession = Depends(get_async_session),
+async def create_route(
+    payload: RouteCreate, service: RouteService = Depends(get_route_service)
 ):
-    route = await create_route(session, payload)
-    return route
+    return await service.create_route(payload)
 
 
 @router.get(
     "/",
-    response_model=list[RouteRead],
+    response_model=dict,
+    summary="Danh sách route",
 )
-async def list_routes_ep(
-    session: AsyncSession = Depends(get_async_session),
-    limit: int = Query(10, ge=1, le=200),
-    offset: int = Query(0, ge=0),
-    q: str | None = Query(None, description="Search by origin/destination IATA"),
-    origin: str | None = Query(None, max_length=3),
-    destination: str | None = Query(None, max_length=3),
+async def list_routes(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=200),
+    q: str | None = Query(None, description="Tìm theo origin/destination"),
+    origin: str | None = Query(None, min_length=3, max_length=3),
+    destination: str | None = Query(None, min_length=3, max_length=3),
+    service: RouteService = Depends(get_route_service),
 ):
-    items, _ = await list_routes(
-        session=session,
-        limit=limit,
-        offset=offset,
+    return await service.list_routes(
+        page=page,
+        page_size=page_size,
         q=q,
         origin=origin,
         destination=destination,
     )
-    return items
 
 
-@router.get(
-    "/{route_id}",
-    response_model=RouteRead,
-)
-async def get_route_ep(
-    route_id: UUID = Path(...),
-    session: AsyncSession = Depends(get_async_session),
+@router.get("/{route_id}", response_model=RouteRead, summary="Chi tiết route")
+async def get_route(route_id: UUID, service: RouteService = Depends(get_route_service)):
+    return await service.get_route(route_id)
+
+
+@router.put("/{route_id}", response_model=RouteRead, summary="Cập nhật route")
+async def update_route(
+    route_id: UUID, payload: RouteUpdate, service: RouteService = Depends(get_route_service)
 ):
-    route = await get_route_by_id(session, route_id)
-    if not route:
-        raise HTTPException(status_code=404, detail="Route not found")
-    return route
-
-
-@router.put(
-    "/{route_id}",
-    response_model=RouteRead,
-)
-async def update_route_ep(
-    route_id: UUID,
-    payload: RouteUpdate,
-    session: AsyncSession = Depends(get_async_session),
-):
-    route = await update_route_by_id(session, route_id, payload)
-    if not route:
-        raise HTTPException(status_code=404, detail="Route not found")
-    return route
+    return await service.update_route(route_id, payload)
 
 
 @router.delete(
     "/{route_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Xóa route",
 )
-async def delete_route_ep(
-    route_id: UUID,
-    session: AsyncSession = Depends(get_async_session),
+async def delete_route(
+    route_id: UUID, service: RouteService = Depends(get_route_service)
 ):
-    ok = await delete_route_by_id(session, route_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Route not found")
+    await service.delete_route(route_id)
     return None
+

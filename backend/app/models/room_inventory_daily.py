@@ -21,8 +21,18 @@ class RoomInventoryDaily(SQLModel, table=True):
         CheckConstraint("base_price >= 0", name="chk_rid_price_positive"),
     )
 
-    room_id: UUID = Field(foreign_key="hotel_room.id", primary_key=True, nullable=False, ondelete="CASCADE")
-    rate_plan_id: UUID = Field(foreign_key="room_rate_plan.id", primary_key=True, nullable=False, ondelete="CASCADE")
+    room_id: UUID = Field(
+        foreign_key="hotel_room.id",
+        primary_key=True,
+        nullable=False,
+        ondelete="CASCADE",
+    )
+    rate_plan_id: UUID = Field(
+        foreign_key="room_rate_plan.id",
+        primary_key=True,
+        nullable=False,
+        ondelete="CASCADE",
+    )
     stay_date: date = Field(primary_key=True, nullable=False)
 
     allotment: int = Field(nullable=False)

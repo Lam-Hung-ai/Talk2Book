@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class City(SQLModel, table=True):
     __tablename__ = "city"  # type: ignore
-    
+
     __table_args__ = (
         UniqueConstraint("country_code", "name", name="uq_city_country_name"),
     )

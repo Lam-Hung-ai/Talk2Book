@@ -1,6 +1,4 @@
 # app/repositories/product.py
-from uuid import UUID
-
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -15,13 +13,15 @@ class ProductRepository(BaseCRUD[Product, ProductCreate, ProductUpdate], Searcha
         BaseCRUD.__init__(self, Product, db)
         SearchableRepository.__init__(self, Product, db)
 
-    async def get_by_provider_id(self, provider_id: UUID) -> list[Product]:
+    async def get_by_provider(self, provider_id: str):
         """Lấy danh sách products theo provider_id"""
-        result = await self.db.exec(select(Product).where(Product.provider_id == provider_id))
-        return list(result.all())
+        stmt = select(Product).where(Product.provider_id == provider_id)
+        result = await self.db.exec(stmt)
+        return result.all()
 
-    async def get_by_city_id(self, city_id: UUID) -> list[Product]:
+    async def get_by_city(self, city_id: str):
         """Lấy danh sách products theo city_id"""
-        result = await self.db.exec(select(Product).where(Product.city_id == city_id))
-        return list(result.all())
+        stmt = select(Product).where(Product.city_id == city_id)
+        result = await self.db.exec(stmt)
+        return result.all()
 

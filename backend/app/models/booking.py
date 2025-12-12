@@ -16,10 +16,10 @@ if TYPE_CHECKING:
     from app.models.coupon_redemption import CouponRedemption
     from app.models.currency import Currency
     from app.models.passenger import Passenger
-    from app.models.payment_model import Payment
+    from app.models.payment import Payment
     from app.models.price_quote import PriceQuote
-    from app.models.refund_model import Refund
-    from app.models.support_ticket_model import SupportTicket
+    from app.models.refund import Refund
+    from app.models.support_ticket import SupportTicket
     from app.models.user import User
 
 
@@ -55,14 +55,16 @@ class Booking(SQLModel, table=True):
             SA_DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
         ),
     )
 
     # Relationships
     user: Optional["User"] = Relationship(back_populates="bookings")
     coupon: Optional["Coupon"] = Relationship(back_populates="bookings")
-    coupon_redemption: Optional["CouponRedemption"] = Relationship(back_populates="booking")
+    coupon_redemption: Optional["CouponRedemption"] = Relationship(
+        back_populates="booking"
+    )
     items: list["BookingItem"] = Relationship(back_populates="booking")
     passengers: list["Passenger"] = Relationship(back_populates="booking")
     currency: Optional["Currency"] = Relationship(back_populates="bookings")

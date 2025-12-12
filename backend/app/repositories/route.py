@@ -1,5 +1,4 @@
-from collections.abc import Sequence
-
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.route import Route
@@ -13,19 +12,8 @@ class RouteRepository(BaseCRUD[Route, RouteCreate, RouteUpdate], SearchableRepos
         BaseCRUD.__init__(self, Route, db)
         SearchableRepository.__init__(self, Route, db)
 
-    async def search_routes(
-        self,
-        *,
-        query: str,
-        limit: int,
-        offset: int,
-    ) -> Sequence[Route]:
-        return await self.search(
-            query=query,
-            search_columns=["origin", "destination"],
-            skip=offset,
-            limit=limit,
-            exact_match=False,
-            case_sensitive=False,
-        )
+    async def get_by_od(self, origin: str, destination: str) -> Route | None:
+        stmt = select(Route).where(Route.origin == origin, Route.destination == destination)
+        result = await self.db.exec(stmt)
+        return result.first()
 

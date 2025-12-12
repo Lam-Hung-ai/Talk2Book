@@ -1,137 +1,119 @@
 # app/services/hotel_room.py
-from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlmodel import and_, col, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.hotel import Hotel
 from app.models.hotel_room import HotelRoom
 from app.repositories.hotel_room import HotelRoomRepository
 from app.schemas.hotel_room import HotelRoomCreate, HotelRoomRead, HotelRoomUpdate
 
 
-async def _ensure_hotel(session: AsyncSession, hotel_id: UUID) -> None:
-    hotel = await session.get(Hotel, hotel_id)
-    if not hotel:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Hotel {hotel_id} does not exist",
-        )
+class HotelRoomService:
+    def __init__(self, db: AsyncSession):
+        self.repo = HotelRoomRepository(db)
+        self.db = db
 
+    async def get_hotel_room_by_id(self, room_id: UUID) -> HotelRoom:
+        """Lấy room theo ID, ném 404 nếu không tồn tại"""
+        return await self.repo.get_or_404(room_id, detail="Hotel room không tồn tại")
 
-async def create_hotel_room(session: AsyncSession, data: HotelRoomCreate) -> HotelRoomRead:
-    await _ensure_hotel(session, data.hotel_id)
-
-    repo = HotelRoomRepository(session)
-    # Kiểm tra unique constraint (hotel_id, code) nếu code được cung cấp
-    if data.code:
-        existing = await repo.db.exec(
-            select(HotelRoom).where(
-                and_(HotelRoom.hotel_id == data.hotel_id, HotelRoom.code == data.code)
+    async def create_hotel_room(self, room_in: HotelRoomCreate) -> HotelRoomRead:
+        """Tạo hotel room mới"""
+        # Kiểm tra unique constraint: hotel_id + code
+        if room_in.code:
+            existing = await self.repo.get_by_hotel_and_code(
+                str(room_in.hotel_id), room_in.code
             )
-        )
-        if existing.first():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Room code '{data.code}' already exists for this hotel",
-            )
-
-    room = await repo.create(data.model_dump())
-    return HotelRoomRead.model_validate(room, from_attributes=True)
-
-
-async def list_hotel_rooms(
-    session: AsyncSession,
-    limit: int,
-    offset: int,
-    q: str | None = None,
-    hotel_id: UUID | None = None,
-    min_capacity: int | None = None,
-    max_capacity: int | None = None,
-) -> tuple[Sequence[HotelRoom], int]:
-    repo = HotelRoomRepository(session)
-
-    query = select(HotelRoom)
-    if hotel_id:
-        query = query.where(HotelRoom.hotel_id == hotel_id)
-    if min_capacity is not None:
-        query = query.where(HotelRoom.capacity >= min_capacity)
-    if max_capacity is not None:
-        query = query.where(HotelRoom.capacity <= max_capacity)
-    if q:
-        like = f"%{q}%"
-        conditions = []
-        conditions.append(col(HotelRoom.code).ilike(like))
-        conditions.append(col(HotelRoom.bed_config).ilike(like))
-        query = query.where(or_(*conditions))
-
-    items = (await session.exec(query.offset(offset).limit(limit))).all()
-    
-    # Count total
-    total_query = select(HotelRoom)
-    if hotel_id:
-        total_query = total_query.where(HotelRoom.hotel_id == hotel_id)
-    if min_capacity is not None:
-        total_query = total_query.where(HotelRoom.capacity >= min_capacity)
-    if max_capacity is not None:
-        total_query = total_query.where(HotelRoom.capacity <= max_capacity)
-    if q:
-        like = f"%{q}%"
-        conditions = []
-        conditions.append(col(HotelRoom.code).ilike(like))
-        conditions.append(col(HotelRoom.bed_config).ilike(like))
-        total_query = total_query.where(or_(*conditions))
-    total = len((await session.exec(total_query)).all())
-    return items, total
-
-
-async def get_hotel_room_by_id(session: AsyncSession, room_id: UUID) -> HotelRoomRead | None:
-    repo = HotelRoomRepository(session)
-    room = await repo.get(room_id)
-    return HotelRoomRead.model_validate(room, from_attributes=True) if room else None
-
-
-async def update_hotel_room_by_id(
-    session: AsyncSession, room_id: UUID, payload: HotelRoomUpdate
-) -> HotelRoomRead | None:
-    repo = HotelRoomRepository(session)
-    room = await repo.get(room_id)
-    if not room:
-        return None
-
-    data = payload.model_dump(exclude_unset=True)
-    if "hotel_id" in data:
-        await _ensure_hotel(session, data["hotel_id"])
-
-    # Kiểm tra unique constraint nếu có update code
-    if "code" in data and data["code"]:
-        final_hotel_id = data.get("hotel_id", room.hotel_id)
-        existing = await repo.db.exec(
-            select(HotelRoom).where(
-                and_(
-                    HotelRoom.hotel_id == final_hotel_id,
-                    HotelRoom.code == data["code"],
-                    HotelRoom.id != room_id,
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Room code đã tồn tại cho hotel này",
                 )
-            )
+
+        db_room = await self.repo.create(room_in)
+        return HotelRoomRead.model_validate(db_room, from_attributes=True)
+
+    async def get_hotel_rooms_paginated(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        hotel_id: UUID | None = None,
+    ) -> dict[str, Any]:
+        """Lấy danh sách hotel rooms có phân trang và filter"""
+        skip = (page - 1) * page_size
+
+        filters = {}
+        if hotel_id is not None:
+            filters["hotel_id"] = hotel_id
+
+        rooms = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
+        total = await self.repo.get_count(**filters)
+
+        return {
+            "items": [HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size,
+        }
+
+    async def update_hotel_room(
+        self, room_id: UUID, room_in: HotelRoomUpdate
+    ) -> HotelRoomRead:
+        """Cập nhật hotel room"""
+        db_room = await self.get_hotel_room_by_id(room_id)
+
+        # Kiểm tra unique constraint nếu code được cập nhật
+        if room_in.code and room_in.code != db_room.code:
+            hotel_id = str(room_in.hotel_id) if room_in.hotel_id else str(db_room.hotel_id)
+            existing = await self.repo.get_by_hotel_and_code(hotel_id, room_in.code)
+            if existing and existing.id != room_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Room code đã tồn tại cho hotel này",
+                )
+
+        updated_room = await self.repo.update(db_room, room_in)
+        return HotelRoomRead.model_validate(updated_room, from_attributes=True)
+
+    async def delete_hotel_room(self, room_id: UUID) -> None:
+        """Xóa hotel room"""
+        await self.repo.delete(room_id)
+
+    async def search_hotel_rooms(
+        self,
+        q: str,
+        page: int = 1,
+        page_size: int = 20,
+        exact_match: bool = False,
+        case_sensitive: bool = False,
+    ) -> dict[str, Any]:
+        """Tìm kiếm hotel rooms theo code hoặc bed_config"""
+        skip = (page - 1) * page_size
+
+        rooms = await self.repo.search(
+            query=q,
+            search_columns=["code", "bed_config"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive,
+            skip=skip,
+            limit=page_size,
         )
-        if existing.first():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Room code '{data['code']}' already exists for this hotel",
-            )
 
-    updated = await repo.update(room, data)
-    return HotelRoomRead.model_validate(updated, from_attributes=True)
+        total = await self.repo.count_search(
+            query=q,
+            search_columns=["code", "bed_config"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive,
+        )
 
-
-async def delete_hotel_room_by_id(session: AsyncSession, room_id: UUID) -> bool:
-    repo = HotelRoomRepository(session)
-    room = await repo.get(room_id)
-    if not room:
-        return False
-    await repo.delete(room_id)
-    return True
+        return {
+            "items": [HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size,
+        }
 
