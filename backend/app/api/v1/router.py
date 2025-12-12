@@ -13,12 +13,15 @@ from app.api.v1.endpoints import (
     hotel,
     hotel_rate_plans,
     hotel_room,
+    product,
     provider,
     refresh_token,
     role,
     room_inventory_daily,
     route as route_ep,
     seat_inventory,
+    slot_inventory,
+    time_slot,
     user,
     user_profile,
 )
@@ -48,3 +51,6 @@ api_router.include_router(hotel.router, prefix="/hotel", tags=["Hotel"])
 api_router.include_router(hotel_room.router, prefix="/hotel-room", tags=["Hotel Room"])
 api_router.include_router(hotel_rate_plans.router, prefix="/room-rate-plan", tags=["Room Rate Plan"])
 api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-daily", tags=["Room Inventory Daily"])
+api_router.include_router(product.router, prefix="/product", tags=["Product"])
+api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
+api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])
