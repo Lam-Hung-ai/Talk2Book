@@ -10,10 +10,12 @@ if TYPE_CHECKING:
     from app.models.flight_schedule import FlightSchedule
 
 class Route(SQLModel, table=True):
+    __tablename__ = "route"  # type: ignore
+    
     __table_args__ = (
-        CheckConstraint("origin != destination", name="chk_routes_origin_dest"),
-        CheckConstraint("distance_km > 0", name="chk_routes_distance"),
-        UniqueConstraint("origin", "destination", name="uq_routes_od"),
+        CheckConstraint("origin != destination", name="chk_route_origin_dest"),
+        CheckConstraint("distance_km IS NULL OR distance_km > 0", name="chk_route_distance"),
+        UniqueConstraint("origin", "destination", name="uq_route_od"),
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)

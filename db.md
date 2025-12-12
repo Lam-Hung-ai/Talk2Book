@@ -1,8 +1,3 @@
-Cảm ơn bạn 😊
-Dưới đây là phần **giải thích chi tiết từng nhóm bảng** trong cơ sở dữ liệu Traveloka-like app mà ta đã thiết kế — nhằm giúp bạn (hoặc dev khác) hiểu rõ vai trò, mối quan hệ, và logic nghiệp vụ.
-
----
-
 ## 🧭 1. Nhóm **Định danh và Địa lý (Identity & Geo)**
 
 | Bảng                                    | Mục đích                                                                                                                                                  |
@@ -85,7 +80,6 @@ Cụm này cho phép tính năng tìm chuyến bay, giữ chỗ, bán vé, và c
 | Bảng                     | Mục đích                                                                                                      |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | **payments**             | Giao dịch thanh toán chính, ghi nhận cổng thanh toán (Momo, Stripe...), trạng thái (authorized, captured...). |
-| **payment_transactions** | Các bước con trong quy trình thanh toán: authorize, capture, refund, void. Giúp tracking chi tiết gateway.    |
 | **refunds**              | Hoàn tiền cho booking: số tiền, lý do, trạng thái.                                                            |
 
 Các bảng này bảo đảm khả năng xử lý nhiều gateway và hỗ trợ hoàn tiền linh hoạt.
@@ -109,21 +103,3 @@ Các bảng này bảo đảm khả năng xử lý nhiều gateway và hỗ tr�
 * `coupons` ↔ `bookings` là quan hệ **1–n** (một coupon có thể được áp dụng cho nhiều booking khác nhau).
 * `price_quotes` đảm bảo giá được “đóng băng” tại thời điểm người dùng xem.
 
----
-
-## ✅ Tổng kết
-
-CSDL này đảm bảo:
-
-* **Chuẩn hóa hợp lý (3NF)**, tránh dư thừa dữ liệu.
-* **Đủ mạnh để mở rộng** sang mô hình microservice.
-* **Bảo toàn dữ liệu giao dịch** và có lịch sử thay đổi.
-* **Hỗ trợ tìm kiếm, đặt vé, thanh toán, khuyến mãi, và đánh giá** – tương đương Traveloka thực tế.
-
----
-
-Nếu bạn muốn, mình có thể:
-
-* Vẽ **sơ đồ logic workflow** (Search → Quote → Booking → Payment → Ticket),
-* Hoặc mô tả **luồng dữ liệu giữa các bảng** khi người dùng đặt vé.
-  Bạn muốn mình tiếp tục với phần nào?

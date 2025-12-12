@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 
 class Role(SQLModel, table=True):
+    __tablename__ = "role"  # type: ignore
+    
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     code: str = Field(nullable=False, unique=True)
 

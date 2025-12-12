@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import DateTime, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
+    from app.models.booking import Booking
     from app.models.currency import Currency
     from app.models.user import User
 
@@ -62,3 +63,4 @@ class PriceQuote(SQLModel, table=True):
     # Relationships
     user: Optional["User"] = Relationship(back_populates="price_quotes")
     currency: "Currency" = Relationship(back_populates="price_quotes")
+    bookings: list["Booking"] = Relationship(back_populates="quote")

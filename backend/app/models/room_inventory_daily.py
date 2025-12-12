@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
+from sqlmodel import CheckConstraint, Field, Relationship, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
     from app.models.hotel_room import HotelRoom
@@ -16,6 +16,9 @@ class RoomInventoryDaily(SQLModel, table=True):
         UniqueConstraint(
             "room_id", "rate_plan_id", "stay_date", name="uq_room_rate_date"
         ),
+        CheckConstraint("sold <= allotment", name="chk_rid_sold_allotment"),
+        CheckConstraint("allotment > 0", name="chk_rid_allotment_positive"),
+        CheckConstraint("base_price >= 0", name="chk_rid_price_positive"),
     )
 
     room_id: UUID = Field(foreign_key="hotel_room.id", primary_key=True, nullable=False, ondelete="CASCADE")

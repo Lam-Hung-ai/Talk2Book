@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class Tax(SQLModel, table=True):
+    __tablename__ = "tax"  # type: ignore
+    
     __table_args__ = (
         CheckConstraint(
             "(rate IS NOT NULL AND amount IS NULL) OR (rate IS NULL AND amount IS NOT NULL)",

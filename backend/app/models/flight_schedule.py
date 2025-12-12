@@ -18,7 +18,7 @@ class FlightSchedule(SQLModel, table=True):
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    provider_id: UUID = Field(foreign_key="provider.id", nullable=False)
+    provider_id: UUID = Field(foreign_key="provider.id", nullable=False, ondelete="RESTRICT")
     route_id: UUID = Field(foreign_key="route.id", nullable=False, ondelete="CASCADE")
     flight_number: str = Field(nullable=False)
     dow: str = Field(nullable=False, description="Bitstring representing Days of Week (e.g., 1000000)")
