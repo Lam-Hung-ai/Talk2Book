@@ -18,7 +18,7 @@ class TicketStatus(str):
 class Ticket(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     code: str = Field(nullable=False, unique=True, max_length=128)
-    booking_item_id: UUID | None = Field(default=None, foreign_key="bookingitem.id")
+    booking_item_id: UUID | None = Field(default=None, foreign_key="booking_item.id")
     issued_at: datetime | None = Field(default=datetime.now())
     valid_from: datetime | None = Field(default=None)
     valid_to: datetime | None = Field(default=None)

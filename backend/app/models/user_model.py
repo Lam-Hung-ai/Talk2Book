@@ -24,7 +24,7 @@ class User(SQLModel, table=True):
     status: UserStatus | None = Field(default=UserStatus.active)
     create_at: datetime | None = Field(default_factory=datetime.now)
 
-    # 👇 Không import các model khác, chỉ dùng tên chuỗi để tránh vòng lặp import
+    # Relationships
     payments: list["Payment"] = Relationship(back_populates="user")
     reviews: list["Review"] = Relationship(back_populates="user")
     support_tickets: list["SupportTicket"] = Relationship(back_populates="user")

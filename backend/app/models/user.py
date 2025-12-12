@@ -11,6 +11,7 @@ from app.models.user_role import UserRole
 
 if TYPE_CHECKING:
     from app.models.booking import Booking
+    from app.models.price_quote import PriceQuote
     from app.models.refresh_token import RefreshToken
     from app.models.role import Role
     from app.models.user_profile import UserProfile
@@ -32,6 +33,7 @@ class User(SQLModel, table=True):
     roles: list["Role"] = Relationship(back_populates="users", link_model=UserRole)
     refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user")
     bookings: list["Booking"] = Relationship(back_populates="user")
+    price_quotes: list["PriceQuote"] = Relationship(back_populates="user")
     # payments: list["Payment"] = Relationship(back_populates="user")
     # reviews: list["Review"] = Relationship(back_populates="user")
     # support_tickets: list["SupportTicket"] = Relationship(back_populates="user")
