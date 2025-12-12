@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.seat_inventory import SeatInventory
 from app.models.enums import CabinType, FareBucketType
+from app.models.seat_inventory import SeatInventory
 from app.schemas.seat_inventory import SeatInventoryCreate, SeatInventoryUpdate
 
 
