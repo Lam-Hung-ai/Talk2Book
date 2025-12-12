@@ -11,13 +11,18 @@ if TYPE_CHECKING:
     from app.models.provider import Provider
     from app.models.time_slot import TimeSlot
 
+
 class Product(SQLModel, table=True):
     __tablename__ = "product"  # type: ignore
-    
+
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    provider_id: UUID = Field(foreign_key="provider.id", nullable=False, ondelete="RESTRICT")
-    city_id: UUID | None = Field(default=None, foreign_key="city.id", ondelete="SET NULL")
+    provider_id: UUID = Field(
+        foreign_key="provider.id", nullable=False, ondelete="RESTRICT"
+    )
+    city_id: UUID | None = Field(
+        default=None, foreign_key="city.id", ondelete="SET NULL"
+    )
 
     type: ProductType = Field(nullable=False)
     title: str = Field(nullable=False)
@@ -30,8 +35,8 @@ class Product(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
-        nullable=False
-        )
+        nullable=False,
+    )
 
     # Relationships
     provider: "Provider" = Relationship(back_populates="products")

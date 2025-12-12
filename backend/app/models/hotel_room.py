@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from app.models.hotel import Hotel
     from app.models.room_inventory_daily import RoomInventoryDaily
 
+
 class HotelRoom(SQLModel, table=True):
     __tablename__ = "hotel_room"  # type: ignore
     __table_args__ = (

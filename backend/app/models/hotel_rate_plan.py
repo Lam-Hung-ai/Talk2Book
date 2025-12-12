@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     pass
 
 
-
 class RoomRatePlan(SQLModel, table=True):
     __table_args__ = (
         UniqueConstraint("hotel_id", "name", name="uq_rateplans_hotel_name"),

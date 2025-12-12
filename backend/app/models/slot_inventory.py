@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.currency import Currency
     from app.models.time_slot import TimeSlot
 
+
 class SlotInventory(SQLModel, table=True):
     __tablename__ = "slot_inventory"  # type: ignore
     __table_args__ = (
@@ -18,19 +19,14 @@ class SlotInventory(SQLModel, table=True):
     )
 
     slot_id: UUID = Field(
-        primary_key=True,
-        foreign_key="time_slot.id",
-        ondelete="CASCADE"
+        primary_key=True, foreign_key="time_slot.id", ondelete="CASCADE"
     )
     capacity: int = Field(nullable=False)
     sold: int = Field(default=0, nullable=False)
 
     price: Decimal = Field(default=0, max_digits=12, decimal_places=2, nullable=False)
     currency_code: str = Field(
-        max_length=3,
-        foreign_key="currency.code",
-        nullable=False,
-        ondelete="RESTRICT"
+        max_length=3, foreign_key="currency.code", nullable=False, ondelete="RESTRICT"
     )
 
     # Relationships

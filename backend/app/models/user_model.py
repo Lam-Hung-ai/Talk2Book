@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.review_model import Review
     from app.models.support_ticket_model import SupportTicket
 
+
 class UserStatus(str, Enum):
     active = "active"
     suspended = "suspended"

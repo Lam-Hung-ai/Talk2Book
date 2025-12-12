@@ -20,11 +20,11 @@ class Coupon(SQLModel, table=True):
     __table_args__ = (
         CheckConstraint(
             "starts_at IS NULL OR ends_at IS NULL OR starts_at < ends_at",
-            name="chk_coupon_window"
+            name="chk_coupon_window",
         ),
         CheckConstraint(
             "current_uses >= 0 AND (max_uses_total IS NULL OR current_uses <= max_uses_total)",
-            name="chk_coupon_usage_limit"
+            name="chk_coupon_usage_limit",
         ),
         CheckConstraint(
             """
@@ -32,7 +32,7 @@ class Coupon(SQLModel, table=True):
             OR
             (discount_type = 'amount'  AND discount_value >= 0 AND currency_code IS NOT NULL)
             """,
-            name="chk_coupon_logic"
+            name="chk_coupon_logic",
         ),
     )
 
@@ -43,8 +43,12 @@ class Coupon(SQLModel, table=True):
     currency_code: str | None = Field(
         default=None, max_length=3, foreign_key="currency.code", ondelete="RESTRICT"
     )
-    min_order_amount: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
-    max_discount_amount: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
+    min_order_amount: Decimal | None = Field(
+        default=None, max_digits=12, decimal_places=2
+    )
+    max_discount_amount: Decimal | None = Field(
+        default=None, max_digits=12, decimal_places=2
+    )
     max_uses_total: int | None = Field(default=None)
     max_uses_per_user: int | None = Field(default=None)
     current_uses: int = Field(default=0, nullable=False)
@@ -62,7 +66,7 @@ class Coupon(SQLModel, table=True):
             SA_DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
         ),
     )
 

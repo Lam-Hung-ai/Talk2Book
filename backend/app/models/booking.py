@@ -55,14 +55,16 @@ class Booking(SQLModel, table=True):
             SA_DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
         ),
     )
 
     # Relationships
     user: Optional["User"] = Relationship(back_populates="bookings")
     coupon: Optional["Coupon"] = Relationship(back_populates="bookings")
-    coupon_redemption: Optional["CouponRedemption"] = Relationship(back_populates="booking")
+    coupon_redemption: Optional["CouponRedemption"] = Relationship(
+        back_populates="booking"
+    )
     items: list["BookingItem"] = Relationship(back_populates="booking")
     passengers: list["Passenger"] = Relationship(back_populates="booking")
     currency: Optional["Currency"] = Relationship(back_populates="bookings")

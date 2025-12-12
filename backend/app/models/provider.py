@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.hotel import Hotel
     from app.models.product import Product
 
+
 class Provider(SQLModel, table=True):
     __tablename__ = "provider"  # type: ignore
 
@@ -24,10 +25,7 @@ class Provider(SQLModel, table=True):
     display_name: str = Field(nullable=False)
 
     country_code: str | None = Field(
-        default=None,
-        foreign_key="country.code",
-        max_length=2,
-        ondelete="RESTRICT"
+        default=None, foreign_key="country.code", max_length=2, ondelete="RESTRICT"
     )
 
     status: UserStatus = Field(default=UserStatus.active, nullable=False)
@@ -44,7 +42,7 @@ class Provider(SQLModel, table=True):
             SA_DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
         ),
     )
 
@@ -52,4 +50,4 @@ class Provider(SQLModel, table=True):
     country: "Country" = Relationship(back_populates="providers")
     flight_schedules: list["FlightSchedule"] = Relationship(back_populates="provider")
     hotels: list["Hotel"] = Relationship(back_populates="provider")
-    products: list['Product'] = Relationship(back_populates="provider")
+    products: list["Product"] = Relationship(back_populates="provider")

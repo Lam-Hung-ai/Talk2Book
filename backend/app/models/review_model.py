@@ -19,9 +19,7 @@ class Review(SQLModel, table=True):
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
+    user_id: UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     target_type: ReviewTargetType = Field(nullable=False)
     target_key: str = Field(nullable=False)
     rating: int = Field(nullable=False)

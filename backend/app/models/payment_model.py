@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import CheckConstraint, DateTime
@@ -15,9 +15,7 @@ if TYPE_CHECKING:
 
 class Payment(SQLModel, table=True):
     __tablename__ = "payment"  # type: ignore
-    __table_args__ = (
-        CheckConstraint("amount > 0", name="chk_payment_amount"),
-    )
+    __table_args__ = (CheckConstraint("amount > 0", name="chk_payment_amount"),)
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     booking_id: UUID = Field(
@@ -26,10 +24,7 @@ class Payment(SQLModel, table=True):
     provider: str = Field(nullable=False)
     amount: Decimal = Field(max_digits=12, decimal_places=2, nullable=False)
     currency_code: str = Field(
-        max_length=3,
-        foreign_key="currency.code",
-        nullable=False,
-        ondelete="RESTRICT"
+        max_length=3, foreign_key="currency.code", nullable=False, ondelete="RESTRICT"
     )
     status: PaymentStatus = Field(nullable=False)
     idempotency_key: str | None = Field(default=None, unique=True)

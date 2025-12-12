@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.flight_schedule import FlightSchedule
     from app.models.seat_inventory import SeatInventory
 
+
 class FlightInstance(SQLModel, table=True):
     __tablename__ = "flight_instance"  # type: ignore
     __table_args__ = (
@@ -17,15 +18,27 @@ class FlightInstance(SQLModel, table=True):
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    schedule_id: UUID = Field(foreign_key="flight_schedule.id", nullable=False, ondelete="CASCADE")
+    schedule_id: UUID = Field(
+        foreign_key="flight_schedule.id", nullable=False, ondelete="CASCADE"
+    )
     flight_date: date = Field(nullable=False)
     dep_datetime: datetime = Field(sa_type=DateTime(timezone=True), nullable=False)
     arr_datetime: datetime = Field(sa_type=DateTime(timezone=True), nullable=False)
     status: str = Field(default="scheduled", max_length=20, nullable=False)
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), sa_type=DateTime(timezone=True), nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_type=DateTime(timezone=True),
+        nullable=False,
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_type=DateTime(timezone=True),
+        nullable=False,
+    )
 
     # Relationships
     schedule: "FlightSchedule" = Relationship(back_populates="instances")
-    seat_inventory: list["SeatInventory"] = Relationship(back_populates="flight_instance")
+    seat_inventory: list["SeatInventory"] = Relationship(
+        back_populates="flight_instance"
+    )

@@ -12,9 +12,10 @@ if TYPE_CHECKING:
     from app.models.provider import Provider
     from app.models.room_rate_plan import RoomRatePlan
 
+
 class Hotel(SQLModel, table=True):
     __tablename__ = "hotel"  # type: ignore
-    
+
     __table_args__ = (
         CheckConstraint("lat >= -90 AND lat <= 90", name="chk_hotel_lat"),
         CheckConstraint("lng >= -180 AND lng <= 180", name="chk_hotel_lng"),
@@ -22,7 +23,9 @@ class Hotel(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    provider_id: UUID = Field(foreign_key="provider.id", nullable=False, ondelete="RESTRICT")
+    provider_id: UUID = Field(
+        foreign_key="provider.id", nullable=False, ondelete="RESTRICT"
+    )
     city_id: UUID = Field(foreign_key="city.id", nullable=False, ondelete="RESTRICT")
 
     name: str = Field(nullable=False)

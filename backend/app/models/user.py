@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class User(SQLModel, table=True):
     __tablename__ = "user"  # type: ignore
-    
+
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     email: EmailStr = Field(unique=True, nullable=False, index=True)
     phone: str = Field(unique=True, nullable=False, max_length=32, index=True)

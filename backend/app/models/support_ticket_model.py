@@ -17,13 +17,9 @@ class SupportTicket(SQLModel, table=True):
     __tablename__ = "support_ticket"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
+    user_id: UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     booking_id: UUID | None = Field(
-        default=None,
-        foreign_key="booking.id",
-        ondelete="SET NULL"
+        default=None, foreign_key="booking.id", ondelete="SET NULL"
     )
     subject: str = Field(nullable=False)
     status: SupportStatus = Field(nullable=False)
@@ -38,7 +34,7 @@ class SupportTicket(SQLModel, table=True):
             SA_DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
         ),
     )
 

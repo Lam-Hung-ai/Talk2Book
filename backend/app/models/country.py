@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class Country(SQLModel, table=True):
     __tablename__ = "country"  # type: ignore
-    
+
     code: str = Field(primary_key=True, max_length=2)
     name: str = Field(nullable=False)
     currency_code: str = Field(
@@ -20,5 +20,5 @@ class Country(SQLModel, table=True):
 
     currency: Optional["Currency"] = Relationship(back_populates="countries")
     cities: list["City"] = Relationship(back_populates="country")
-    providers: list['Provider'] = Relationship(back_populates="country")
+    providers: list["Provider"] = Relationship(back_populates="country")
     passengers: list["Passenger"] = Relationship(back_populates="country")

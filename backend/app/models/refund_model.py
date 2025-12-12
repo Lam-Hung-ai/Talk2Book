@@ -14,9 +14,7 @@ if TYPE_CHECKING:
 
 class Refund(SQLModel, table=True):
     __tablename__ = "refund"  # type: ignore
-    __table_args__ = (
-        CheckConstraint("amount > 0", name="chk_refund_amount"),
-    )
+    __table_args__ = (CheckConstraint("amount > 0", name="chk_refund_amount"),)
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     booking_id: UUID = Field(
