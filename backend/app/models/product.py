@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from app.models.time_slot import TimeSlot
 
 class Product(SQLModel, table=True):
+    __tablename__ = "product"  # type: ignore
+    
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
     provider_id: UUID = Field(foreign_key="provider.id", nullable=False, ondelete="RESTRICT")

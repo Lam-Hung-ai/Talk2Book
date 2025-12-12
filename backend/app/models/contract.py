@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.provider import Provider
 
 class Contract(SQLModel, table=True):
+    __tablename__ = "contract"  # type: ignore
 
     __table_args__ = (
         CheckConstraint(

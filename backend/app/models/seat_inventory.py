@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
+from sqlmodel import CheckConstraint, Field, Relationship, SQLModel, UniqueConstraint
 
 from app.models.enums import CabinType, FareBucketType
 
@@ -15,6 +15,7 @@ class SeatInventory(SQLModel, table=True):
         UniqueConstraint(
             "instance_id", "cabin", "fare_bucket", name="uq_instance_cabin_bucket"
         ),
+        CheckConstraint("held_seats + sold_seats <= total_seats", name="chk_si_seats"),
     )
 
     instance_id: UUID = Field(foreign_key="flight_instance.id", primary_key=True, ondelete="CASCADE")

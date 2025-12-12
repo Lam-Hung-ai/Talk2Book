@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.product import Product
 
 class Provider(SQLModel, table=True):
+    __tablename__ = "provider"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     type: ProviderType = Field(nullable=False)
