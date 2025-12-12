@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
 from app.schemas.hotel_room import (

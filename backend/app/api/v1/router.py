@@ -9,8 +9,14 @@ from app.api.v1.endpoints import (
     country,
     flight_instance,
     flight_schedule,
+    geo,
+    hotel,
+    hotel_rate_plans,
+    hotel_room,
+    provider,
     refresh_token,
     role,
+    room_inventory_daily,
     route as route_ep,
     seat_inventory,
     user,
@@ -33,6 +39,12 @@ api_router.include_router(route_ep.router, prefix="/route", tags=["Route"])
 api_router.include_router(flight_schedule.router, prefix="/flight-schedule", tags=["Flight Schedule"])
 api_router.include_router(flight_instance.router, prefix="/flight-instance", tags=["Flight Instance"])
 api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])
+api_router.include_router(geo.router, tags=["Geo"])
 api_router.include_router(country.router, prefix="/country", tags=["Country"])
 api_router.include_router(city.router, prefix="/city", tags=["City"])
 api_router.include_router(airport.router, prefix="/airport", tags=["Airport"])
+api_router.include_router(provider.router, prefix="/provider", tags=["Provider"])
+api_router.include_router(hotel.router, prefix="/hotel", tags=["Hotel"])
+api_router.include_router(hotel_room.router, prefix="/hotel-room", tags=["Hotel Room"])
+api_router.include_router(hotel_rate_plans.router, prefix="/room-rate-plan", tags=["Room Rate Plan"])
+api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-daily", tags=["Room Inventory Daily"])
