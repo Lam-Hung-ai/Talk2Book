@@ -2,6 +2,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    airport,
     auth,
     city,
     contract,
@@ -34,3 +35,4 @@ api_router.include_router(flight_instance.router, prefix="/flight-instance", tag
 api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])
 api_router.include_router(country.router, prefix="/country", tags=["Country"])
 api_router.include_router(city.router, prefix="/city", tags=["City"])
+api_router.include_router(airport.router, prefix="/airport", tags=["Airport"])
