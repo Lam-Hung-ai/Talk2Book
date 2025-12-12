@@ -18,9 +18,12 @@ from app.api.v1.endpoints import (
     geo,
     hotel,
     hotel_room,
+    passenger,
+    payment,
     price_quote,
     product,
     provider,
+    refund,
     refresh_token,
     role,
     room_inventory_daily,
@@ -29,9 +32,8 @@ from app.api.v1.endpoints import (
     seat_inventory,
     slot_inventory,
     tax,
-    time_slot,
-    passenger,
     ticket,
+    time_slot,
     user,
     user_profile,
 )
@@ -69,3 +71,5 @@ api_router.include_router(booking_item.router, prefix="/booking-item", tags=["Bo
 api_router.include_router(passenger.router, prefix="/passenger", tags=["Passenger"])
 api_router.include_router(ticket.router, prefix="/ticket", tags=["Ticket"])
 api_router.include_router(booking_audit_log.router, prefix="/booking-audit-log", tags=["Booking Audit Log"])
+api_router.include_router(payment.router, prefix="/payment", tags=["Payment"])
+api_router.include_router(refund.router, prefix="/refund", tags=["Refund"])

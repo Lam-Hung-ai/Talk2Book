@@ -1,13 +1,16 @@
 # app/services/refund.py
 from collections.abc import Sequence
+from typing import Any
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.models.enums import RefundStatus
 from app.models.refund import Refund
-from app.repositories.payment import PaymentRepository
+from app.repositories.booking import BookingRepository
 from app.repositories.refund import RefundRepository
-from app.schemas.refund import RefundCreate, RefundUpdate
+from app.schemas.refund import RefundCreate, RefundRead, RefundUpdate
 
 
 class RefundService:
@@ -15,177 +18,99 @@ class RefundService:
 
     def __init__(self, db: AsyncSession):
         self.repo = RefundRepository(db)
-        self.payment_repo = PaymentRepository(db)
+        self.booking_repo = BookingRepository(db)
+        self.db = db
 
-    async def create_refund(self, refund_data: RefundCreate) -> Refund:
+    async def create_refund(self, refund_data: RefundCreate) -> RefundRead:
         """Tạo refund mới"""
-        # Validate payment tồn tại
-        payment = await self.payment_repo.get_or_404(
-            refund_data.payment_id,
-            detail="Payment not found"
+        # Validate booking tồn tại
+        booking = await self.booking_repo.get_or_404(
+            refund_data.booking_id,
+            detail="Booking không tồn tại"
         )
 
-        # Validate amount
-        if refund_data.amount <= 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Refund amount must be greater than 0"
-            )
+        # Validate amount > 0 (đã được validate trong schema)
+        # Có thể thêm logic kiểm tra tổng refund không vượt quá booking amount nếu cần
 
-        # Validate amount không vượt quá payment amount
-        if refund_data.amount > payment.amount:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Refund amount cannot exceed payment amount ({payment.amount})"
-            )
+        db_refund = await self.repo.create(refund_data.model_dump())
+        return RefundRead.model_validate(db_refund, from_attributes=True)
 
-        # Kiểm tra tổng refund không vượt quá payment amount
-        total_refunded = await self.repo.get_total_refund_amount_by_payment(
-            payment_id=refund_data.payment_id,
-            status="completed"
-        )
-
-        if total_refunded + refund_data.amount > payment.amount:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Total refund amount would exceed payment amount. Already refunded: {total_refunded}"
-            )
-
-        return await self.repo.create(refund_data)
-
-    async def get_refund(self, refund_id: int) -> Refund:
+    async def get_refund_by_id(self, refund_id: UUID) -> Refund:
         """Lấy refund theo ID"""
-        return await self.repo.get_or_404(refund_id, detail="Refund not found")
+        return await self.repo.get_or_404(refund_id, detail="Refund không tồn tại")
 
-    async def get_refunds(
+    async def get_refunds_paginated(
         self,
-        skip: int = 0,
-        limit: int = 100
-    ) -> Sequence[Refund]:
-        """Lấy danh sách tất cả refunds"""
-        return await self.repo.get_multi(skip=skip, limit=limit)
+        page: int = 1,
+        page_size: int = 20,
+        booking_id: UUID | None = None,
+        status: RefundStatus | None = None
+    ) -> dict[str, Any]:
+        """Lấy danh sách refunds có phân trang và filter"""
+        skip = (page - 1) * page_size
 
-    async def get_refunds_by_payment(
-        self,
-        payment_id: int
-    ) -> Sequence[Refund]:
-        """Lấy danh sách refunds của một payment"""
-        # Validate payment tồn tại
-        await self.payment_repo.get_or_404(payment_id, detail="Payment not found")
-        return await self.repo.get_by_payment_id(payment_id)
+        filters = {}
+        if booking_id is not None:
+            filters["booking_id"] = booking_id
+        if status is not None:
+            filters["status"] = status
 
-    async def get_refunds_by_status(
-        self,
-        status: str,
-        skip: int = 0,
-        limit: int = 100
-    ) -> Sequence[Refund]:
-        """Lấy refunds theo trạng thái"""
-        return await self.repo.get_by_status(status, skip=skip, limit=limit)
+        refunds = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
+        total = await self.repo.get_count(**filters)
+
+        return {
+            "items": [RefundRead.model_validate(r, from_attributes=True) for r in refunds],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
 
     async def update_refund(
         self,
-        refund_id: int,
+        refund_id: UUID,
         refund_data: RefundUpdate
-    ) -> Refund:
+    ) -> RefundRead:
         """Cập nhật refund"""
-        refund = await self.repo.get_or_404(refund_id, detail="Refund not found")
+        refund = await self.get_refund_by_id(refund_id)
+        updated_refund = await self.repo.update(refund, refund_data)
+        return RefundRead.model_validate(updated_refund, from_attributes=True)
 
-        # Nếu update amount, validate lại
-        if refund_data.amount is not None:
-            payment = await self.payment_repo.get_or_404(refund.payment_id)
-            if refund_data.amount > payment.amount:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Refund amount cannot exceed payment amount ({payment.amount})"
-                )
-
-        return await self.repo.update(refund, refund_data)
-
-    async def update_refund_status(
-        self,
-        refund_id: int,
-        new_status: str
-    ) -> Refund:
-        """Cập nhật trạng thái refund"""
-        valid_statuses = ["pending", "approved", "rejected", "completed", "cancelled"]
-        if new_status not in valid_statuses:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-            )
-
-        return await self.repo.update_status(refund_id, new_status)
-
-    async def approve_refund(self, refund_id: int) -> Refund:
-        """Duyệt refund"""
-        return await self.update_refund_status(refund_id, "approved")
-
-    async def reject_refund(self, refund_id: int) -> Refund:
-        """Từ chối refund"""
-        return await self.update_refund_status(refund_id, "rejected")
-
-    async def complete_refund(self, refund_id: int) -> Refund:
-        """Hoàn thành refund"""
-        refund = await self.repo.get_or_404(refund_id, detail="Refund not found")
-
-        if refund.status != "approved":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Only approved refunds can be completed"
-            )
-
-        return await self.update_refund_status(refund_id, "completed")
-
-    async def delete_refund(self, refund_id: int) -> None:
-        """Xóa refund (chỉ cho phép nếu status là pending)"""
-        refund = await self.repo.get_or_404(refund_id, detail="Refund not found")
-
-        if refund.status not in ["pending", "rejected"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Can only delete pending or rejected refunds"
-            )
-
+    async def delete_refund(self, refund_id: UUID) -> None:
+        """Xóa refund"""
         await self.repo.delete(refund_id)
 
     async def search_refunds(
         self,
-        query: str,
-        search_fields: list[str] | None = None,
-        skip: int = 0,
-        limit: int = 20
-    ) -> Sequence[Refund]:
-        """Tìm kiếm refunds"""
-        if search_fields is None:
-            search_fields = ["reason", "status"]
+        q: str,
+        page: int = 1,
+        page_size: int = 20,
+        exact_match: bool = False,
+        case_sensitive: bool = False
+    ) -> dict[str, Any]:
+        """Tìm kiếm refunds theo reason hoặc status"""
+        skip = (page - 1) * page_size
 
-        return await self.repo.search(
-            query=query,
-            search_columns=search_fields,
+        refunds = await self.repo.search(
+            query=q,
+            search_columns=["reason"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive,
             skip=skip,
-            limit=limit
+            limit=page_size
         )
 
-    async def get_payment_refund_stats(self, payment_id: int) -> dict:
-        """Lấy thống kê refund của một payment"""
-        await self.payment_repo.get_or_404(payment_id, detail="Payment not found")
-
-        total_refunds = await self.repo.count_by_payment_id(payment_id)
-        total_amount = await self.repo.get_total_refund_amount_by_payment(payment_id)
-        completed_amount = await self.repo.get_total_refund_amount_by_payment(
-            payment_id,
-            status="completed"
-        )
-        pending_amount = await self.repo.get_total_refund_amount_by_payment(
-            payment_id,
-            status="pending"
+        total = await self.repo.count_search(
+            query=q,
+            search_columns=["reason"],
+            exact_match=exact_match,
+            case_sensitive=case_sensitive
         )
 
         return {
-            "payment_id": payment_id,
-            "total_refunds": total_refunds,
-            "total_refund_amount": total_amount,
-            "completed_amount": completed_amount,
-            "pending_amount": pending_amount
+            "items": [RefundRead.model_validate(r, from_attributes=True) for r in refunds],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
         }

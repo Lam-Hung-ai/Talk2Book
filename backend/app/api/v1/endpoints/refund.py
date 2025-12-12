@@ -1,9 +1,12 @@
 # app/api/v1/endpoints/refund.py
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
-from app.schemas.refund import RefundCreate, RefundResponse, RefundUpdate
+from app.models.enums import RefundStatus
+from app.schemas.refund import RefundCreate, RefundRead, RefundUpdate
 from app.services.refund import RefundService
 
 router = APIRouter()
@@ -14,141 +17,87 @@ def get_refund_service(db: AsyncSession = Depends(get_async_session)) -> RefundS
     return RefundService(db)
 
 
-@router.post("/", response_model=RefundResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=RefundRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Tạo refund mới",
+)
 async def create_refund(
     refund_data: RefundCreate, service: RefundService = Depends(get_refund_service)
 ):
     """
     Tạo refund mới
-
-    - **payment_id**: ID của payment cần hoàn tiền
-    - **amount**: Số tiền hoàn lại (phải <= payment amount)
-    - **reason**: Lý do hoàn tiền
-    - **status**: Trạng thái refund (pending, approved, rejected, completed)
     """
     return await service.create_refund(refund_data)
 
 
-@router.get("/search/", response_model=list[RefundResponse])
-async def search_refunds(
-    q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
-    service: RefundService = Depends(get_refund_service),
-):
-    """
-    Tìm kiếm refunds theo reason hoặc status
-    """
-    return await service.search_refunds(query=q, skip=skip, limit=limit)
-
-
-@router.get("/pending/", response_model=list[RefundResponse])
-async def get_pending_refunds(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
-    service: RefundService = Depends(get_refund_service),
-):
-    """Lấy danh sách refunds đang chờ xử lý"""
-    return await service.repo.get_pending_refunds(skip=skip, limit=limit)
-
-
-@router.get("/approved/", response_model=list[RefundResponse])
-async def get_approved_refunds(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
-    service: RefundService = Depends(get_refund_service),
-):
-    """Lấy danh sách refunds đã được duyệt"""
-    return await service.repo.get_approved_refunds(skip=skip, limit=limit)
-
-
-@router.get("/payment/{payment_id}", response_model=list[RefundResponse])
-async def get_refunds_by_payment(
-    payment_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Lấy danh sách refunds của một payment"""
-    return await service.get_refunds_by_payment(payment_id)
-
-
-@router.get("/payment/{payment_id}/stats")
-async def get_payment_refund_stats(
-    payment_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Lấy thống kê refund của một payment"""
-    return await service.get_payment_refund_stats(payment_id)
-
-
-@router.get("/{refund_id}", response_model=RefundResponse)
+@router.get("/{refund_id}", response_model=RefundRead, summary="Lấy thông tin refund theo ID")
 async def get_refund(
-    refund_id: int, service: RefundService = Depends(get_refund_service)
+    refund_id: UUID, service: RefundService = Depends(get_refund_service)
 ):
-    """Lấy thông tin refund theo ID"""
-    return await service.get_refund(refund_id)
+    """
+    Lấy thông tin refund theo ID. Ném 404 nếu không tồn tại
+    """
+    refund = await service.get_refund_by_id(refund_id)
+    return RefundRead.model_validate(refund, from_attributes=True)
 
 
-@router.get("/")
+@router.get("/", response_model=dict, summary="Danh sách refunds có phân trang")
 async def get_refunds(
-    skip: int = Query(0, ge=0, description="Số bản ghi bỏ qua"),
-    limit: int = Query(100, ge=1, le=100, description="Số bản ghi tối đa"),
+    page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
+    page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
+    booking_id: UUID | None = Query(None, description="Lọc theo booking_id"),
+    status: RefundStatus | None = Query(None, description="Lọc theo trạng thái"),
     service: RefundService = Depends(get_refund_service),
 ):
-    """Lấy danh sách tất cả refunds với pagination"""
-    items = await service.get_refunds(skip=skip, limit=limit)
-    total = await service.repo.get_count()
+    """
+    Lấy danh sách refunds với phân trang và filter
+    """
+    return await service.get_refunds_paginated(
+        page=page, page_size=page_size, booking_id=booking_id, status=status
+    )
 
-    return {"total": total, "items": items, "skip": skip, "limit": limit}
 
-
-@router.put("/{refund_id}", response_model=RefundResponse)
+@router.put("/{refund_id}", response_model=RefundRead, summary="Cập nhật thông tin refund")
 async def update_refund(
-    refund_id: int,
-    refund_data: RefundUpdate,
-    service: RefundService = Depends(get_refund_service),
+    refund_id: UUID, refund_data: RefundUpdate, service: RefundService = Depends(get_refund_service)
 ):
-    """Cập nhật thông tin refund"""
+    """
+    Cập nhật refund
+    """
     return await service.update_refund(refund_id, refund_data)
 
 
-@router.patch("/{refund_id}/status", response_model=RefundResponse)
-async def update_refund_status(
-    refund_id: int,
-    new_status: str = Query(
-        ...,
-        description="Trạng thái mới: pending, approved, rejected, completed, cancelled",
-    ),
+@router.delete("/{refund_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa refund")
+async def delete_refund(
+    refund_id: UUID, service: RefundService = Depends(get_refund_service)
+):
+    """
+    Xóa refund
+    """
+    await service.delete_refund(refund_id)
+    return None
+
+
+@router.get(
+    "/search/mixin", response_model=dict, summary="Tìm kiếm refunds"
+)
+async def search_refunds(
+    q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    exact_match: bool = Query(False, description="Tìm chính xác toàn bộ chuỗi"),
+    case_sensitive: bool = Query(False, description="Phân biệt hoa/thường"),
     service: RefundService = Depends(get_refund_service),
 ):
-    """Cập nhật trạng thái refund"""
-    return await service.update_refund_status(refund_id, new_status)
-
-
-@router.patch("/{refund_id}/approve", response_model=RefundResponse)
-async def approve_refund(
-    refund_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Duyệt refund"""
-    return await service.approve_refund(refund_id)
-
-
-@router.patch("/{refund_id}/reject", response_model=RefundResponse)
-async def reject_refund(
-    refund_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Từ chối refund"""
-    return await service.reject_refund(refund_id)
-
-
-@router.patch("/{refund_id}/complete", response_model=RefundResponse)
-async def complete_refund(
-    refund_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Hoàn thành refund (chỉ khi đã approved)"""
-    return await service.complete_refund(refund_id)
-
-
-@router.delete("/{refund_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_refund(
-    refund_id: int, service: RefundService = Depends(get_refund_service)
-):
-    """Xóa refund (chỉ cho phép pending hoặc rejected)"""
-    await service.delete_refund(refund_id)
+    """
+    Tìm kiếm refunds theo reason
+    """
+    return await service.search_refunds(
+        q=q,
+        page=page,
+        page_size=page_size,
+        exact_match=exact_match,
+        case_sensitive=case_sensitive,
+    )
