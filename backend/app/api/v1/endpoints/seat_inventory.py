@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
@@ -10,90 +10,84 @@ from app.schemas.seat_inventory import (
     SeatInventoryRead,
     SeatInventoryUpdate,
 )
-from app.services.seat_inventory import (
-    create_seat_inventory,
-    delete_seat_inventory,
-    get_seat_inventory,
-    list_seat_inventory,
-    update_seat_inventory,
-)
+from app.services.seat_inventory import SeatInventoryService
 
 router = APIRouter()
 
 
+def get_seat_inventory_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> SeatInventoryService:
+    return SeatInventoryService(db)
+
+
 @router.post(
-    "",
+    "/",
     response_model=SeatInventoryRead,
     status_code=status.HTTP_201_CREATED,
+    summary="Tạo seat inventory",
 )
-async def create_seat_inventory_ep(
+async def create_seat_inventory(
     payload: SeatInventoryCreate,
-    session: AsyncSession = Depends(get_async_session),
+    service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    return await create_seat_inventory(session, payload)
+    return await service.create_inventory(payload)
 
 
-@router.get(
-    "/",
-    response_model=list[SeatInventoryRead],
-)
-async def list_seat_inventory_ep(
-    session: AsyncSession = Depends(get_async_session),
-    limit: int = Query(10, ge=1, le=200),
-    offset: int = Query(0, ge=0),
+@router.get("/", response_model=dict, summary="Danh sách seat inventory")
+async def list_seat_inventory(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=200),
     instance_id: UUID | None = Query(None),
+    service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    items, _ = await list_seat_inventory(
-        session=session, limit=limit, offset=offset, instance_id=instance_id
+    return await service.list_inventory(
+        page=page, page_size=page_size, instance_id=instance_id
     )
-    return items
 
 
 @router.get(
     "/{instance_id}/{cabin}/{fare_bucket}",
     response_model=SeatInventoryRead,
+    summary="Chi tiết seat inventory",
 )
-async def get_seat_inventory_ep(
-    instance_id: UUID = Path(...),
+async def get_seat_inventory(
+    instance_id: UUID,
     cabin: CabinType = Path(...),
     fare_bucket: FareBucketType = Path(...),
-    session: AsyncSession = Depends(get_async_session),
+    service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    obj = await get_seat_inventory(session, instance_id, cabin, fare_bucket)
-    if not obj:
-        raise HTTPException(status_code=404, detail="Seat inventory not found")
-    return obj
+    return await service.get_inventory(instance_id, cabin, fare_bucket)
 
 
 @router.put(
     "/{instance_id}/{cabin}/{fare_bucket}",
     response_model=SeatInventoryRead,
+    summary="Cập nhật seat inventory",
 )
-async def update_seat_inventory_ep(
+async def update_seat_inventory(
+    instance_id: UUID,
+    cabin: CabinType,
+    fare_bucket: FareBucketType,
     payload: SeatInventoryUpdate,
-    instance_id: UUID = Path(...),
-    cabin: CabinType = Path(...),
-    fare_bucket: FareBucketType = Path(...),
-    session: AsyncSession = Depends(get_async_session),
+    service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    obj = await update_seat_inventory(session, instance_id, cabin, fare_bucket, payload)
-    if not obj:
-        raise HTTPException(status_code=404, detail="Seat inventory not found")
-    return obj
+    return await service.update_inventory(
+        instance_id, cabin, fare_bucket, payload
+    )
 
 
 @router.delete(
     "/{instance_id}/{cabin}/{fare_bucket}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Xóa seat inventory",
 )
-async def delete_seat_inventory_ep(
-    instance_id: UUID = Path(...),
-    cabin: CabinType = Path(...),
-    fare_bucket: FareBucketType = Path(...),
-    session: AsyncSession = Depends(get_async_session),
+async def delete_seat_inventory(
+    instance_id: UUID,
+    cabin: CabinType,
+    fare_bucket: FareBucketType,
+    service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    ok = await delete_seat_inventory(session, instance_id, cabin, fare_bucket)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Seat inventory not found")
+    await service.delete_inventory(instance_id, cabin, fare_bucket)
     return None
 

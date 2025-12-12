@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from datetime import date
 from uuid import UUID
 
@@ -7,31 +6,36 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.flight_instance import FlightInstance
 from app.repositories.base import BaseCRUD
+from app.repositories.searchable import SearchableRepository
 from app.schemas.flight_instance import FlightInstanceCreate, FlightInstanceUpdate
 
 
 class FlightInstanceRepository(
-    BaseCRUD[FlightInstance, FlightInstanceCreate, FlightInstanceUpdate]
+    BaseCRUD[FlightInstance, FlightInstanceCreate, FlightInstanceUpdate],
+    SearchableRepository,
 ):
     def __init__(self, db: AsyncSession):
-        super().__init__(FlightInstance, db)
+        BaseCRUD.__init__(self, FlightInstance, db)
+        SearchableRepository.__init__(self, FlightInstance, db)
 
     async def list_filtered(
         self,
         *,
         limit: int,
         offset: int,
-        schedule_id: UUID | None,
-        flight_date: date | None,
-        status: str | None,
-    ) -> Sequence[FlightInstance]:
-        query = select(FlightInstance)
+        schedule_id: UUID | None = None,
+        flight_date: date | None = None,
+        status: str | None = None,
+    ):
+        stmt = select(FlightInstance)
         if schedule_id:
-            query = query.where(FlightInstance.schedule_id == schedule_id)
+            stmt = stmt.where(FlightInstance.schedule_id == schedule_id)
         if flight_date:
-            query = query.where(FlightInstance.flight_date == flight_date)
+            stmt = stmt.where(FlightInstance.flight_date == flight_date)
         if status:
-            query = query.where(FlightInstance.status == status)
-        result = await self.db.exec(query.offset(offset).limit(limit))
+            stmt = stmt.where(FlightInstance.status == status)
+
+        stmt = stmt.offset(offset).limit(limit)
+        result = await self.db.exec(stmt)
         return result.all()
 

@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.refund_model import Refund
+from app.models.refund import Refund
 from app.repositories.payment import PaymentRepository
 from app.repositories.refund import RefundRepository
 from app.schemas.refund import RefundCreate, RefundUpdate

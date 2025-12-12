@@ -17,8 +17,8 @@ from app.api.v1.endpoints import (
     provider,
     refresh_token,
     role,
+    route,
     room_inventory_daily,
-    route as route_ep,
     seat_inventory,
     slot_inventory,
     time_slot,
@@ -38,15 +38,14 @@ api_router.include_router(contract.router, prefix="/contract", tags=["Contract"]
 api_router.include_router(user_profile.router, prefix="/profile", tags=["User Profile"])
 
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
-api_router.include_router(route_ep.router, prefix="/route", tags=["Route"])
-api_router.include_router(flight_schedule.router, prefix="/flight-schedule", tags=["Flight Schedule"])
-api_router.include_router(flight_instance.router, prefix="/flight-instance", tags=["Flight Instance"])
-api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])
 api_router.include_router(geo.router, tags=["Geo"])
 api_router.include_router(country.router, prefix="/country", tags=["Country"])
 api_router.include_router(city.router, prefix="/city", tags=["City"])
 api_router.include_router(airport.router, prefix="/airport", tags=["Airport"])
 api_router.include_router(provider.router, prefix="/provider", tags=["Provider"])
+api_router.include_router(route.router, prefix="/route", tags=["Route"])
+api_router.include_router(flight_schedule.router, prefix="/flight-schedule", tags=["Flight Schedule"])
+api_router.include_router(flight_instance.router, prefix="/flight-instance", tags=["Flight Instance"])
 api_router.include_router(hotel.router, prefix="/hotel", tags=["Hotel"])
 api_router.include_router(hotel_room.router, prefix="/hotel-room", tags=["Hotel Room"])
 api_router.include_router(hotel_rate_plans.router, prefix="/room-rate-plan", tags=["Room Rate Plan"])
@@ -54,3 +53,4 @@ api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-d
 api_router.include_router(product.router, prefix="/product", tags=["Product"])
 api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
 api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])
+api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])

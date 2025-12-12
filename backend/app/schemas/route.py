@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 
 
 class RouteBase(BaseModel):
-    origin: str = Field(min_length=3, max_length=3, description="IATA of origin airport")
-    destination: str = Field(min_length=3, max_length=3, description="IATA of destination airport")
-    distance_km: int | None = Field(default=None, ge=1)
+    origin: str = Field(min_length=3, max_length=3, description="IATA origin")
+    destination: str = Field(min_length=3, max_length=3, description="IATA destination")
+    distance_km: int | None = Field(default=None, gt=0)
 
 
 class RouteCreate(RouteBase):
@@ -17,7 +17,7 @@ class RouteCreate(RouteBase):
 class RouteUpdate(BaseModel):
     origin: str | None = Field(default=None, min_length=3, max_length=3)
     destination: str | None = Field(default=None, min_length=3, max_length=3)
-    distance_km: int | None = Field(default=None, ge=1)
+    distance_km: int | None = Field(default=None, gt=0)
 
 
 class RouteRead(RouteBase):

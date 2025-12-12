@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.review_model import Review
+from app.models.review import Review
 from app.repositories.base import BaseCRUD
 from app.repositories.searchable import SearchableRepository
 from app.schemas.review import ReviewCreate, ReviewUpdate

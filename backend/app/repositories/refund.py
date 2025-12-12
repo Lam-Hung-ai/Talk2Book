@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.refund_model import Refund
+from app.models.refund import Refund
 from app.repositories.base import BaseCRUD
 from app.repositories.searchable import SearchableRepository
 from app.schemas.refund import RefundCreate, RefundUpdate
@@ -20,7 +20,7 @@ class RefundRepository(BaseCRUD[Refund, RefundCreate, RefundUpdate], SearchableR
 
     async def get_by_payment_id(self, payment_id: int) -> Sequence[Refund]:
         """Lấy danh sách refunds theo payment_id"""
-        statement = select(Refund).where(Refund.payment_id == payment_id)
+        statement = select(Refund).where(Refund.id == payment_id)
         result = await self.db.exec(statement)
         return result.all()
 
@@ -45,7 +45,7 @@ class RefundRepository(BaseCRUD[Refund, RefundCreate, RefundUpdate], SearchableR
         """Tính tổng số tiền đã hoàn lại cho một payment"""
         from sqlmodel import func
 
-        query = select(func.sum(Refund.amount)).where(Refund.payment_id == payment_id)
+        query = select(func.sum(Refund.amount)).where(Refund.id == payment_id)
 
         if status:
             query = query.where(Refund.status == status)

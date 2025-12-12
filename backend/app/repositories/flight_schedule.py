@@ -1,7 +1,6 @@
-from collections.abc import Sequence
 from uuid import UUID
 
-from sqlmodel import col, or_, select
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.flight_schedule import FlightSchedule
@@ -23,23 +22,20 @@ class FlightScheduleRepository(
         *,
         limit: int,
         offset: int,
-        provider_id: UUID | None,
-        route_id: UUID | None,
-        dow: int | None,
-    ) -> Sequence[FlightSchedule]:
-        query = select(FlightSchedule)
+        provider_id: UUID | None = None,
+        route_id: UUID | None = None,
+        dow: int | str | None = None,
+    ):
+        stmt = select(FlightSchedule)
         if provider_id:
-            query = query.where(FlightSchedule.provider_id == provider_id)
+            stmt = stmt.where(FlightSchedule.provider_id == provider_id)
         if route_id:
-            query = query.where(FlightSchedule.route_id == route_id)
+            stmt = stmt.where(FlightSchedule.route_id == route_id)
         if dow is not None:
-            pattern = f"_{dow}_"
-            query = query.where(
-                or_(
-                    col(FlightSchedule.dow).ilike(f"%{pattern}%"),
-                    col(FlightSchedule.dow).ilike(f"%{dow}%"),
-                )
-            )
-        result = await self.db.exec(query.offset(offset).limit(limit))
+            dow_str = f"{int(dow):07b}" if isinstance(dow, int) else str(dow)
+            stmt = stmt.where(FlightSchedule.dow == dow_str)
+
+        stmt = stmt.offset(offset).limit(limit)
+        result = await self.db.exec(stmt)
         return result.all()
 

@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.payment_model import Payment
+from app.models.payment import Payment
 from app.repositories.payment import PaymentRepository
 from app.schemas.payment import PaymentCreate, PaymentUpdate
 

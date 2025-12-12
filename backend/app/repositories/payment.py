@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.payment_model import Payment
+from app.models.payment import Payment
 from app.repositories.base import BaseCRUD
 from app.repositories.searchable import SearchableRepository
 from app.schemas.payment import PaymentCreate, PaymentUpdate

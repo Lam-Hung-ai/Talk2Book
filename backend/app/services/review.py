@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.review_model import Review
+from app.models.review import Review
 from app.repositories.review import ReviewRepository
 from app.schemas.review import ReviewCreate, ReviewUpdate
 
