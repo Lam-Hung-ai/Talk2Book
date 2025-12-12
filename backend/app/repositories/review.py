@@ -27,29 +27,29 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         """Lấy danh sách reviews của một user"""
         return await self.get_multi(skip=skip, limit=limit, user_id=user_id)
 
-    async def get_by_service(
+    async def get_by_target(
         self,
-        service_type: str,
-        service_id: int,
+        target_type: str,
+        target_key: str,
         skip: int = 0,
         limit: int = 100
     ) -> Sequence[Review]:
-        """Lấy reviews của một dịch vụ cụ thể"""
+        """Lấy reviews của một đối tượng cụ thể"""
         statement = select(Review).where(
-            Review.service_type == service_type,
-            Review.service_id == service_id
+            Review.target_type == target_type,
+            Review.target_key == target_key
         ).offset(skip).limit(limit)
         result = await self.db.exec(statement)
         return result.all()
 
-    async def get_by_service_type(
+    async def get_by_target_type(
         self,
-        service_type: str,
+        target_type: str,
         skip: int = 0,
         limit: int = 100
     ) -> Sequence[Review]:
-        """Lấy reviews theo loại dịch vụ"""
-        return await self.get_multi(skip=skip, limit=limit, service_type=service_type)
+        """Lấy reviews theo loại đối tượng"""
+        return await self.get_multi(skip=skip, limit=limit, target_type=target_type)
 
     async def get_by_rating(
         self,
@@ -79,40 +79,40 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
         """Đếm số lượng reviews của user"""
         return await self.get_count(user_id=user_id)
 
-    async def count_by_service(self, service_type: str, service_id: int) -> int:
-        """Đếm số reviews của một dịch vụ"""
+    async def count_by_target(self, target_type: str, target_key: str) -> int:
+        """Đếm số reviews của một đối tượng"""
         statement = select(func.count()).select_from(Review).where(
-            Review.service_type == service_type,
-            Review.service_id == service_id
+            Review.target_type == target_type,
+            Review.target_key == target_key
         )
         result = await self.db.exec(statement)
         return result.one()
 
-    async def get_average_rating_by_service(
+    async def get_average_rating_by_target(
         self,
-        service_type: str,
-        service_id: int
+        target_type: str,
+        target_key: str
     ) -> float:
-        """Tính rating trung bình của một dịch vụ"""
+        """Tính rating trung bình của một đối tượng"""
         statement = select(func.avg(Review.rating)).where(
-            Review.service_type == service_type,
-            Review.service_id == service_id
+            Review.target_type == target_type,
+            Review.target_key == target_key
         )
         result = await self.db.exec(statement)
         avg = result.one()
         return float(avg) if avg else 0.0
 
-    async def get_rating_distribution_by_service(
+    async def get_rating_distribution_by_target(
         self,
-        service_type: str,
-        service_id: int
+        target_type: str,
+        target_key: str
     ) -> dict:
-        """Lấy phân bố rating của một dịch vụ (1-5 sao)"""
+        """Lấy phân bố rating của một đối tượng (1-5 sao)"""
         distribution = {}
         for rating in range(1, 6):
             count_statement = select(func.count()).select_from(Review).where(
-                Review.service_type == service_type,
-                Review.service_id == service_id,
+                Review.target_type == target_type,
+                Review.target_key == target_key,
                 Review.rating == rating
             )
             result = await self.db.exec(count_statement)
@@ -121,7 +121,7 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
 
     async def get_recent_reviews(
         self,
-        service_type: str | None = None,
+        target_type: str | None = None,
         limit: int = 10
     ) -> Sequence[Review]:
         """Lấy reviews mới nhất"""
@@ -129,8 +129,8 @@ class ReviewRepository(BaseCRUD[Review, ReviewCreate, ReviewUpdate], SearchableR
 
         statement = select(Review).order_by(desc(Review.created_at)).limit(limit)
 
-        if service_type:
-            statement = statement.where(Review.service_type == service_type)
+        if target_type:
+            statement = statement.where(Review.target_type == target_type)
 
         result = await self.db.exec(statement)
         return result.all()

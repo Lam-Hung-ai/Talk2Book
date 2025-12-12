@@ -25,12 +25,14 @@ from app.api.v1.endpoints import (
     provider,
     refund,
     refresh_token,
+    review,
     role,
     room_inventory_daily,
     room_rate_plan,
     route,
     seat_inventory,
     slot_inventory,
+    support_ticket,
     tax,
     ticket,
     time_slot,
@@ -73,3 +75,5 @@ api_router.include_router(ticket.router, prefix="/ticket", tags=["Ticket"])
 api_router.include_router(booking_audit_log.router, prefix="/booking-audit-log", tags=["Booking Audit Log"])
 api_router.include_router(payment.router, prefix="/payment", tags=["Payment"])
 api_router.include_router(refund.router, prefix="/refund", tags=["Refund"])
+api_router.include_router(review.router, prefix="/review", tags=["Review"])
+api_router.include_router(support_ticket.router, prefix="/support-ticket", tags=["Support Ticket"])
