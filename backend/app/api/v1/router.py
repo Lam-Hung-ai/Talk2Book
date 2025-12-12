@@ -4,9 +4,14 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     airport,
     auth,
+    booking,
+    booking_audit_log,
+    booking_item,
     city,
     contract,
     country,
+    coupon,
+    coupon_redemption,
     exchange_rate,
     flight_instance,
     flight_schedule,
@@ -25,6 +30,8 @@ from app.api.v1.endpoints import (
     slot_inventory,
     tax,
     time_slot,
+    passenger,
+    ticket,
     user,
     user_profile,
 )
@@ -55,3 +62,10 @@ api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=
 api_router.include_router(tax.router, prefix="/tax", tags=["Tax"])
 api_router.include_router(exchange_rate.router, prefix="/exchange-rate", tags=["Exchange Rate"])
 api_router.include_router(price_quote.router, prefix="/price-quote", tags=["Price Quote"])
+api_router.include_router(coupon.router, prefix="/coupon", tags=["Coupon"])
+api_router.include_router(coupon_redemption.router, prefix="/coupon-redemption", tags=["Coupon Redemption"])
+api_router.include_router(booking.router, prefix="/booking", tags=["Booking"])
+api_router.include_router(booking_item.router, prefix="/booking-item", tags=["Booking Item"])
+api_router.include_router(passenger.router, prefix="/passenger", tags=["Passenger"])
+api_router.include_router(ticket.router, prefix="/ticket", tags=["Ticket"])
+api_router.include_router(booking_audit_log.router, prefix="/booking-audit-log", tags=["Booking Audit Log"])
