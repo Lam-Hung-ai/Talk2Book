@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     geo,
     hotel,
     hotel_room,
+    product,
     provider,
     refresh_token,
     role,
@@ -45,10 +46,11 @@ api_router.include_router(provider.router, prefix="/provider", tags=["Provider"]
 api_router.include_router(route.router, prefix="/route", tags=["Route"])
 api_router.include_router(flight_schedule.router, prefix="/flight-schedule", tags=["Flight Schedule"])
 api_router.include_router(flight_instance.router, prefix="/flight-instance", tags=["Flight Instance"])
-api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
-api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])
 api_router.include_router(seat_inventory.router, prefix="/seat-inventory", tags=["Seat Inventory"])
 api_router.include_router(hotel.router, prefix="/hotel", tags=["Hotel"])
 api_router.include_router(hotel_room.router, prefix="/hotel-room", tags=["Hotel Room"])
 api_router.include_router(room_rate_plan.router, prefix="/room-rate-plan", tags=["Room Rate Plan"])
 api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-daily", tags=["Room Inventory Daily"])
+api_router.include_router(product.router, prefix="/product", tags=["Product"])
+api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
+api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])

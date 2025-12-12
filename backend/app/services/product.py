@@ -1,97 +1,108 @@
 # app/services/product.py
-from typing import Any
+from collections.abc import Sequence
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.models.city import City
 from app.models.product import Product
+from app.models.provider import Provider
 from app.repositories.product import ProductRepository
 from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
 
 
 class ProductService:
     def __init__(self, db: AsyncSession):
-        self.repo = ProductRepository(db)
         self.db = db
+        self.repo = ProductRepository(db)
 
-    async def get_product_by_id(self, product_id: UUID) -> Product:
-        """Lấy product theo ID, ném 404 nếu không tồn tại"""
-        return await self.repo.get_or_404(product_id, detail="Product không tồn tại")
+    async def _ensure_provider(self, provider_id: UUID) -> None:
+        provider = await self.db.get(Provider, provider_id)
+        if not provider:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Provider {provider_id} does not exist",
+            )
 
-    async def create_product(self, product_in: ProductCreate) -> ProductRead:
-        """Tạo product mới"""
-        db_product = await self.repo.create(product_in)
-        return ProductRead.model_validate(db_product, from_attributes=True)
+    async def _ensure_city(self, city_id: UUID) -> None:
+        city = await self.db.get(City, city_id)
+        if not city:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"City {city_id} does not exist",
+            )
 
-    async def get_products_paginated(
+    async def create_product(self, payload: ProductCreate) -> ProductRead:
+        await self._ensure_provider(payload.provider_id)
+        if payload.city_id:
+            await self._ensure_city(payload.city_id)
+
+        product = await self.repo.create(payload)
+        return ProductRead.model_validate(product, from_attributes=True)
+
+    async def list_products(
         self,
         page: int = 1,
         page_size: int = 20,
+        q: str | None = None,
         provider_id: UUID | None = None,
         city_id: UUID | None = None,
-    ) -> dict[str, Any]:
-        """Lấy danh sách products có phân trang và filter"""
+        type: str | None = None,
+    ) -> dict[str, object]:
         skip = (page - 1) * page_size
 
-        filters = {}
-        if provider_id is not None:
-            filters["provider_id"] = provider_id
-        if city_id is not None:
-            filters["city_id"] = city_id
+        if q:
+            items = await self.repo.search(
+                query=q,
+                search_columns=["title"],
+                skip=skip,
+                limit=page_size,
+                exact_match=False,
+                case_sensitive=False,
+            )
+            total = await self.repo.count_search(
+                query=q,
+                search_columns=["title"],
+                exact_match=False,
+                case_sensitive=False,
+            )
+        else:
+            filters = {}
+            if provider_id:
+                filters["provider_id"] = provider_id
+            if city_id:
+                filters["city_id"] = city_id
+            if type:
+                filters["type"] = type
 
-        products = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
-        total = await self.repo.get_count(**filters)
+            items = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
+            total = await self.repo.get_count(**filters)
 
         return {
-            "items": [ProductRead.model_validate(p, from_attributes=True) for p in products],
+            "items": [ProductRead.model_validate(p, from_attributes=True) for p in items],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_product(self, product_id: UUID, product_in: ProductUpdate) -> ProductRead:
-        """Cập nhật product"""
-        db_product = await self.get_product_by_id(product_id)
-        updated_product = await self.repo.update(db_product, product_in)
-        return ProductRead.model_validate(updated_product, from_attributes=True)
+    async def get_product(self, product_id: UUID) -> ProductRead:
+        product = await self.repo.get_or_404(product_id, detail="Product not found")
+        return ProductRead.model_validate(product, from_attributes=True)
+
+    async def update_product(self, product_id: UUID, payload: ProductUpdate) -> ProductRead:
+        product = await self.repo.get_or_404(product_id, detail="Product not found")
+        data = payload.model_dump(exclude_unset=True)
+
+        if "provider_id" in data:
+            await self._ensure_provider(data["provider_id"])
+        if "city_id" in data and data["city_id"] is not None:
+            await self._ensure_city(data["city_id"])
+
+        updated = await self.repo.update(product, data)
+        return ProductRead.model_validate(updated, from_attributes=True)
 
     async def delete_product(self, product_id: UUID) -> None:
-        """Xóa product"""
         await self.repo.delete(product_id)
-
-    async def search_products(
-        self,
-        q: str,
-        page: int = 1,
-        page_size: int = 20,
-        exact_match: bool = False,
-        case_sensitive: bool = False
-    ) -> dict[str, Any]:
-        """Tìm kiếm products theo title"""
-        skip = (page - 1) * page_size
-
-        products = await self.repo.search(
-            query=q,
-            search_columns=["title"],
-            exact_match=exact_match,
-            case_sensitive=case_sensitive,
-            skip=skip,
-            limit=page_size
-        )
-
-        total = await self.repo.count_search(
-            query=q,
-            search_columns=["title"],
-            exact_match=exact_match,
-            case_sensitive=case_sensitive
-        )
-
-        return {
-            "items": [ProductRead.model_validate(p, from_attributes=True) for p in products],
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
-        }
 

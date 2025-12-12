@@ -11,7 +11,7 @@ class ProductBase(BaseModel):
     provider_id: UUID
     city_id: UUID | None = None
     type: ProductType
-    title: str = Field(min_length=1)
+    title: str = Field(min_length=1, max_length=255)
 
 
 class ProductCreate(ProductBase):
@@ -22,7 +22,7 @@ class ProductUpdate(BaseModel):
     provider_id: UUID | None = None
     city_id: UUID | None = None
     type: ProductType | None = None
-    title: str | None = Field(default=None, min_length=1)
+    title: str | None = Field(default=None, min_length=1, max_length=255)
 
 
 class ProductRead(ProductBase):

@@ -1,6 +1,4 @@
 # app/repositories/time_slot.py
-from uuid import UUID
-
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -15,8 +13,9 @@ class TimeSlotRepository(BaseCRUD[TimeSlot, TimeSlotCreate, TimeSlotUpdate], Sea
         BaseCRUD.__init__(self, TimeSlot, db)
         SearchableRepository.__init__(self, TimeSlot, db)
 
-    async def get_by_product_id(self, product_id: UUID) -> list[TimeSlot]:
-        """Lấy danh sách time_slots theo product_id"""
-        result = await self.db.exec(select(TimeSlot).where(TimeSlot.product_id == product_id))
-        return list(result.all())
+    async def get_by_product(self, product_id: str):
+        """Lấy danh sách time slots theo product_id"""
+        stmt = select(TimeSlot).where(TimeSlot.product_id == product_id)
+        result = await self.db.exec(stmt)
+        return result.all()
 

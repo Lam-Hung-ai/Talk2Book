@@ -14,7 +14,7 @@ class SlotInventoryRepository(BaseCRUD[SlotInventory, SlotInventoryCreate, SlotI
         BaseCRUD.__init__(self, SlotInventory, db)
         SearchableRepository.__init__(self, SlotInventory, db)
 
-    async def get_by_slot_id(self, slot_id: UUID) -> SlotInventory | None:
-        """Lấy slot_inventory theo slot_id"""
-        return await self.db.get(SlotInventory, slot_id)
+    async def get_by_slot(self, slot_id: UUID):
+        """Lấy slot inventory theo slot_id"""
+        return await self.get(slot_id)
 
