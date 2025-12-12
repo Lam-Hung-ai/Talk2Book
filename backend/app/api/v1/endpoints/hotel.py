@@ -1,80 +1,94 @@
+# app/api/v1/endpoints/hotel.py
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
 from app.schemas.hotel import HotelCreate, HotelRead, HotelUpdate
-from app.services.hotel import (
-    create_hotel,
-    delete_hotel_by_id,
-    get_hotel_by_id,
-    list_hotels,
-    update_hotel_by_id,
-)
+from app.services.hotel import HotelService
 
 router = APIRouter()
 
 
-@router.post("", response_model=HotelRead, status_code=status.HTTP_201_CREATED)
-async def create_hotel_ep(
-    payload: HotelCreate,
-    session: AsyncSession = Depends(get_async_session),
-):
-    hotel = await create_hotel(session, payload)
-    return hotel
+def get_hotel_service(db: AsyncSession = Depends(get_async_session)) -> HotelService:
+    return HotelService(db)
 
 
-@router.get("/", response_model=list[HotelRead])
-async def list_hotels_ep(
-    session: AsyncSession = Depends(get_async_session),
-    limit: int = Query(10, ge=1, le=200),
-    offset: int = Query(0, ge=0),
-    q: str | None = Query(None, description="Search by name"),
-    provider_id: UUID | None = Query(None),
-    city_id: UUID | None = Query(None),
+@router.post(
+    "/",
+    response_model=HotelRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Tạo hotel mới",
+)
+async def create_hotel(
+    hotel_in: HotelCreate, service: HotelService = Depends(get_hotel_service)
 ):
-    items, _ = await list_hotels(
-        session=session,
-        limit=limit,
-        offset=offset,
-        q=q,
-        provider_id=provider_id,
-        city_id=city_id,
+    """Endpoint tạo hotel mới"""
+    return await service.create_hotel(hotel_in)
+
+
+@router.get("/{hotel_id}", response_model=HotelRead, summary="Lấy thông tin hotel theo ID")
+async def get_hotel(
+    hotel_id: UUID, service: HotelService = Depends(get_hotel_service)
+):
+    """Lấy thông tin hotel theo ID. Ném 404 nếu không tồn tại"""
+    hotel = await service.get_hotel_by_id(hotel_id)
+    return HotelRead.model_validate(hotel, from_attributes=True)
+
+
+@router.get("/", response_model=dict, summary="Danh sách hotels có phân trang")
+async def get_hotels(
+    page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
+    page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
+    city_id: UUID | None = Query(None, description="Lọc theo city_id"),
+    provider_id: UUID | None = Query(None, description="Lọc theo provider_id"),
+    service: HotelService = Depends(get_hotel_service),
+):
+    """Lấy danh sách hotels với phân trang và filter"""
+    return await service.get_hotels_paginated(
+        page=page, page_size=page_size, city_id=city_id, provider_id=provider_id
     )
-    return items
 
 
-@router.get("/{hotel_id}", response_model=HotelRead)
-async def get_hotel_ep(
-    hotel_id: UUID = Path(...),
-    session: AsyncSession = Depends(get_async_session),
-):
-    hotel = await get_hotel_by_id(session, hotel_id)
-    if not hotel:
-        raise HTTPException(status_code=404, detail="Hotel not found")
-    return hotel
-
-
-@router.put("/{hotel_id}", response_model=HotelRead)
-async def update_hotel_ep(
+@router.put("/{hotel_id}", response_model=HotelRead, summary="Cập nhật thông tin hotel")
+async def update_hotel(
     hotel_id: UUID,
-    payload: HotelUpdate,
-    session: AsyncSession = Depends(get_async_session),
+    hotel_in: HotelUpdate,
+    service: HotelService = Depends(get_hotel_service),
 ):
-    hotel = await update_hotel_by_id(session, hotel_id, payload)
-    if not hotel:
-        raise HTTPException(status_code=404, detail="Hotel not found")
-    return hotel
+    """Cập nhật hotel"""
+    return await service.update_hotel(hotel_id, hotel_in)
 
 
-@router.delete("/{hotel_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_hotel_ep(
-    hotel_id: UUID,
-    session: AsyncSession = Depends(get_async_session),
+@router.delete(
+    "/{hotel_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa hotel"
+)
+async def delete_hotel(
+    hotel_id: UUID, service: HotelService = Depends(get_hotel_service)
 ):
-    ok = await delete_hotel_by_id(session, hotel_id)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Hotel not found")
+    """Xóa hotel"""
+    await service.delete_hotel(hotel_id)
     return None
+
+
+@router.get(
+    "/search/mixin", response_model=dict, summary="Tìm kiếm hotels theo name hoặc address"
+)
+async def search_hotels(
+    q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    exact_match: bool = Query(False, description="Tìm chính xác toàn bộ chuỗi"),
+    case_sensitive: bool = Query(False, description="Phân biệt hoa/thường"),
+    service: HotelService = Depends(get_hotel_service),
+):
+    """Search hotels theo name và address"""
+    return await service.search_hotels(
+        q=q,
+        page=page,
+        page_size=page_size,
+        exact_match=exact_match,
+        case_sensitive=case_sensitive,
+    )
 

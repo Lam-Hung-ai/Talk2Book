@@ -1,7 +1,8 @@
+# app/api/v1/endpoints/room_inventory_daily.py
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
@@ -10,97 +11,100 @@ from app.schemas.room_inventory_daily import (
     RoomInventoryDailyRead,
     RoomInventoryDailyUpdate,
 )
-from app.services.room_inventory_daily import (
-    create_room_inventory_daily,
-    delete_room_inventory_daily,
-    get_room_inventory_daily_by_id,
-    list_room_inventory_daily,
-    update_room_inventory_daily,
-)
+from app.services.room_inventory_daily import RoomInventoryDailyService
 
 router = APIRouter()
 
 
-@router.post("", response_model=RoomInventoryDailyRead, status_code=status.HTTP_201_CREATED)
-async def create_room_inventory_daily_ep(
-    payload: RoomInventoryDailyCreate,
-    session: AsyncSession = Depends(get_async_session),
-):
-    inventory = await create_room_inventory_daily(session, payload)
-    return inventory
+def get_room_inventory_daily_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> RoomInventoryDailyService:
+    return RoomInventoryDailyService(db)
 
 
-@router.get("/", response_model=list[RoomInventoryDailyRead])
-async def list_room_inventory_daily_ep(
-    session: AsyncSession = Depends(get_async_session),
-    limit: int = Query(10, ge=1, le=200),
-    offset: int = Query(0, ge=0),
-    room_id: UUID | None = Query(None),
-    rate_plan_id: UUID | None = Query(None),
-    stay_date: date | None = Query(None),
-    stay_date_from: date | None = Query(None),
-    stay_date_to: date | None = Query(None),
+@router.post(
+    "/",
+    response_model=RoomInventoryDailyRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Tạo room inventory daily mới",
+)
+async def create_room_inventory_daily(
+    inventory_in: RoomInventoryDailyCreate,
+    service: RoomInventoryDailyService = Depends(get_room_inventory_daily_service),
 ):
-    items, _ = await list_room_inventory_daily(
-        session=session,
-        limit=limit,
-        offset=offset,
-        room_id=room_id,
-        rate_plan_id=rate_plan_id,
-        stay_date=stay_date,
-        stay_date_from=stay_date_from,
-        stay_date_to=stay_date_to,
-    )
-    return items
+    """Endpoint tạo room inventory daily mới"""
+    return await service.create_room_inventory_daily(inventory_in)
 
 
 @router.get(
     "/{room_id}/{rate_plan_id}/{stay_date}",
     response_model=RoomInventoryDailyRead,
+    summary="Lấy thông tin room inventory daily theo composite key",
 )
-async def get_room_inventory_daily_ep(
-    room_id: UUID = Path(...),
-    rate_plan_id: UUID = Path(...),
-    stay_date: date = Path(...),
-    session: AsyncSession = Depends(get_async_session),
+async def get_room_inventory_daily(
+    room_id: UUID,
+    rate_plan_id: UUID,
+    stay_date: date,
+    service: RoomInventoryDailyService = Depends(get_room_inventory_daily_service),
 ):
-    inventory = await get_room_inventory_daily_by_id(session, room_id, rate_plan_id, stay_date)
-    if not inventory:
-        raise HTTPException(status_code=404, detail="Room inventory not found")
-    return inventory
+    """Lấy thông tin room inventory daily theo composite key (room_id, rate_plan_id, stay_date). Ném 404 nếu không tồn tại"""
+    inventory = await service.get_room_inventory_daily(room_id, rate_plan_id, stay_date)
+    return RoomInventoryDailyRead.model_validate(inventory, from_attributes=True)
+
+
+@router.get(
+    "/", response_model=dict, summary="Danh sách room inventory dailies có phân trang"
+)
+async def get_room_inventory_dailies(
+    page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
+    page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
+    room_id: UUID | None = Query(None, description="Lọc theo room_id"),
+    rate_plan_id: UUID | None = Query(None, description="Lọc theo rate_plan_id"),
+    stay_date_from: date | None = Query(None, description="Lọc từ ngày"),
+    stay_date_to: date | None = Query(None, description="Lọc đến ngày"),
+    service: RoomInventoryDailyService = Depends(get_room_inventory_daily_service),
+):
+    """Lấy danh sách room inventory dailies với phân trang và filter"""
+    return await service.get_room_inventory_dailies_paginated(
+        page=page,
+        page_size=page_size,
+        room_id=room_id,
+        rate_plan_id=rate_plan_id,
+        stay_date_from=stay_date_from,
+        stay_date_to=stay_date_to,
+    )
 
 
 @router.put(
     "/{room_id}/{rate_plan_id}/{stay_date}",
     response_model=RoomInventoryDailyRead,
+    summary="Cập nhật thông tin room inventory daily",
 )
-async def update_room_inventory_daily_ep(
+async def update_room_inventory_daily(
     room_id: UUID,
     rate_plan_id: UUID,
     stay_date: date,
-    payload: RoomInventoryDailyUpdate,
-    session: AsyncSession = Depends(get_async_session),
+    inventory_in: RoomInventoryDailyUpdate,
+    service: RoomInventoryDailyService = Depends(get_room_inventory_daily_service),
 ):
-    inventory = await update_room_inventory_daily(
-        session, room_id, rate_plan_id, stay_date, payload
+    """Cập nhật room inventory daily"""
+    return await service.update_room_inventory_daily(
+        room_id, rate_plan_id, stay_date, inventory_in
     )
-    if not inventory:
-        raise HTTPException(status_code=404, detail="Room inventory not found")
-    return inventory
 
 
 @router.delete(
     "/{room_id}/{rate_plan_id}/{stay_date}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Xóa room inventory daily",
 )
-async def delete_room_inventory_daily_ep(
+async def delete_room_inventory_daily(
     room_id: UUID,
     rate_plan_id: UUID,
     stay_date: date,
-    session: AsyncSession = Depends(get_async_session),
+    service: RoomInventoryDailyService = Depends(get_room_inventory_daily_service),
 ):
-    ok = await delete_room_inventory_daily(session, room_id, rate_plan_id, stay_date)
-    if not ok:
-        raise HTTPException(status_code=404, detail="Room inventory not found")
+    """Xóa room inventory daily"""
+    await service.delete_room_inventory_daily(room_id, rate_plan_id, stay_date)
     return None
 
