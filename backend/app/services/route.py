@@ -1,11 +1,9 @@
-from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.airport import Airport
-from app.models.route import Route
 from app.repositories.route import RouteRepository
 from app.schemas.route import RouteCreate, RouteRead, RouteUpdate
 

@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from uuid import UUID
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession

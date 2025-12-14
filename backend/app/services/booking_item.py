@@ -6,7 +6,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.repositories.booking import BookingRepository
 from app.repositories.booking_item import BookingItemRepository
-from app.schemas.booking_item import BookingItemCreate, BookingItemRead, BookingItemUpdate
+from app.schemas.booking_item import (
+    BookingItemCreate,
+    BookingItemRead,
+    BookingItemUpdate,
+)
 
 
 class BookingItemService:

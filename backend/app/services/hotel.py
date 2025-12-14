@@ -2,7 +2,6 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.hotel import Hotel

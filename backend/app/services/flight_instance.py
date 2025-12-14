@@ -1,11 +1,9 @@
-from collections.abc import Sequence
 from datetime import date
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.flight_instance import FlightInstance
 from app.models.flight_schedule import FlightSchedule
 from app.repositories.flight_instance import FlightInstanceRepository
 from app.schemas.flight_instance import (

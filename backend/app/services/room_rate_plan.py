@@ -7,7 +7,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.room_rate_plan import RoomRatePlan
 from app.repositories.room_rate_plan import RoomRatePlanRepository
-from app.schemas.room_rate_plan import RoomRatePlanCreate, RoomRatePlanRead, RoomRatePlanUpdate
+from app.schemas.room_rate_plan import (
+    RoomRatePlanCreate,
+    RoomRatePlanRead,
+    RoomRatePlanUpdate,
+)
 
 
 class RoomRatePlanService:

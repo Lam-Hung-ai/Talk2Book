@@ -1,5 +1,4 @@
 # app/services/time_slot.py
-from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
@@ -7,7 +6,6 @@ from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.product import Product
-from app.models.time_slot import TimeSlot
 from app.repositories.time_slot import TimeSlotRepository
 from app.schemas.time_slot import TimeSlotCreate, TimeSlotRead, TimeSlotUpdate
 

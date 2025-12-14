@@ -5,7 +5,11 @@ from typing import Any
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.repositories.exchange_rate import ExchangeRateRepository
-from app.schemas.exchange_rate import ExchangeRateCreate, ExchangeRateRead, ExchangeRateUpdate
+from app.schemas.exchange_rate import (
+    ExchangeRateCreate,
+    ExchangeRateRead,
+    ExchangeRateUpdate,
+)
 
 
 class ExchangeRateService:

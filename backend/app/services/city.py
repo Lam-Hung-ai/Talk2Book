@@ -78,7 +78,7 @@ class CityService:
         db_city = await self.get_city_by_id(city_id)
 
         update_data = city_in.model_dump(exclude_unset=True)
-        
+
         # Kiểm tra country_code nếu có update
         if "country_code" in update_data:
             country_code_upper = update_data["country_code"].upper()

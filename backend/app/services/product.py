@@ -1,12 +1,10 @@
 # app/services/product.py
-from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.city import City
-from app.models.product import Product
 from app.models.provider import Provider
 from app.repositories.product import ProductRepository
 from app.schemas.product import ProductCreate, ProductRead, ProductUpdate
