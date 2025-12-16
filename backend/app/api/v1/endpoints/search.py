@@ -1,10 +1,12 @@
 # app/api/v1/endpoints/search.py
+from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
+from app.models.enums import CabinType, FareBucketType
 from app.schemas.search import (
     FlightSearchRequest,
     FlightSearchResponse,
@@ -30,7 +32,7 @@ def get_search_service(db: AsyncSession = Depends(get_async_session)) -> SearchS
     description="""
     Tìm chuyến bay theo origin, destination và ngày bay.
     Backend sẽ join Route -> Schedule -> Instance và check SeatInventory để chỉ trả về các chuyến bay còn ghế.
-    
+
     - **origin**: IATA code của sân bay đi (3 ký tự)
     - **destination**: IATA code của sân bay đến (3 ký tự)
     - **flight_date**: Ngày bay
@@ -42,35 +44,28 @@ async def search_flights(
     origin: str = Query(..., min_length=3, max_length=3, description="IATA code sân bay đi"),
     destination: str = Query(..., min_length=3, max_length=3, description="IATA code sân bay đến"),
     flight_date: str = Query(..., description="Ngày bay (YYYY-MM-DD)"),
-    cabin: str | None = Query(None, description="Loại cabin (economy/premium/business/first)"),
-    fare_bucket: str | None = Query(None, description="Fare bucket"),
+    cabin: CabinType | None = Query(None, description="Loại cabin (economy/premium/business/first)"),
+    fare_bucket: FareBucketType | None = Query(None, description="Fare bucket"),
     page: int = Query(1, ge=1, description="Số trang"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
     service: SearchService = Depends(get_search_service),
 ):
     """Tìm chuyến bay với logic phức tạp: join và check seat inventory"""
-    from datetime import datetime
 
     # Parse date
     try:
         flight_date_parsed = datetime.strptime(flight_date, "%Y-%m-%d").date()
     except ValueError:
-        from fastapi import HTTPException
-
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Định dạng ngày không hợp lệ. Sử dụng YYYY-MM-DD",
         )
-
-    # Parse cabin và fare_bucket nếu có
-    from app.models.enums import CabinType, FareBucketType
 
     cabin_enum = None
     if cabin:
         try:
             cabin_enum = CabinType(cabin)
         except ValueError:
-            from fastapi import HTTPException
 
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -82,7 +77,6 @@ async def search_flights(
         try:
             fare_bucket_enum = FareBucketType(fare_bucket)
         except ValueError:
-            from fastapi import HTTPException
 
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,14 +121,11 @@ async def search_hotels(
     service: SearchService = Depends(get_search_service),
 ):
     """Tìm khách sạn với logic phức tạp: check room availability trong khoảng ngày"""
-    from datetime import datetime
-
     # Parse dates
     try:
         check_in_parsed = datetime.strptime(check_in, "%Y-%m-%d").date()
         check_out_parsed = datetime.strptime(check_out, "%Y-%m-%d").date()
     except ValueError:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -180,7 +171,6 @@ async def get_hotel_availability(
         check_in_parsed = datetime.strptime(check_in, "%Y-%m-%d").date()
         check_out_parsed = datetime.strptime(check_out, "%Y-%m-%d").date()
     except ValueError:
-        from fastapi import HTTPException
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

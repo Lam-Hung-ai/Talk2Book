@@ -1,75 +1,289 @@
 [
   {
     "hotel_name": "Vinpearl Hotel Times City",
-    "name": "Giá cơ bản",
+    "name": "Giá cơ bản linh hoạt",
     "meal_plan": "RO",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "flexible",
+      "description": "Hủy miễn phí trước 3 ngày so với ngày nhận phòng",
+      "free_cancel_days_before_checkin": 3,
+      "penalty": {
+        "type": "percent",
+        "value": 100,
+        "applied_nights": 1
+      }
+    }
   },
   {
     "hotel_name": "Vinpearl Hotel Times City",
     "name": "Bao gồm bữa sáng",
     "meal_plan": "BB",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 5 ngày: miễn phí, trong 5 ngày: phạt 1 đêm",
+      "free_cancel_days_before_checkin": 5,
+      "penalty": {
+        "type": "night",
+        "value": 1
+      }
+    }
+  },
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "name": "Không hoàn hủy - Giá rẻ nhất",
+    "meal_plan": "RO",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "non_refundable",
+      "description": "Không hoàn hủy, không thay đổi ngày",
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   },
   {
     "hotel_name": "InterContinental Hanoi Westlake",
-    "name": "Giá cơ bản",
+    "name": "Giá cơ bản linh hoạt",
     "meal_plan": "RO",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "flexible",
+      "description": "Hủy miễn phí trước 2 ngày so với ngày nhận phòng",
+      "free_cancel_days_before_checkin": 2,
+      "penalty": {
+        "type": "percent",
+        "value": 100,
+        "applied_nights": 1
+      }
+    }
   },
   {
     "hotel_name": "InterContinental Hanoi Westlake",
     "name": "Bao gồm bữa sáng",
     "meal_plan": "BB",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 7 ngày: miễn phí, trong 7 ngày: phạt 1 đêm",
+      "free_cancel_days_before_checkin": 7,
+      "penalty": {
+        "type": "night",
+        "value": 1
+      }
+    }
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "name": "Ưu đãi đặt sớm 30 ngày",
+    "meal_plan": "BB",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "early_bird",
+      "description": "Ưu đãi đặt sớm 30 ngày, không hoàn hủy",
+      "min_days_before_checkin": 30,
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   },
   {
     "hotel_name": "JW Marriott Hotel Saigon",
-    "name": "Giá cơ bản",
+    "name": "Giá cơ bản linh hoạt",
     "meal_plan": "RO",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "flexible",
+      "description": "Hủy miễn phí trước 1 ngày",
+      "free_cancel_days_before_checkin": 1,
+      "penalty": {
+        "type": "percent",
+        "value": 100,
+        "applied_nights": 1
+      }
+    }
   },
   {
     "hotel_name": "JW Marriott Hotel Saigon",
     "name": "Bao gồm bữa sáng",
     "meal_plan": "BB",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trong vòng 3 ngày: phạt 1 đêm",
+      "free_cancel_days_before_checkin": 3,
+      "penalty": {
+        "type": "night",
+        "value": 1
+      }
+    }
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "name": "Gói cuối tuần - Ở 2 đêm trả tiền 1 đêm rưỡi",
+    "meal_plan": "BB",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "non_refundable",
+      "description": "Áp dụng cho đặt phòng cuối tuần, không hoàn hủy",
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   },
   {
     "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
-    "name": "All Inclusive",
+    "name": "All Inclusive - Gia đình",
     "meal_plan": "AI",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 14 ngày: miễn phí, trong 14 ngày: phạt 2 đêm",
+      "free_cancel_days_before_checkin": 14,
+      "penalty": {
+        "type": "night",
+        "value": 2
+      }
+    }
   },
   {
     "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
     "name": "Bao gồm bữa sáng",
     "meal_plan": "BB",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "flexible",
+      "description": "Hủy miễn phí trước 5 ngày",
+      "free_cancel_days_before_checkin": 5,
+      "penalty": {
+        "type": "percent",
+        "value": 100,
+        "applied_nights": 1
+      }
+    }
   },
   {
     "hotel_name": "Vinpearl Resort Nha Trang",
-    "name": "All Inclusive",
+    "name": "All Inclusive - Biển Nha Trang",
     "meal_plan": "AI",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 10 ngày: miễn phí, trong 10 ngày: phạt 1 đêm",
+      "free_cancel_days_before_checkin": 10,
+      "penalty": {
+        "type": "night",
+        "value": 1
+      }
+    }
+  },
+  {
+    "hotel_name": "Vinpearl Resort Nha Trang",
+    "name": "Gói trăng mật",
+    "meal_plan": "BB",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "non_refundable",
+      "description": "Gói trăng mật giá ưu đãi, không hoàn hủy",
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   },
   {
     "hotel_name": "Vinpearl Resort Phú Quốc",
-    "name": "All Inclusive",
+    "name": "All Inclusive - Nghỉ dưỡng biển",
     "meal_plan": "AI",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 15 ngày: miễn phí, trong 15 ngày: phạt 2 đêm",
+      "free_cancel_days_before_checkin": 15,
+      "penalty": {
+        "type": "night",
+        "value": 2
+      }
+    }
+  },
+  {
+    "hotel_name": "Vinpearl Resort Phú Quốc",
+    "name": "Gói 3N2Đ - Công viên chủ đề",
+    "meal_plan": "AI",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "non_refundable",
+      "description": "Combo 3N2Đ bao gồm vé vui chơi, không hoàn hủy",
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   },
   {
     "hotel_name": "Sofitel Legend Metropole Hanoi",
     "name": "Bao gồm bữa sáng",
     "meal_plan": "BB",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "flexible",
+      "description": "Hủy miễn phí trước 3 ngày",
+      "free_cancel_days_before_checkin": 3,
+      "penalty": {
+        "type": "percent",
+        "value": 100,
+        "applied_nights": 1
+      }
+    }
+  },
+  {
+    "hotel_name": "Sofitel Legend Metropole Hanoi",
+    "name": "Gói ẩm thực Pháp",
+    "meal_plan": "HB",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 7 ngày: miễn phí, trong 7 ngày: phạt 1 đêm",
+      "free_cancel_days_before_checkin": 7,
+      "penalty": {
+        "type": "night",
+        "value": 1
+      }
+    }
   },
   {
     "hotel_name": "Sofitel Danang Premier Resort",
-    "name": "All Inclusive",
+    "name": "All Inclusive - Biển Đà Nẵng",
     "meal_plan": "AI",
-    "currency_code": "VND"
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "semi_flexible",
+      "description": "Hủy trước 10 ngày: miễn phí, trong 10 ngày: phạt 2 đêm",
+      "free_cancel_days_before_checkin": 10,
+      "penalty": {
+        "type": "night",
+        "value": 2
+      }
+    }
+  },
+  {
+    "hotel_name": "Sofitel Danang Premier Resort",
+    "name": "Gói nghỉ dưỡng cuối tuần",
+    "meal_plan": "BB",
+    "currency_code": "VND",
+    "cancellation_policy": {
+      "type": "non_refundable",
+      "description": "Gói cuối tuần giá tốt, không hoàn hủy",
+      "penalty": {
+        "type": "percent",
+        "value": 100
+      }
+    }
   }
 ]
+
 

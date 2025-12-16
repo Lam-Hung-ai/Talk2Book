@@ -1,11 +1,10 @@
 # app/services/search.py
-from datetime import date, timedelta
+from datetime import timedelta
 from decimal import Decimal
-from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, func
+from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -98,7 +97,6 @@ class SearchService:
             .where(FlightInstance.flight_date == request.flight_date)
             .where(Route.id == route.id)
         )
-
         # Phân trang
         skip = (page - 1) * page_size
         instances_stmt = instances_stmt.offset(skip).limit(page_size * 2)  # Lấy thêm để filter sau
@@ -123,7 +121,6 @@ class SearchService:
                 continue
 
             # Tìm seat có ghế trống
-            found_available = False
             for seat in seat_list:
                 available = seat.total_seats - seat.sold_seats - seat.held_seats
                 if available > 0:
@@ -145,7 +142,6 @@ class SearchService:
                             sold_seats=seat.sold_seats,
                         )
                     )
-                    found_available = True
                     break  # Chỉ lấy 1 record đầu tiên có ghế trống
 
         # Giới hạn số lượng items theo page_size
