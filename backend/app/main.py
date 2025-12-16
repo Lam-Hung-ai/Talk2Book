@@ -1,3 +1,4 @@
+import json
 import logging
 from contextlib import asynccontextmanager
 
@@ -13,6 +14,16 @@ from app.core.logging import setup_logging
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return route.name
+
+def load_function_tool_calls(*keys, file_path: str = "tool_call.json") -> list[str]:
+
+    list_tool_calls = []
+    with open(file_path) as f:
+        tool_calls = json.load(f)
+    for key in keys:
+        if key in tool_calls:
+            list_tool_calls.extend(tool_calls[key])
+    return list_tool_calls
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -55,5 +66,6 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api/v1")
 
-mcp =FastApiMCP(app, name="Talk2Book project")
+
+mcp =FastApiMCP(app, name="Talk2Book project", include_operations=load_function_tool_calls("search", "city", "country", "airport", "user", "booking"))
 mcp.mount_http()

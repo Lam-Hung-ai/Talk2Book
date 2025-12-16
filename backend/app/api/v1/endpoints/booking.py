@@ -5,6 +5,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
 from app.schemas.booking import BookingCreate, BookingRead, BookingUpdate
+from app.schemas.booking_flow import (
+    FlightBookingRequest,
+    FlightBookingResult,
+    HotelBookingRequest,
+    HotelBookingResult,
+)
 from app.services.booking import BookingService
 
 router = APIRouter()
@@ -90,4 +96,44 @@ async def search_bookings(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
+
+
+# ---------- FLOW: ĐẶT VÉ MÁY BAY & ĐẶT PHÒNG ----------
+
+
+@router.post(
+    "/flight-booking",
+    response_model=FlightBookingResult,
+    status_code=status.HTTP_201_CREATED,
+    summary="Đặt vé máy bay từ kết quả search",
+)
+async def create_flight_booking(
+    payload: FlightBookingRequest,
+    service: BookingService = Depends(get_booking_service),
+):
+    """
+    Tạo booking vé máy bay dựa trên `FlightInstance` + `SeatInventory`.
+    Dùng sau khi user đã search chuyến bay và chọn 1 option cụ thể.
+    """
+
+    return await service.create_flight_booking(payload)
+
+
+@router.post(
+    "/hotel-booking",
+    response_model=HotelBookingResult,
+    status_code=status.HTTP_201_CREATED,
+    summary="Đặt phòng khách sạn từ kết quả search",
+)
+async def create_hotel_booking(
+    payload: HotelBookingRequest,
+    service: BookingService = Depends(get_booking_service),
+):
+    """
+    Tạo booking khách sạn dựa trên `HotelRoom` + `RoomRatePlan` + `RoomInventoryDaily`.
+    Dùng sau khi user đã search khách sạn và chọn 1 loại phòng + gói giá.
+    """
+
+    return await service.create_hotel_booking(payload)
+
 

@@ -14,6 +14,19 @@ router = APIRouter()
 def get_user_service(db: AsyncSession = Depends(get_async_session)) -> UserService:
     return UserService(db)
 
+# ========== ME (Current User) ==========
+@router.get(
+    "/me",
+    response_model=AllUserInfor,
+    summary="Lấy thông tin user hiện đăng nhập"
+)
+async def get_current_user_info(service: UserService = Depends(get_user_service)):
+    """
+    Lấy thông tin của user đang đăng nhập (từ JWT token)
+    """
+    user_id: UUID = UUID("3e7dbe94-a397-4a4d-9c40-7dd3af793c9b")
+    user = await service.get_all_info_by_id(user_id)
+    return AllUserInfor.model_validate(user, from_attributes=True)
 
 @router.post(
     "/",
@@ -125,16 +138,5 @@ async def search_users(
     )
 
 
-# ========== ME (Current User) ==========
-# @router.get(
-#     "/me",
-#     response_model=UserRead,
-#     summary="Lấy thông tin user hiện đăng nhập"
-# )
-# async def get_current_user_info(
-#     current_user: User = Depends(get_current_user)
-# ):
-#     """
-#     Lấy thông tin của user đang đăng nhập (từ JWT token)
-#     """
-#     return UserRead.model_validate(current_user, from_attributes=True)
+
+

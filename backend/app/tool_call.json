@@ -1,0 +1,8 @@
+{
+    "user" : ["get_detail_user_info_by_id", "get_current_user_info"],
+    "country": ["get_countries"],
+    "city": ["get_cities"],
+    "airport": ["get_airports"],
+    "search": ["search_hotels", "search_flights", "get_hotel_availability"],
+    "booking": ["create_flight_booking", "create_hotel_booking"]
+}

@@ -272,9 +272,9 @@ class SearchService:
                 )
 
         # Đếm total hotels trong city
-        total_stmt = select(func.count()).select_from(Hotel).where(Hotel.city_id == request.city_id)
-        total_result = await self.db.exec(total_stmt)
-        total = total_result.one() or 0
+        # total_stmt = select(func.count()).select_from(Hotel).where(Hotel.city_id == request.city_id)
+        # total_result = await self.db.exec(total_stmt)
+        # total = total_result.one() or 0
 
         return HotelSearchResponse(
             items=items,
