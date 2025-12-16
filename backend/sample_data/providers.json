@@ -1,0 +1,101 @@
+[
+  {
+    "type": "airline",
+    "legal_name": "Tổng công ty Hàng không Việt Nam",
+    "display_name": "Vietnam Airlines",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "airline",
+    "legal_name": "Công ty Cổ phần Hàng không VietJet",
+    "display_name": "VietJet Air",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "airline",
+    "legal_name": "Công ty Cổ phần Hàng không Tre Việt",
+    "display_name": "Bamboo Airways",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "hotel",
+    "legal_name": "Tập đoàn Vingroup",
+    "display_name": "Vinpearl Hotels & Resorts",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "hotel",
+    "legal_name": "InterContinental Hotels Group",
+    "display_name": "InterContinental Vietnam",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "hotel",
+    "legal_name": "Accor Hotels",
+    "display_name": "Sofitel & Novotel Vietnam",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "hotel",
+    "legal_name": "Marriott International",
+    "display_name": "Marriott Vietnam",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "hotel",
+    "legal_name": "Tập đoàn Khách sạn Việt Nam",
+    "display_name": "Vietnam Hotels",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "operator",
+    "legal_name": "Công ty Du lịch Saigontourist",
+    "display_name": "Saigontourist",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "operator",
+    "legal_name": "Công ty Du lịch Vietravel",
+    "display_name": "Vietravel",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "operator",
+    "legal_name": "Công ty Du lịch BestPrice",
+    "display_name": "BestPrice Travel",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "operator",
+    "legal_name": "Công ty Du lịch Local Vietnam",
+    "display_name": "Local Vietnam Tours",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "transport",
+    "legal_name": "Công ty Vận tải Phương Trang",
+    "display_name": "Phương Trang",
+    "country_code": "VN",
+    "status": "active"
+  },
+  {
+    "type": "transport",
+    "legal_name": "Công ty Xe khách Hoàng Long",
+    "display_name": "Hoàng Long",
+    "country_code": "VN",
+    "status": "active"
+  }
+]
+

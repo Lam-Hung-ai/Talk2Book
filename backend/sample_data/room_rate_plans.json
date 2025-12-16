@@ -1,0 +1,75 @@
+[
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "name": "Giá cơ bản",
+    "meal_plan": "RO",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "name": "Bao gồm bữa sáng",
+    "meal_plan": "BB",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "name": "Giá cơ bản",
+    "meal_plan": "RO",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "name": "Bao gồm bữa sáng",
+    "meal_plan": "BB",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "name": "Giá cơ bản",
+    "meal_plan": "RO",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "name": "Bao gồm bữa sáng",
+    "meal_plan": "BB",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
+    "name": "All Inclusive",
+    "meal_plan": "AI",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
+    "name": "Bao gồm bữa sáng",
+    "meal_plan": "BB",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Nha Trang",
+    "name": "All Inclusive",
+    "meal_plan": "AI",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Phú Quốc",
+    "name": "All Inclusive",
+    "meal_plan": "AI",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Sofitel Legend Metropole Hanoi",
+    "name": "Bao gồm bữa sáng",
+    "meal_plan": "BB",
+    "currency_code": "VND"
+  },
+  {
+    "hotel_name": "Sofitel Danang Premier Resort",
+    "name": "All Inclusive",
+    "meal_plan": "AI",
+    "currency_code": "VND"
+  }
+]
+

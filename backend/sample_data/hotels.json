@@ -1,0 +1,201 @@
+[
+  {
+    "provider_name": "Vinpearl Hotels & Resorts",
+    "city_name": "Hà Nội",
+    "name": "Vinpearl Hotel Times City",
+    "star_rating": 5.0,
+    "address": "458 Minh Khai, Hai Bà Trưng, Hà Nội",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 20.9984,
+    "lng": 105.8621
+  },
+  {
+    "provider_name": "InterContinental Vietnam",
+    "city_name": "Hà Nội",
+    "name": "InterContinental Hanoi Westlake",
+    "star_rating": 5.0,
+    "address": "1A Nghi Tàm, Tây Hồ, Hà Nội",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 21.0504,
+    "lng": 105.8250
+  },
+  {
+    "provider_name": "Sofitel & Novotel Vietnam",
+    "city_name": "Hà Nội",
+    "name": "Sofitel Legend Metropole Hanoi",
+    "star_rating": 5.0,
+    "address": "15 Ngô Quyền, Hoàn Kiếm, Hà Nội",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 21.0245,
+    "lng": 105.8412
+  },
+  {
+    "provider_name": "Marriott Vietnam",
+    "city_name": "Thành phố Hồ Chí Minh",
+    "name": "JW Marriott Hotel Saigon",
+    "star_rating": 5.0,
+    "address": "8 Nguyễn Du, Quận 1, TP.HCM",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 10.7769,
+    "lng": 106.7009
+  },
+  {
+    "provider_name": "Vinpearl Hotels & Resorts",
+    "city_name": "Thành phố Hồ Chí Minh",
+    "name": "Vinpearl Landmark 81",
+    "star_rating": 5.0,
+    "address": "720A Điện Biên Phủ, Bình Thạnh, TP.HCM",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 10.7947,
+    "lng": 106.7219
+  },
+  {
+    "provider_name": "InterContinental Vietnam",
+    "city_name": "Thành phố Hồ Chí Minh",
+    "name": "InterContinental Saigon",
+    "star_rating": 5.0,
+    "address": "Corner of Hai Ba Trung & Le Duan, Quận 1, TP.HCM",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 10.7796,
+    "lng": 106.6992
+  },
+  {
+    "provider_name": "Vinpearl Hotels & Resorts",
+    "city_name": "Đà Nẵng",
+    "name": "Vinpearl Resort & Spa Đà Nẵng",
+    "star_rating": 5.0,
+    "address": "7 Trường Sa, Hòa Hải, Ngũ Hành Sơn, Đà Nẵng",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 16.0471,
+    "lng": 108.2468
+  },
+  {
+    "provider_name": "Sofitel & Novotel Vietnam",
+    "city_name": "Đà Nẵng",
+    "name": "Sofitel Danang Premier Resort",
+    "star_rating": 5.0,
+    "address": "Bãi Bắc, Sơn Trà, Đà Nẵng",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 16.0800,
+    "lng": 108.2500
+  },
+  {
+    "provider_name": "Marriott Vietnam",
+    "city_name": "Đà Nẵng",
+    "name": "Marriott Danang Resort & Spa",
+    "star_rating": 5.0,
+    "address": "Non Nuoc Beach, Ngũ Hành Sơn, Đà Nẵng",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 16.0500,
+    "lng": 108.2400
+  },
+  {
+    "provider_name": "Vinpearl Hotels & Resorts",
+    "city_name": "Nha Trang",
+    "name": "Vinpearl Resort Nha Trang",
+    "star_rating": 5.0,
+    "address": "Đảo Hòn Tre, Nha Trang",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 12.2388,
+    "lng": 109.1967
+  },
+  {
+    "provider_name": "Sofitel & Novotel Vietnam",
+    "city_name": "Nha Trang",
+    "name": "Sofitel Nha Trang",
+    "star_rating": 5.0,
+    "address": "26 Trần Phú, Nha Trang",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 12.2388,
+    "lng": 109.1967
+  },
+  {
+    "provider_name": "Vinpearl Hotels & Resorts",
+    "city_name": "Phú Quốc",
+    "name": "Vinpearl Resort Phú Quốc",
+    "star_rating": 5.0,
+    "address": "Bãi Dài, Gành Dầu, Phú Quốc",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 10.2899,
+    "lng": 103.9840
+  },
+  {
+    "provider_name": "InterContinental Vietnam",
+    "city_name": "Phú Quốc",
+    "name": "InterContinental Phu Quoc Long Beach Resort",
+    "star_rating": 5.0,
+    "address": "Bãi Trường, Dương Tơ, Phú Quốc",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "lat": 10.2899,
+    "lng": 103.9840
+  },
+  {
+    "provider_name": "Vietnam Hotels",
+    "city_name": "Hội An",
+    "name": "Anantara Hoi An Resort",
+    "star_rating": 5.0,
+    "address": "1 Phạm Hồng Thái, Cẩm Châu, Hội An",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 15.8801,
+    "lng": 108.3380
+  },
+  {
+    "provider_name": "Vietnam Hotels",
+    "city_name": "Sapa",
+    "name": "Topas Ecolodge Sapa",
+    "star_rating": 4.0,
+    "address": "Thanh Kim, Sapa, Lào Cai",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "lat": 22.3364,
+    "lng": 103.8441
+  },
+  {
+    "provider_name": "Vietnam Hotels",
+    "city_name": "Huế",
+    "name": "La Residence Hue Hotel & Spa",
+    "star_rating": 5.0,
+    "address": "5 Lê Lợi, Vĩnh Ninh, Huế",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 16.4637,
+    "lng": 107.5909
+  },
+  {
+    "provider_name": "Vietnam Hotels",
+    "city_name": "Đà Lạt",
+    "name": "Dalat Palace Heritage Hotel",
+    "star_rating": 5.0,
+    "address": "2 Trần Hưng Đạo, Đà Lạt",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 11.9404,
+    "lng": 108.4583
+  },
+  {
+    "provider_name": "Vietnam Hotels",
+    "city_name": "Hạ Long",
+    "name": "Novotel Ha Long Bay",
+    "star_rating": 4.0,
+    "address": "160 Hạ Long, Bãi Cháy, Hạ Long",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "lat": 20.9101,
+    "lng": 107.1839
+  }
+]
+

@@ -75,7 +75,7 @@ async def delete_hotel(
 @router.get(
     "/search/mixin", response_model=dict, summary="Tìm kiếm hotels theo name hoặc address"
 )
-async def search_hotels(
+async def search_mixin_hotels(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
