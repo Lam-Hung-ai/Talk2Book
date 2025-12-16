@@ -5,7 +5,6 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.provider import Provider
 from app.repositories.provider import ProviderRepository
 from app.schemas.provider import ProviderCreate, ProviderRead, ProviderUpdate
 

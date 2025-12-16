@@ -1,0 +1,129 @@
+[
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "code": "DLX",
+    "capacity": 2,
+    "bed_config": "1 giường đôi lớn"
+  },
+  {
+    "hotel_name": "Vinpearl Hotel Times City",
+    "code": "SUITE",
+    "capacity": 4,
+    "bed_config": "1 giường đôi + 1 sofa bed"
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "code": "DLX",
+    "capacity": 2,
+    "bed_config": "1 giường đôi lớn"
+  },
+  {
+    "hotel_name": "InterContinental Hanoi Westlake",
+    "code": "SUITE",
+    "capacity": 4,
+    "bed_config": "1 giường đôi + 1 giường phụ"
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "code": "DLX",
+    "capacity": 2,
+    "bed_config": "1 giường đôi lớn"
+  },
+  {
+    "hotel_name": "JW Marriott Hotel Saigon",
+    "code": "SUITE",
+    "capacity": 4,
+    "bed_config": "1 giường đôi + 1 giường phụ"
+  },
+  {
+    "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Resort & Spa Đà Nẵng",
+    "code": "VILA",
+    "capacity": 4,
+    "bed_config": "2 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Nha Trang",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Nha Trang",
+    "code": "VILA",
+    "capacity": 4,
+    "bed_config": "2 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Phú Quốc",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Vinpearl Resort Phú Quốc",
+    "code": "VILA",
+    "capacity": 6,
+    "bed_config": "3 giường đôi"
+  },
+  {
+    "hotel_name": "Sofitel Legend Metropole Hanoi",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Sofitel Legend Metropole Hanoi",
+    "code": "DLX",
+    "capacity": 2,
+    "bed_config": "1 giường đôi lớn"
+  },
+  {
+    "hotel_name": "Sofitel Danang Premier Resort",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Sofitel Danang Premier Resort",
+    "code": "VILA",
+    "capacity": 4,
+    "bed_config": "2 giường đôi"
+  },
+  {
+    "hotel_name": "Marriott Danang Resort & Spa",
+    "code": "STD",
+    "capacity": 2,
+    "bed_config": "1 giường đôi"
+  },
+  {
+    "hotel_name": "Marriott Danang Resort & Spa",
+    "code": "VILA",
+    "capacity": 4,
+    "bed_config": "2 giường đôi"
+  }
+]
+

@@ -1,13 +1,10 @@
 # app/services/slot_inventory.py
-from collections.abc import Sequence
-from decimal import Decimal
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.currency import Currency
-from app.models.slot_inventory import SlotInventory
 from app.models.time_slot import TimeSlot
 from app.repositories.slot_inventory import SlotInventoryRepository
 from app.schemas.slot_inventory import (

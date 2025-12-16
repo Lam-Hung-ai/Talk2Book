@@ -109,7 +109,7 @@ class AirportService:
         db_airport = await self.get_airport_by_iata(iata)
 
         update_data = airport_in.model_dump(exclude_unset=True)
-        
+
         # Kiểm tra city_id nếu có update
         if "city_id" in update_data:
             city = await self.db.get(City, update_data["city_id"])

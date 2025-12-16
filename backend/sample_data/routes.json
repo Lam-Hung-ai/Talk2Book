@@ -1,0 +1,103 @@
+[
+  {
+    "origin": "HAN",
+    "destination": "SGN",
+    "distance_km": 1730
+  },
+  {
+    "origin": "SGN",
+    "destination": "HAN",
+    "distance_km": 1730
+  },
+  {
+    "origin": "HAN",
+    "destination": "DAD",
+    "distance_km": 764
+  },
+  {
+    "origin": "DAD",
+    "destination": "HAN",
+    "distance_km": 764
+  },
+  {
+    "origin": "SGN",
+    "destination": "DAD",
+    "distance_km": 980
+  },
+  {
+    "origin": "DAD",
+    "destination": "SGN",
+    "distance_km": 980
+  },
+  {
+    "origin": "HAN",
+    "destination": "PQC",
+    "distance_km": 1200
+  },
+  {
+    "origin": "PQC",
+    "destination": "HAN",
+    "distance_km": 1200
+  },
+  {
+    "origin": "SGN",
+    "destination": "PQC",
+    "distance_km": 300
+  },
+  {
+    "origin": "PQC",
+    "destination": "SGN",
+    "distance_km": 300
+  },
+  {
+    "origin": "SGN",
+    "destination": "CXR",
+    "distance_km": 400
+  },
+  {
+    "origin": "CXR",
+    "destination": "SGN",
+    "distance_km": 400
+  },
+  {
+    "origin": "HAN",
+    "destination": "CXR",
+    "distance_km": 1300
+  },
+  {
+    "origin": "CXR",
+    "destination": "HAN",
+    "distance_km": 1300
+  },
+  {
+    "origin": "DAD",
+    "destination": "HUI",
+    "distance_km": 100
+  },
+  {
+    "origin": "HUI",
+    "destination": "DAD",
+    "distance_km": 100
+  },
+  {
+    "origin": "SGN",
+    "destination": "DLI",
+    "distance_km": 300
+  },
+  {
+    "origin": "DLI",
+    "destination": "SGN",
+    "distance_km": 300
+  },
+  {
+    "origin": "SGN",
+    "destination": "VCA",
+    "distance_km": 170
+  },
+  {
+    "origin": "VCA",
+    "destination": "SGN",
+    "distance_km": 170
+  }
+]
+

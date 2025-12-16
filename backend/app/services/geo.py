@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 from fastapi import HTTPException
-from sqlmodel import select
+from sqlmodel import col, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.city import City
@@ -108,7 +108,7 @@ async def list_cities(session: AsyncSession, limit: int, offset: int, country_co
         query = query.where(City.country_code == country_code.upper())
     if q:
         like = f"%{q}%"
-        query = query.where(City.name.ilike(like))
+        query = query.where(col(City.name).ilike(like))
     items = (await session.exec(query.offset(offset).limit(limit))).all()
     total = (await session.exec(select(City))).all()
     return items, len(total)

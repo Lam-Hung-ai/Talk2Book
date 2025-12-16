@@ -1,5 +1,4 @@
 # app/repositories/country.py
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.country import Country

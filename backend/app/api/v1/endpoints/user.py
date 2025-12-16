@@ -58,9 +58,9 @@ async def get_users(
 @router.get(
     "/all_user_info/{user_id}",
     response_model=AllUserInfor,
-    summary="Lấy tất cả thông tin người dùng gồm bảng user, role, userprofile",
+    summary="Lấy thông tin chi tiết của 1 người dùng gồm bảng user, role, userprofile",
 )
-async def get_all_user_info(
+async def get_detail_user_info_by_id(
     user_id: UUID, service: UserService = Depends(get_user_service)
 ):
     """

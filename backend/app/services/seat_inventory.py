@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.enums import CabinType, FareBucketType
@@ -65,7 +66,7 @@ class SeatInventoryService:
             )
         else:
             stmt_items = await self.db.exec(
-                SeatInventory.__table__.select().offset(skip).limit(page_size)
+                select(SeatInventory).offset(skip).limit(page_size)
             )
             items = stmt_items.all()
             total = await self.repo.get_count()

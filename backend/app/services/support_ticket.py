@@ -3,12 +3,15 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.support_ticket import SupportTicket
 from app.repositories.support_ticket import SupportTicketRepository
-from app.schemas.support_ticket import SupportTicketCreate, SupportTicketRead, SupportTicketUpdate
+from app.schemas.support_ticket import (
+    SupportTicketCreate,
+    SupportTicketRead,
+    SupportTicketUpdate,
+)
 
 
 class SupportTicketService:

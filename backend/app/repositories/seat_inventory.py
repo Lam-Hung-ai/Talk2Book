@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlmodel import select, func
+from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.seat_inventory import SeatInventory

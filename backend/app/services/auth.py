@@ -8,8 +8,8 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.api.v1.deps import get_async_session
 from app.core.config import settings
 from app.core.security import create_token, decode_token, verify_password
-from app.models.user import User
 from app.models.enums import UserStatus
+from app.models.user import User
 from app.schemas.auth import LoginSchema, TokenPayload, TokenType
 from app.services.refresh_token import RefreshTokenService
 from app.services.user import UserService

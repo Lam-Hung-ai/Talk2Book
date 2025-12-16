@@ -72,7 +72,7 @@ class CountryService:
     async def update_country(self, code: str, country_in: CountryUpdate) -> CountryRead:
         """Cập nhật country"""
         db_country = await self.get_country_by_code(code)
-        
+
         update_data = country_in.model_dump(exclude_unset=True)
         if "currency_code" in update_data:
             currency_code_upper = update_data["currency_code"].upper()

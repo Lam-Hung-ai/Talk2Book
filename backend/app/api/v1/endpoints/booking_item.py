@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
-from app.schemas.booking_item import BookingItemCreate, BookingItemRead, BookingItemUpdate
+from app.schemas.booking_item import (
+    BookingItemCreate,
+    BookingItemRead,
+    BookingItemUpdate,
+)
 from app.services.booking_item import BookingItemService
 
 router = APIRouter()

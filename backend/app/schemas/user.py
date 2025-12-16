@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.models.enums import UserStatus, GenderType
+from app.models.enums import GenderType, UserStatus
 
 
 class UserRead(BaseModel):
