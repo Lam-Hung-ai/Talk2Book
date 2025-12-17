@@ -5,6 +5,7 @@ description = "this is an backend for project Talk2Book"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiohttp>=3.13.2",
     "asyncpg>=0.30.0",
     "bcrypt>=5.0.0",
     "fastapi-mcp>=0.4.0",
@@ -12,8 +13,13 @@ dependencies = [
     "langchain>=1.1.2",
     "langchain-mcp-adapters>=0.1.14",
     "langchain-openai>=1.1.0",
+    "numpy>=2.3.5",
     "pydantic-settings>=2.11.0",
     "pyjwt>=2.10.1",
+    "python-socketio>=5.15.0",
+    "scipy>=1.16.3",
+    "sounddevice>=0.5.3",
+    "soundfile>=0.13.1",
     "sqlmodel>=0.0.27",
 ]
 

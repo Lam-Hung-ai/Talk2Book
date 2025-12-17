@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local WebRTC Demo</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #202124; color: white; }
+        h2 { margin-top: 20px; }
+        .video-container { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        video { width: 400px; height: 300px; background: black; border-radius: 8px; border: 2px solid #555; object-fit: cover; transform: scaleX(-1); /* Gương */ }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 20px; cursor: pointer; font-size: 16px; background: #8ab4f8; border: none; border-radius: 4px; color: #202124; font-weight: bold; }
+        button:hover { background: #d2e3fc; }
+    </style>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+</head>
+<body>
+
+    <h2>Demo WebRTC (Localhost)</h2>
+    
+    <div class="video-container">
+        <div>
+            <p>Tôi (Local)</p>
+            <video id="localVideo" autoplay playsinline muted></video> </div>
+        <div>
+            <p>Người kia (Remote)</p>
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="startButton">Bắt đầu gọi</button>
+    </div>
+
+    <script>
+        // Cấu hình STUN server (Google public STUN) để lấy thông tin mạng
+        const rtcConfig = {
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        };
+
+        const socket = io();
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const startButton = document.getElementById('startButton');
+
+        let localStream;
+        let peerConnection;
+
+        // 1. Khởi động Camera/Mic ngay khi vào trang
+        async function startCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+            } catch (err) {
+                console.error("Lỗi truy cập camera:", err);
+                alert("Không thể truy cập Camera/Mic. Hãy kiểm tra quyền.");
+            }
+        }
+        startCamera();
+
+        // 2. Xử lý sự kiện từ Socket (Signaling)
+        socket.on('message', async (data) => {
+            if (!peerConnection) createPeerConnection();
+
+            if (data.type === 'offer') {
+                console.log("Nhận Offer");
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit('message', answer);
+            } 
+            else if (data.type === 'answer') {
+                console.log("Nhận Answer");
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+            } 
+            else if (data.candidate) {
+                console.log("Nhận ICE Candidate");
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data));
+                } catch (e) {
+                    console.error("Lỗi thêm candidate", e);
+                }
+            }
+        });
+
+        // 3. Logic tạo kết nối P2P
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            // Gửi ICE Candidate tìm được cho đối phương qua server
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('message', event.candidate);
+                }
+            };
+
+            // Khi nhận được stream từ đối phương -> hiển thị lên màn hình
+            peerConnection.ontrack = (event) => {
+                remoteVideo.srcObject = event.streams[0];
+            };
+
+            // Thêm stream của mình vào kết nối
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+        }
+
+        // 4. Bắt đầu cuộc gọi (Người gọi bấm nút này)
+        startButton.onclick = async () => {
+            if (!localStream) return alert("Chưa có camera!");
+            createPeerConnection();
+            
+            // Tạo Offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            
+            // Gửi Offer qua Socket
+            socket.emit('message', offer);
+            startButton.disabled = true; // Chỉ cần bấm 1 lần
+            startButton.innerText = "Đang gọi...";
+        };
+    </script>
+</body>
+</html>
