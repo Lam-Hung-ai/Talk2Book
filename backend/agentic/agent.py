@@ -19,6 +19,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_mcp_adapters.sessions import StreamableHttpConnection
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
+from prompt import system_prompt
 
 load_dotenv()
 
@@ -146,7 +147,10 @@ def transcribe_audio(file_path):
         print("⏳ Đang gửi lên OpenAI Whisper...")
         with open(file_path, "rb") as audio_file:
             res = openai_client.audio.transcriptions.create(
-                model="gpt-4o-mini-transcribe", file=audio_file, language="vi"
+                model="gpt-4o-transcribe",
+                file=audio_file,
+                language="vi",
+                prompt="Bạn hãy chuyển đổi giọng nói của tôi thành văn bản tiếng Việt chuẩn xác nhất có thể."
             )
         os.remove(file_path)
         return res.text
@@ -159,11 +163,11 @@ async def main():
     client = MultiServerMCPClient(connections={"Talk2Book backend": connect})
     try:
         tools = await client.get_tools(server_name="Talk2Book backend")
-    except:
+    except Exception:
         tools = []
 
     agent = create_agent(model=llm, tools=tools,
-                         system_prompt="Bạn hãy đóng vai làm nhân viên chăm sóc khách hàng tận tình, nói ngắn gọn đúng trọng tâm, chú ý khi gọi công cụ gì thì bạn hãy thông báo công cụ mình dùng ví dụ:  gọi api xem thông tin người dùng thì bạn hãy thông báo cho người dùng theo phong cách tư vấn là 'Để tôi giúp bạn kiểm tra thông tin của bạn trên hệ thống'")
+                         system_prompt=system_prompt)
 
     system_instruction = """
 Bạn hãy đóng vai làm nhân viên chăm sóc khách hàng tận tình, nói ngắn gọn đúng trọng tâm, 
