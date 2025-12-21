@@ -44,11 +44,57 @@ async def get_airport(
 async def get_airports(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
-    city_id: str | None = Query(None, description="Lọc theo city ID"),
+    city_id: str | None = Query(None, description="Lọc theo city ID (UUID format)"),
     service: AirportService = Depends(get_airport_service),
 ):
     """
-    Lấy danh sách airports với phân trang và filter theo city_id
+    Truy xuất danh sách các sân bay (Airports) với tính năng phân trang và lọc theo thành phố.
+
+    Hàm này trả về dữ liệu chi tiết về sân bay bao gồm mã IATA, ICAO, tên sân bay và múi giờ.
+    Kết quả được đóng gói trong cấu trúc phân trang chuẩn.
+
+    Args:
+        page (int): Số thứ tự trang hiện tại (bắt đầu từ 1). Mặc định là 1.
+        page_size (int): Số lượng bản ghi trên một trang (giới hạn 1-100). Mặc định là 20.
+        city_id (str, optional): Chuỗi UUID của thành phố để lọc các sân bay thuộc thành phố đó.
+                                 Ví dụ: "d2063e38-ff44-46e3-bd90-e529b449e642".
+
+    Returns:
+        dict: Một từ điển chứa danh sách sân bay và metadata phân trang.
+
+    Response Schema:
+        {
+            "items": [
+                {
+                    "iata": str,      # Mã IATA (3 ký tự, VD: "HAN")
+                    "icao": str,      # Mã ICAO (4 ký tự, VD: "VVNB")
+                    "city_id": UUID,  # ID của thành phố chứa sân bay
+                    "name": str,      # Tên đầy đủ của sân bay
+                    "timezone": str   # Múi giờ (VD: "Asia/Ho_Chi_Minh")
+                }
+            ],
+            "total": int,        # Tổng số bản ghi tìm thấy
+            "page": int,         # Trang hiện tại
+            "page_size": int,    # Kích thước trang
+            "total_pages": int   # Tổng số trang tính toán được
+        }
+
+    Example Response:
+        {
+            "items": [
+                {
+                    "iata": "HAN",
+                    "icao": "VVNB",
+                    "city_id": "d2063e38-ff44-46e3-bd90-e529b449e642",
+                    "name": "Sân bay quốc tế Nội Bài",
+                    "timezone": "Asia/Ho_Chi_Minh"
+                }
+            ],
+            "total": 1,
+            "page": 1,
+            "page_size": 20,
+            "total_pages": 1
+        }
     """
     from uuid import UUID
     city_uuid = UUID(city_id) if city_id else None

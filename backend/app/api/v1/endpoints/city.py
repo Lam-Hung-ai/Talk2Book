@@ -46,11 +46,58 @@ async def get_city(
 async def get_cities(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
-    country_code: str | None = Query(None, description="Lọc theo country code"),
+    country_code: str | None = Query(None, min_length=2, max_length=2, description="Lọc theo mã quốc gia (ISO 3166-1 alpha-2), ví dụ: 'VN'"),
     service: CityService = Depends(get_city_service),
 ):
     """
-    Lấy danh sách cities với phân trang và filter theo country_code
+    Truy xuất danh sách các thành phố (Cities) hỗ trợ phân trang và lọc theo quốc gia.
+
+    Hàm này trả về thông tin định danh và tên của các thành phố. Hữu ích cho việc
+    xây dựng các dropdown menu địa điểm hoặc validate dữ liệu địa lý.
+
+    Args:
+        page (int): Số thứ tự trang hiện tại (bắt đầu từ 1). Mặc định là 1.
+        page_size (int): Số lượng bản ghi trên một trang (giới hạn 1-100). Mặc định là 20.
+        country_code (str, optional): Mã quốc gia 2 ký tự để lọc thành phố.
+                                      Ví dụ: "VN" cho Việt Nam, "US" cho Mỹ.
+
+    Returns:
+        dict: Một từ điển chứa danh sách thành phố và metadata phân trang.
+
+    Response Schema:
+        {
+            "items": [
+                {
+                    "id": UUID,            # ID định danh duy nhất của thành phố (UUID)
+                    "country_code": str,   # Mã quốc gia (VD: "VN")
+                    "name": str            # Tên hiển thị của thành phố (VD: "Hà Nội")
+                }
+            ],
+            "total": int,        # Tổng số bản ghi tìm thấy
+            "page": int,         # Trang hiện tại
+            "page_size": int,    # Kích thước trang
+            "total_pages": int   # Tổng số trang tính toán được
+        }
+
+    Example Response:
+        {
+            "items": [
+                {
+                    "id": "d2063e38-ff44-46e3-bd90-e529b449e642",
+                    "country_code": "VN",
+                    "name": "Hà Nội"
+                },
+                {
+                    "id": "15e3fa91-a5e9-42fb-8503-8df6f233cf12",
+                    "country_code": "VN",
+                    "name": "Thành phố Hồ Chí Minh"
+                }
+            ],
+            "total": 15,
+            "page": 1,
+            "page_size": 20,
+            "total_pages": 1
+        }
     """
     return await service.get_cities_paginated(
         page=page, page_size=page_size, country_code=country_code

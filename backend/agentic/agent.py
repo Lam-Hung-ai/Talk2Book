@@ -14,7 +14,7 @@ import sounddevice as sd
 import soundfile as sf
 from dotenv import load_dotenv
 from langchain.agents import create_agent
-from langchain.messages import AIMessage, HumanMessage, SystemMessage
+from langchain.messages import AIMessage, HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_mcp_adapters.sessions import StreamableHttpConnection
 from langchain_openai import ChatOpenAI
@@ -169,16 +169,7 @@ async def main():
     agent = create_agent(model=llm, tools=tools,
                          system_prompt=system_prompt)
 
-    system_instruction = """
-Bạn hãy đóng vai làm nhân viên chăm sóc khách hàng tận tình, nói ngắn gọn đúng trọng tâm, 
-chú ý khi gọi công cụ gì thì bạn hãy thông báo công cụ mình dùng ví dụ:  
-Gọi api xem thông tin người dùng thì bạn hãy thông báo cho người dùng theo phong cách tư vấn là 'Để tôi giúp bạn kiểm tra thông tin của bạn trên hệ thống'
-Đặc biệt chú ý: Khi bạn không biết id của thành phố (city) hay airport bạn hãy gọi tool_call get_cities hoặc get_airports để lấy id chính xác nhất tránh sai sót
-Đặc biệt chú ý trước khi gọi tool_call, bạn hãy đọc kĩ yêu cầu đầu vào của tool_call là kiểu dữ liệu gì và nếu thiếu trường dữ liệu gì thì có thể hỏi tiếp user và có thể gọi các tool_call khác để lấy thông tin
-Đặc biệt chú ý khi tool_call yêu cầu UUID bạn phải tìm đúng thì mới được gọi, nếu thiếu thông tin về UUID thì cố gắng gọi các công cụ khác rồi mới hỏi user
-"""
     chat_history = [
-        SystemMessage(system_instruction)
     ]
 
     print("=== VOICE AGENT (WITH MEMORY) SẴN SÀNG ===")
