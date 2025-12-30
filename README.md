@@ -66,6 +66,6 @@ fastapi run main.py
 cd backend
 python import_sample_data.py
 python import_room_inventory_daily.py
-python import_seat_inventory.py
 python import_flight_instances.py
+python import_seat_inventory.py
 ```
