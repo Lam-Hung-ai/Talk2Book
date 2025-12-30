@@ -32,9 +32,15 @@ if not key or not openai_key:
 llm = ChatOpenAI(
     api_key=key, # type: ignore
     base_url="https://openrouter.ai/api/v1",
-    model="openai/gpt-oss-20b",
+    model="openai/gpt-oss-20B",
     # reasoning_effort="high"
 )
+
+# llm = ChatOpenAI(
+#     api_key="0db3f6cbf2004c29b10e76d307b9ebb5.QPtYJ4pHM6D0piJH", # type: ignore
+#     base_url="https://api.z.ai/api/paas/v4/",
+#     model="GLM-4.6V-Flash"
+#     )
 
 openai_client = OpenAI(api_key=openai_key)
 
@@ -176,15 +182,15 @@ async def main():
     print("=== VOICE AGENT (WITH MEMORY) SẴN SÀNG ===")
 
     while True:
-        audio_path = record_until_enter()
-        user_query = transcribe_audio(audio_path)
+        # audio_path = record_until_enter()
+        # user_query = transcribe_audio(audio_path)
 
-        if not user_query or user_query.strip() == "":
-            print("⚠️ Không nghe rõ.")
-            continue
+        # if not user_query or user_query.strip() == "":
+        #     print("⚠️ Không nghe rõ.")
+        #     continue
 
-        print(f"\n🗣️  User: {user_query}")
-
+        # print(f"\n🗣️  User: {user_query}")
+        user_query = input().strip()
         chat_history.append(HumanMessage(user_query))
 
         tts_streamer = TextToSpeechStreamer()
