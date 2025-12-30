@@ -30,20 +30,12 @@ git push -u oringin ten_cua_ban     # Đẩy code lên repo với nhánh ten_cua
 ```cmd
 git pull --no-rebase
 ```
-## 3. Hướng dẫn tạo cơ sở dữ liệu
-- Tải [postgres](https://www.postgresql.org/download/) vào máy tính
-- Đổi tên file backend/.env.example thành backend/.env, đồng thời cấu hình các thông số phù hợp với postgres
-- Vào thư mục backend và chạy chương trình
-```cmd
-cd backend
-python -m app.core.db
-```
 
-# 4. Hướng dẫn sử dụng [uv](https://docs.astral.sh/uv/getting-started/installation/) trong dự án
+# 3. Hướng dẫn sử dụng [uv](https://docs.astral.sh/uv/getting-started/installation/) trong dự án
 - Tạo môi trường ảo với [uv](https://docs.astral.sh/uv/pip/environments/#creating-a-virtual-environment) và đồng bộ các thư viện
 ```cmd
 cd /backend
-uv env
+uv venv
 uv sync
 ```
 - Kích hoạt môi trường ảo
@@ -54,4 +46,26 @@ uv sync
 ```cmd
 cd backend/app
 fastapi run main.py
+```
+
+## 4. Hướng dẫn tạo cơ sở dữ liệu và dữ liệu mẫu
+- Tải [postgres](https://www.postgresql.org/download/) vào máy tính
+- Đổi tên file backend/.env.example thành backend/.env, đồng thời cấu hình các thông số phù hợp với postgres
+- Vào thư mục backend và chạy chương trình
+```cmd
+cd backend
+python -m app.db.init_db
+```
+- tạo dữ liệu mẫu chạy từng file chú ý lúc tạo dữ liệu mẫu thì phải chạy backend
+- chạy backend
+```cmd
+cd backend/app
+fastapi run main.py
+```
+```cmd
+cd backend
+python import_sample_data.py
+python import_room_inventory_daily.py
+python import_seat_inventory.py
+python import_flight_instances.py
 ```
