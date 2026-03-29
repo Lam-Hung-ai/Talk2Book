@@ -1,26 +1,9 @@
 {
-    // --- Cấu hình Môi trường (Cross-platform) ---
-    "python.venvPath": "${workspaceFolder}/backend",
-    "python.terminal.activateEnvironment": true,
-
-    // --- Phân tích mã & Type Checking ---
-    "python.analysis.typeCheckingMode": "standard",
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/backend"
-    ],
-
-    // --- Ruff (Linter & Formatter) ---
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.fixAll.ruff": "explicit",
-            "source.organizeImports.ruff": "explicit"
+            "source.organizeImports": "explicit"
         }
     },
     "ruff.configuration": "${workspaceFolder}/backend/pyproject.toml",
-    "ruff.nativeServer": "on",
-
-    // --- Terminal ---
-    "terminal.integrated.cwd": "${workspaceFolder}/backend"
 }

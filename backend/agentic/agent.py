@@ -1,4 +1,3 @@
-
 import asyncio
 import os
 import queue
@@ -23,17 +22,20 @@ from prompt import system_prompt
 
 load_dotenv()
 
-key: str | None = getenv("paid")
-openai_key: str | None = getenv("OPENAI_API_KEY")
+llm_key: str  = getenv("OPENROUTER_API_KEY")
+openai_key: str  = getenv("OPENAI_API_KEY")
+# base_url = "https://api.z.ai/api/paas/v4"
+base_url="https://openrouter.ai/api/v1"
 
-if not key or not openai_key:
+
+if not llm_key or not openai_key:
     raise Exception("Thiếu API Key. Vui lòng kiểm tra file .env")
 
 llm = ChatOpenAI(
-    api_key=key, # type: ignore
-    base_url="https://openrouter.ai/api/v1",
-    model="openai/gpt-oss-20b",
-    # reasoning_effort="high"
+    api_key=llm_key, # type: ignore
+    base_url=base_url,
+    model="qwen/qwen3.5-9b",
+    reasoning_effort="high"
 )
 
 openai_client = OpenAI(api_key=openai_key)
