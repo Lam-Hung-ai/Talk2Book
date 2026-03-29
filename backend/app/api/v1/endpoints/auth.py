@@ -62,8 +62,8 @@ async def login(
     return AccessTokenSchema(access_token=access)
 
 
-@router.post("/refresh", response_model=AccessTokenSchema)
-async def refresh(req: Request, auth_service: AuthService = Depends(get_auth_service)):
+@router.post("/refresh-access-token", response_model=AccessTokenSchema)
+async def refresh_access_token(req: Request, auth_service: AuthService = Depends(get_auth_service)):
     # Đọc refresh token từ cookie
     refresh_token = req.cookies.get(settings.COOKIE_REFRESH_NAME)
     if not refresh_token:
