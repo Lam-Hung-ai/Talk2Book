@@ -5,3 +5,6 @@ __pycache__/
 .idea/
 .cursor/
 backend/log/*
+/dist/
+/node_modules/
+/frontend/.next/

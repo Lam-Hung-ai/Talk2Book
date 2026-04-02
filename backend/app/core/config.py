@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Talk 2 Book"
     API_V1_STR: str = "api/v1"
 
+    FLIGHT_API_PROVIDER: str = "opensky"
+    AVIATIONSTACK_API_KEY: str = ""
+    AVIATIONSTACK_BASE_URL: str = "http://api.aviationstack.com/v1/flights"
+    OPENSKY_BASE_URL: str = "https://opensky-network.org/api/states/all"
+
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 14
     SECRET_KEY: str = "f528196732e95b603041ba3628b839196ee278f89941633206bf46d217d42621"
@@ -54,7 +59,6 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"  # "lax", "strict", "none"
     COOKIE_DOMAIN: str | None = None
     COOKIE_PATH: str | None = None
-
     postgres: PgParts = PgParts()
 
     logging: Log = Log()

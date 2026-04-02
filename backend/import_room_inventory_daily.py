@@ -10,6 +10,7 @@ Script tạo dữ liệu RoomInventoryDaily đa dạng cho tất cả phòng (ro
   sold <= allotment, allotment > 0, base_price >= 0
 """
 
+import os
 import sys
 from datetime import date, timedelta
 from decimal import Decimal
@@ -19,7 +20,7 @@ import httpx
 from rich.console import Console
 
 console = Console()
-BASE_URL = "http://127.0.0.1:8000/api/v1"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/api/v1")
 
 
 def make_request(method: str, url: str, data: dict | None = None) -> dict[str, Any]:
@@ -286,5 +287,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

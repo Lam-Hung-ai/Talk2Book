@@ -8,15 +8,16 @@ class FlightScheduleBase(BaseModel):
     provider_id: UUID
     route_id: UUID
     flight_number: str = Field(min_length=1)
-    dow: str = Field(
-        min_length=7,
-        max_length=7,
-        description="Bitstring for days of week, e.g. 1000000 for Monday",
-    )
+    dow: str = Field(min_length=7, max_length=7, description="Bitstring for days of week, e.g. 1000000 for Monday")
     dep_time: time
     arr_time: time
     arrival_day_offset: int = Field(default=0)
     aircraft_code: str | None = None
+    # Rich fields
+    cabin_class: str | None = None      # Economy, Business, First (từ danh mục)
+    ticket_type: str | None = None      # Loại vé (từ danh mục)
+    amenities: str | None = None        # JSON: '["Bữa ăn","Wifi"]'
+    price_from: float | None = None     # Giá tham khảo chưa VAT
 
 
 class FlightScheduleCreate(FlightScheduleBase):
@@ -32,6 +33,10 @@ class FlightScheduleUpdate(BaseModel):
     arr_time: time | None = None
     arrival_day_offset: int | None = None
     aircraft_code: str | None = None
+    cabin_class: str | None = None
+    ticket_type: str | None = None
+    amenities: str | None = None
+    price_from: float | None = None
 
 
 class FlightScheduleRead(FlightScheduleBase):
@@ -41,4 +46,3 @@ class FlightScheduleRead(FlightScheduleBase):
 
     class Config:
         from_attributes = True
-

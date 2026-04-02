@@ -38,6 +38,12 @@ class Hotel(SQLModel, table=True):
     lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6)
     lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6)
 
+    # Rich fields
+    description: str | None = Field(default=None)           # Giới thiệu chung
+    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
+    amenities: str | None = Field(default=None)              # JSON: ["Hồ bơi","Gym",...]
+    usp: str | None = Field(default=None)                    # Điểm đặc trưng (gần biển...)
+    room_count: int | None = Field(default=None)             # Số lượng phòng
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),

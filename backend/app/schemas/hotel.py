@@ -16,6 +16,12 @@ class HotelBase(BaseModel):
     checkout_time: time | None = None
     lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-90, le=90)
     lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
+    # Rich fields
+    description: str | None = None
+    images: str | None = None          # JSON array string: '["url1","url2"]'
+    amenities: str | None = None       # JSON array string: '["Hồ bơi","Gym"]'
+    usp: str | None = None
+    room_count: int | None = None
 
 
 class HotelCreate(HotelBase):
@@ -32,6 +38,11 @@ class HotelUpdate(BaseModel):
     checkout_time: time | None = None
     lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-90, le=90)
     lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
+    description: str | None = None
+    images: str | None = None
+    amenities: str | None = None
+    usp: str | None = None
+    room_count: int | None = None
 
 
 class HotelRead(HotelBase):
@@ -41,4 +52,3 @@ class HotelRead(HotelBase):
 
     class Config:
         from_attributes = True
-

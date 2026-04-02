@@ -7,6 +7,7 @@ Script để import seat_inventory thật đa dạng cho các flight_instance đ
 - Số ghế total/held/sold được random theo từng chuyến để dữ liệu phong phú
 """
 
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -16,7 +17,7 @@ import httpx
 from rich.console import Console
 
 console = Console()
-BASE_URL = "http://127.0.0.1:8000/api/v1"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/api/v1")
 
 
 def make_request(method: str, url: str, data: dict | None = None) -> dict[str, Any]:
@@ -261,5 +262,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

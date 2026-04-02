@@ -27,6 +27,15 @@ class Product(SQLModel, table=True):
     type: ProductType = Field(nullable=False)
     title: str = Field(nullable=False)
 
+    # Rich fields
+    tour_type: str | None = Field(default=None)              # Loại tour (từ danh mục)
+    description: str | None = Field(default=None)            # Giới thiệu chung
+    detail_description: str | None = Field(default=None)     # Giới thiệu chi tiết
+    itinerary: str | None = Field(default=None)              # JSON: [{day,title,description},...]
+    costs: str | None = Field(default=None)                  # JSON: [{item,amount,note},...]
+    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
+    duration_days: int | None = Field(default=None)          # Số ngày
+
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         sa_type=DateTime(timezone=True),
