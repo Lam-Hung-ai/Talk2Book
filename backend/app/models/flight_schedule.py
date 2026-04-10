@@ -1,8 +1,9 @@
 from datetime import UTC, datetime, time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, UniqueConstraint
+from sqlalchemy import Column, DateTime, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -40,7 +41,7 @@ class FlightSchedule(SQLModel, table=True):
     aircraft_code: str | None = None
     cabin_class: str | None = Field(default=None)        # Economy, Business, First...
     ticket_type: str | None = Field(default=None)        # Loại vé (từ danh mục)
-    amenities: str | None = Field(default=None)          # JSON: ["Bữa ăn","Wifi",...]
+    amenities: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
     price_from: float | None = Field(default=None)       # Giá tham khảo chưa VAT
 
     created_at: datetime = Field(

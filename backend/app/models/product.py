@@ -2,8 +2,9 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
+from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
+from sqlmodel import DateTime, Field, Relationship, SQLModel
 
 from app.models.enums import ProductType
 
@@ -28,9 +29,13 @@ class Product(SQLModel, table=True):
     tour_type: str | None = Field(default=None)              # Loại tour (từ danh mục)
     description: str | None = Field(default=None)            # Giới thiệu chung
     detail_description: str | None = Field(default=None)     # Giới thiệu chi tiết
-    itinerary: str | None = Field(default=None)              # JSON: [{day,title,description},...]
-    costs: str | None = Field(default=None)                  # JSON: [{item,amount,note},...]
-    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
+    itinerary: list[dict[str, Any]] | None = Field(
+        default=None, sa_column=Column[Any](JSONB)
+    )
+    costs: list[dict[str, Any]] | None = Field(
+        default=None, sa_column=Column[Any](JSONB)
+    )
+    images: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
     duration_days: int | None = Field(default=None)          # Số ngày
 
     created_at: datetime = Field(

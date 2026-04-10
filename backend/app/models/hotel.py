@@ -1,9 +1,10 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime
+from sqlalchemy import Column, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -35,8 +36,8 @@ class Hotel(SQLModel, table=True):
 
     # Rich fields
     description: str | None = Field(default=None)           # Giới thiệu chung
-    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
-    amenities: str | None = Field(default=None)              # JSON: ["Hồ bơi","Gym",...]
+    images: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
+    amenities: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
     usp: str | None = Field(default=None)                    # Điểm đặc trưng (gần biển...)
     room_count: int | None = Field(default=None)             # Số lượng phòng
     created_at: datetime = Field(

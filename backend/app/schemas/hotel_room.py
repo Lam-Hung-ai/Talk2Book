@@ -13,11 +13,11 @@ class HotelRoomBase(BaseModel):
     room_type: str | None = None           # Loại phòng (từ danh mục)
     area_sqm: float | None = None          # Diện tích m²
     view_type: str | None = None           # Tầm nhìn (từ danh mục)
-    amenities: str | None = None           # JSON: '["Bồn tắm","Ban công"]'
-    service_package: str | None = None     # Gói dịch vụ (từ danh mục)
+    amenities: list[str] | None = None
+    service_package: str | None = None
     cancellation_policy: str | None = None
     description: str | None = None
-    images: str | None = None              # JSON: '["url1","url2"]'
+    images: list[str] | None = None
 
 
 class HotelRoomCreate(HotelRoomBase):
@@ -32,11 +32,11 @@ class HotelRoomUpdate(BaseModel):
     room_type: str | None = None
     area_sqm: float | None = None
     view_type: str | None = None
-    amenities: str | None = None
+    amenities: list[str] | None = None
     service_package: str | None = None
     cancellation_policy: str | None = None
     description: str | None = None
-    images: str | None = None
+    images: list[str] | None = None
 
 
 class HotelRoomRead(HotelRoomBase):

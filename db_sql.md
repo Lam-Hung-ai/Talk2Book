@@ -3,6 +3,7 @@
 -- Travel Super-App (PostgreSQL) – Full DDL (Singular Naming)
 -- Description: Complete Database Schema with SINGULAR table names
 -- Scope: Flight, Hotel, Tour (product), Booking, Payment, Coupon
+-- Aligned with: backend/app/models (SQLModel)
 -- =========================================================
 
 -- CREATE DATABASE travel_app;
@@ -74,7 +75,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE product_type AS ENUM ('tour');
+  CREATE TYPE product_type AS ENUM ('tour','activity','transport');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -104,13 +105,32 @@ CREATE TABLE IF NOT EXISTS city (
 
 CREATE TABLE IF NOT EXISTS airport (
   iata     CHAR(3) PRIMARY KEY,
-  icao     CHAR(4),
+  icao     CHAR(4) UNIQUE,
   city_id  UUID NOT NULL REFERENCES city(id) ON DELETE RESTRICT,
   name     TEXT NOT NULL,
   timezone TEXT NOT NULL,
-  CONSTRAINT uq_airport_icao UNIQUE (icao),
   CONSTRAINT uq_airport_city_name UNIQUE (city_id, name)
 );
+
+-- =========================================================
+-- 1b) Category (lookup / taxonomy)
+-- =========================================================
+CREATE TABLE IF NOT EXISTS category (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_name   TEXT NOT NULL,
+  value        TEXT NOT NULL,
+  description  TEXT,
+  sort_order   INT NOT NULL DEFAULT 0,
+  is_active    BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_category_group_value UNIQUE (group_name, value)
+);
+CREATE INDEX IF NOT EXISTS idx_category_group_name ON category (group_name);
+DROP TRIGGER IF EXISTS trg_category_updated_at ON category;
+CREATE TRIGGER trg_category_updated_at
+BEFORE UPDATE ON category
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- =========================================================
 -- 2) User, Profile & Role
@@ -127,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 CREATE TABLE IF NOT EXISTS user_profile (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID NOT NULL UNIQUE REFERENCES "user"(id) ON DELETE CASCADE,
+  user_id      UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   full_name    TEXT NOT NULL,
   gender       gender_type,
   birthday     DATE,
@@ -162,6 +182,16 @@ CREATE TABLE IF NOT EXISTS user_role (
   PRIMARY KEY (user_id, role_id)
 );
 
+CREATE TABLE IF NOT EXISTS refresh_token (
+  jti            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  refresh_token  TEXT NOT NULL,
+  revoked        BOOLEAN NOT NULL DEFAULT FALSE,
+  expires_at     TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_refresh_token_lookup ON refresh_token (refresh_token);
+CREATE INDEX IF NOT EXISTS idx_refresh_token_user ON refresh_token (user_id);
+
 -- =========================================================
 -- 3) Provider & Contract
 -- =========================================================
@@ -187,7 +217,9 @@ CREATE TABLE IF NOT EXISTS contract (
   effective_to   DATE,
   commission_pct NUMERIC(5,2),
   currency_code  CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  CHECK (commission_pct IS NULL OR (commission_pct >= 0 AND commission_pct <= 100))
+  CONSTRAINT check_commission_pct CHECK (
+    (commission_pct IS NULL) OR (commission_pct >= 0 AND commission_pct <= 100)
+  )
 );
 
 DO $$
@@ -215,31 +247,35 @@ CREATE TABLE IF NOT EXISTS route (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT chk_route_origin_dest CHECK (origin <> destination),
-  CONSTRAINT chk_route_distance CHECK (distance_km IS NULL OR distance_km > 0)
+  CONSTRAINT chk_route_distance CHECK (distance_km IS NULL OR distance_km > 0),
+  CONSTRAINT uq_route_od UNIQUE (origin, destination)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS uq_route_od ON route(origin, destination);
 DROP TRIGGER IF EXISTS trg_route_updated_at ON route;
 CREATE TRIGGER trg_route_updated_at
 BEFORE UPDATE ON route
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS flight_schedule (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider_id       UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
-  route_id          UUID NOT NULL REFERENCES route(id) ON DELETE CASCADE,
-  flight_number     TEXT NOT NULL,
-  dow               BIT(7) NOT NULL,
-  dep_time          TIME NOT NULL,
-  arr_time          TIME NOT NULL,
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id        UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
+  route_id           UUID NOT NULL REFERENCES route(id) ON DELETE CASCADE,
+  flight_number      TEXT NOT NULL,
+  dow                VARCHAR(7) NOT NULL,
+  dep_time           TIME NOT NULL,
+  arr_time           TIME NOT NULL,
   arrival_day_offset SMALLINT NOT NULL DEFAULT 0,
-  aircraft_code     TEXT,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT chk_fs_dow_nonzero CHECK (dow <> B'0000000')
+  aircraft_code      TEXT,
+  cabin_class        TEXT,
+  ticket_type        TEXT,
+  amenities          JSONB,
+  price_from         DOUBLE PRECISION,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT chk_fs_dow_bits CHECK (
+    char_length(dow) = 7 AND dow ~ '^[01]+$' AND dow <> '0000000'
+  ),
+  CONSTRAINT uq_fs_provider_route_flt_dow_time UNIQUE (provider_id, route_id, flight_number, dow, dep_time)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS uq_fs_provider_route_flt_dow_time
-  ON flight_schedule(provider_id, route_id, flight_number, dow, dep_time);
-
 DROP TRIGGER IF EXISTS trg_flight_schedule_updated_at ON flight_schedule;
 CREATE TRIGGER trg_flight_schedule_updated_at
 BEFORE UPDATE ON flight_schedule
@@ -254,8 +290,8 @@ CREATE TABLE IF NOT EXISTS flight_instance (
   status       VARCHAR(20) NOT NULL DEFAULT 'scheduled',
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (schedule_id, flight_date),
-  CHECK (dep_datetime < arr_datetime)
+  CONSTRAINT uq_fi_schedule_date UNIQUE (schedule_id, flight_date),
+  CONSTRAINT chk_fi_time CHECK (dep_datetime < arr_datetime)
 );
 CREATE INDEX IF NOT EXISTS idx_flight_instance_date ON flight_instance (flight_date);
 
@@ -272,8 +308,8 @@ CREATE TABLE IF NOT EXISTS seat_inventory (
   held_seats  INT NOT NULL DEFAULT 0,
   sold_seats  INT NOT NULL DEFAULT 0,
   amenities   JSONB NOT NULL DEFAULT '{}'::jsonb,
-  PRIMARY KEY (instance_id, cabin, fare_bucket),
-  CHECK (held_seats + sold_seats <= total_seats)
+  CONSTRAINT chk_si_seats CHECK (held_seats + sold_seats <= total_seats),
+  PRIMARY KEY (instance_id, cabin, fare_bucket)
 );
 CREATE INDEX IF NOT EXISTS idx_si_instance ON seat_inventory(instance_id, cabin, fare_bucket);
 
@@ -287,6 +323,15 @@ CREATE TABLE IF NOT EXISTS hotel (
   name          TEXT NOT NULL,
   star_rating   NUMERIC(2,1),
   address       TEXT,
+  checkin_time  TIMESTAMPTZ,
+  checkout_time TIMESTAMPTZ,
+  lat           NUMERIC(9,6),
+  lng           NUMERIC(9,6),
+  description   TEXT,
+  images        JSONB,
+  amenities     JSONB,
+  usp           TEXT,
+  room_count    INT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -297,12 +342,19 @@ BEFORE UPDATE ON hotel
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS hotel_room (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  hotel_id   UUID NOT NULL REFERENCES hotel(id) ON DELETE CASCADE,
-  code       TEXT,
-  capacity   INT NOT NULL,
-  bed_config TEXT,
-  amenities  JSONB NOT NULL DEFAULT '{}'::jsonb,
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  hotel_id              UUID NOT NULL REFERENCES hotel(id) ON DELETE CASCADE,
+  code                  TEXT,
+  capacity              INT NOT NULL,
+  bed_config            TEXT,
+  room_type             TEXT,
+  area_sqm              DOUBLE PRECISION,
+  view_type             TEXT,
+  amenities             JSONB,
+  service_package       TEXT,
+  cancellation_policy   TEXT,
+  description           TEXT,
+  images                JSONB,
   CONSTRAINT uq_room_hotel_code UNIQUE (hotel_id, code),
   CONSTRAINT chk_room_capacity CHECK (capacity > 0)
 );
@@ -332,10 +384,10 @@ CREATE TABLE IF NOT EXISTS room_inventory_daily (
   sold         INT  NOT NULL DEFAULT 0,
   stop_sell    BOOLEAN NOT NULL DEFAULT FALSE,
   base_price   NUMERIC(12,2) NOT NULL,
-  PRIMARY KEY (room_id, rate_plan_id, stay_date),
-  CHECK (sold <= allotment),
-  CHECK (allotment > 0),
-  CHECK (base_price >= 0)
+  CONSTRAINT chk_rid_sold_allotment CHECK (sold <= allotment),
+  CONSTRAINT chk_rid_allotment_positive CHECK (allotment > 0),
+  CONSTRAINT chk_rid_price_positive CHECK (base_price >= 0),
+  PRIMARY KEY (room_id, rate_plan_id, stay_date)
 );
 CREATE INDEX IF NOT EXISTS idx_room_inv_date ON room_inventory_daily (stay_date);
 CREATE INDEX IF NOT EXISTS idx_room_inv_room_date ON room_inventory_daily (room_id, stay_date);
@@ -344,15 +396,19 @@ CREATE INDEX IF NOT EXISTS idx_room_inv_room_date ON room_inventory_daily (room_
 -- 6) Tour product (time-slotted inventory)
 -- =========================================================
 CREATE TABLE IF NOT EXISTS product (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider_id UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
-  type        product_type NOT NULL,
-  title       TEXT NOT NULL,
-  description TEXT NOT NULL,
-  image_url   TEXT,
-  itinerary   JSONB NOT NULL DEFAULT '{}'::jsonb,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id        UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
+  type               product_type NOT NULL,
+  title              TEXT NOT NULL,
+  tour_type          TEXT,
+  description        TEXT,
+  detail_description TEXT,
+  itinerary          JSONB,
+  costs              JSONB,
+  images             JSONB,
+  duration_days      INT,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_product_provider_type ON product(provider_id, type);
 DROP TRIGGER IF EXISTS trg_product_updated_at ON product;
@@ -367,7 +423,7 @@ CREATE TABLE IF NOT EXISTS time_slot (
   end_datetime   TIMESTAMPTZ NOT NULL,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (start_datetime < end_datetime),
+  CONSTRAINT chk_slot_dates CHECK (start_datetime < end_datetime),
   CONSTRAINT uq_slot_unique UNIQUE (product_id, start_datetime, end_datetime)
 );
 CREATE INDEX IF NOT EXISTS idx_slot_product_start ON time_slot(product_id, start_datetime);
@@ -377,14 +433,14 @@ BEFORE UPDATE ON time_slot
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS slot_inventory (
-  slot_id      UUID PRIMARY KEY REFERENCES time_slot(id) ON DELETE CASCADE,
-  capacity     INT NOT NULL,
-  sold         INT NOT NULL DEFAULT 0,
-  price        NUMERIC(12,2) NOT NULL,
+  slot_id       UUID PRIMARY KEY REFERENCES time_slot(id) ON DELETE CASCADE,
+  capacity      INT NOT NULL,
+  sold          INT NOT NULL DEFAULT 0,
+  price         NUMERIC(12,2) NOT NULL DEFAULT 0,
   currency_code CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  CHECK (sold <= capacity),
-  CHECK (capacity > 0),
-  CHECK (price >= 0)
+  CONSTRAINT chk_inventory_sold_capacity CHECK (sold <= capacity),
+  CONSTRAINT chk_inventory_capacity_positive CHECK (capacity > 0),
+  CONSTRAINT chk_inventory_price_positive CHECK (price >= 0)
 );
 
 -- =========================================================
@@ -396,21 +452,23 @@ CREATE TABLE IF NOT EXISTS tax (
   name          TEXT NOT NULL,
   rate          NUMERIC(6,3),
   amount        NUMERIC(12,2),
-  currency_code CHAR(3),
+  currency_code CHAR(3) REFERENCES currency(code) ON DELETE RESTRICT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK ((rate IS NOT NULL AND amount IS NULL) OR (rate IS NULL AND amount IS NOT NULL)),
-  CHECK (rate IS NULL OR (rate >= 0 AND rate <= 1)),
-  CHECK (amount IS NULL OR amount >= 0)
+  CONSTRAINT check_tax_rate_or_amount CHECK (
+    (rate IS NOT NULL AND amount IS NULL) OR (rate IS NULL AND amount IS NOT NULL)
+  ),
+  CONSTRAINT check_tax_rate_range CHECK (rate IS NULL OR (rate >= 0 AND rate <= 1)),
+  CONSTRAINT check_tax_amount_positive CHECK (amount IS NULL OR amount >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS exchange_rate (
   rate_date DATE NOT NULL,
-  base      CHAR(3) NOT NULL,
-  quote     CHAR(3) NOT NULL,
+  base      CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
+  quote     CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
   rate      NUMERIC(18,8) NOT NULL,
-  PRIMARY KEY (rate_date, base, quote),
-  CHECK (base <> quote),
-  CHECK (rate > 0)
+  CONSTRAINT uq_exrates_date_base_quote PRIMARY KEY (rate_date, base, quote),
+  CONSTRAINT check_exrates_base_neq_quote CHECK (base <> quote),
+  CONSTRAINT check_exrates_rate_positive CHECK (rate > 0)
 );
 
 CREATE TABLE IF NOT EXISTS price_quote (
@@ -422,10 +480,10 @@ CREATE TABLE IF NOT EXISTS price_quote (
   total_amount  NUMERIC(12,2) NOT NULL,
   expires_at    TIMESTAMPTZ NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (total_amount >= 0),
-  CHECK (expires_at > (now() - interval '1 minute'))
+  CONSTRAINT check_price_quotes_amount_positive CHECK (total_amount >= 0),
+  CONSTRAINT check_price_quotes_expiry CHECK (expires_at > (now() - interval '1 minute'))
 );
-CREATE INDEX IF NOT EXISTS idx_price_quote_expiry ON price_quote (expires_at);
+CREATE INDEX IF NOT EXISTS idx_price_quotes_expiry ON price_quote (expires_at);
 
 -- =========================================================
 -- 8) Promotion & Coupon
@@ -433,22 +491,22 @@ CREATE INDEX IF NOT EXISTS idx_price_quote_expiry ON price_quote (expires_at);
 CREATE TABLE IF NOT EXISTS coupon (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code                TEXT UNIQUE NOT NULL,
-  
+
   discount_type       discount_type NOT NULL,
-  discount_value      NUMERIC(12,2) NOT NULL, 
-  currency_code       CHAR(3),                
-  
-  min_order_amount    NUMERIC(12,2),          
-  max_discount_amount NUMERIC(12,2),         
-  
-  max_uses_total      INT,                    
-  max_uses_per_user   INT,                    
-  current_uses        INT NOT NULL DEFAULT 0, 
-  
+  discount_value      NUMERIC(12,2) NOT NULL,
+  currency_code       CHAR(3) REFERENCES currency(code) ON DELETE RESTRICT,
+
+  min_order_amount    NUMERIC(12,2),
+  max_discount_amount NUMERIC(12,2),
+
+  max_uses_total      INT,
+  max_uses_per_user   INT,
+  current_uses        INT NOT NULL DEFAULT 0,
+
   starts_at           TIMESTAMPTZ,
   ends_at             TIMESTAMPTZ,
-  is_active           BOOLEAN NOT NULL DEFAULT TRUE, 
-  
+  is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
 
@@ -461,6 +519,7 @@ CREATE TABLE IF NOT EXISTS coupon (
   )
 );
 
+DROP TRIGGER IF EXISTS trg_coupon_updated_at ON coupon;
 CREATE TRIGGER trg_coupon_updated_at
 BEFORE UPDATE ON coupon
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
@@ -478,24 +537,38 @@ CREATE TABLE IF NOT EXISTS booking (
   coupon_id     UUID REFERENCES coupon(id) ON DELETE SET NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (total_amount >= 0)
+  CONSTRAINT chk_booking_total_amount CHECK (total_amount >= 0)
 );
 DROP TRIGGER IF EXISTS trg_booking_updated_at ON booking;
 CREATE TRIGGER trg_booking_updated_at
 BEFORE UPDATE ON booking
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+CREATE TABLE IF NOT EXISTS booking_audit_log (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id  UUID NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
+  actor_type  TEXT,
+  actor_id    UUID REFERENCES "user"(id) ON DELETE SET NULL,
+  action      TEXT NOT NULL,
+  from_state  TEXT,
+  to_state    TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  meta        JSONB
+);
+CREATE INDEX IF NOT EXISTS idx_booking_audit_log_booking ON booking_audit_log (booking_id);
+CREATE INDEX IF NOT EXISTS idx_booking_audit_log_actor ON booking_audit_log (actor_id);
+
 CREATE TABLE IF NOT EXISTS coupon_redemption (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   coupon_id       UUID NOT NULL REFERENCES coupon(id) ON DELETE RESTRICT,
   user_id         UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   booking_id      UUID NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
-  
+
   discount_amount NUMERIC(12,2) NOT NULL,
   currency_code   CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  
+
   redeemed_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-  
+
   CONSTRAINT uq_redemption_booking UNIQUE (booking_id, coupon_id),
   CONSTRAINT chk_redemption_amount CHECK (discount_amount > 0)
 );
@@ -507,12 +580,12 @@ CREATE OR REPLACE FUNCTION update_coupon_usage_count()
 RETURNS TRIGGER AS $$
 BEGIN
   IF (TG_OP = 'INSERT') THEN
-    UPDATE coupon 
-    SET current_uses = current_uses + 1 
+    UPDATE coupon
+    SET current_uses = current_uses + 1
     WHERE id = NEW.coupon_id;
   ELSIF (TG_OP = 'DELETE') THEN
-    UPDATE coupon 
-    SET current_uses = current_uses - 1 
+    UPDATE coupon
+    SET current_uses = current_uses - 1
     WHERE id = OLD.coupon_id;
   END IF;
   RETURN NULL;
@@ -531,7 +604,7 @@ CREATE TABLE IF NOT EXISTS booking_item (
   supplier_ref TEXT,
   details      JSONB NOT NULL,
   price_amount NUMERIC(12,2) NOT NULL,
-  CHECK (price_amount >= 0)
+  CONSTRAINT chk_item_price_amount CHECK (price_amount >= 0)
 );
 CREATE INDEX IF NOT EXISTS idx_booking_item_booking ON booking_item(booking_id);
 
@@ -562,7 +635,7 @@ CREATE TABLE IF NOT EXISTS payment (
   status          payment_status NOT NULL,
   idempotency_key TEXT UNIQUE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (amount > 0)
+  CONSTRAINT chk_payment_amount CHECK (amount > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_payment_booking_created ON payment(booking_id, created_at);
 
@@ -573,7 +646,7 @@ CREATE TABLE IF NOT EXISTS refund (
   reason     TEXT,
   status     refund_status NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CHECK (amount > 0)
+  CONSTRAINT chk_refund_amount CHECK (amount > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_refund_booking_created ON refund(booking_id, created_at);
 
@@ -585,9 +658,10 @@ CREATE TABLE IF NOT EXISTS review (
   user_id     UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   target_type review_target_type NOT NULL,
   target_key  TEXT NOT NULL,
-  rating      INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  rating      INT NOT NULL,
   comment     TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT chk_review_rating CHECK (rating >= 1 AND rating <= 5),
   CONSTRAINT uq_review_once UNIQUE (user_id, target_type, target_key)
 );
 CREATE INDEX IF NOT EXISTS idx_review_target ON review (target_type, target_key);

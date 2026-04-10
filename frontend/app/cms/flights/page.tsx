@@ -21,7 +21,7 @@ type FlightItem = {
   id: string; provider_id: string; route_id: string; flight_number: string;
   dow: string; dep_time: string; arr_time: string; arrival_day_offset: number;
   aircraft_code: string | null; cabin_class: string | null; ticket_type: string | null;
-  amenities: string | null; price_from: number | null;
+  amenities: string[] | null; price_from: number | null;
 };
 
 type FlightListResponse = { items: FlightItem[]; total: number; page: number; page_size: number; total_pages: number };
@@ -48,11 +48,6 @@ const DOW_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function parseDow(dow: string): string {
   return dow.split("").map((c, i) => c === "1" ? DOW_LABELS[i] : null).filter(Boolean).join(", ") || "—";
-}
-
-function parseJsonArray(s: string | null): string[] {
-  if (!s) return [];
-  try { return JSON.parse(s) as string[]; } catch { return []; }
 }
 
 function FlightsPageContent() {
@@ -137,7 +132,7 @@ function FlightsPageContent() {
       arrival_day_offset: String(item.arrival_day_offset),
       aircraft_code: item.aircraft_code ?? "",
       cabin_class: item.cabin_class ?? "", ticket_type: item.ticket_type ?? "",
-      amenities: parseJsonArray(item.amenities),
+      amenities: item.amenities ?? [],
       price_from: item.price_from != null ? String(item.price_from) : "",
     });
     setModalOpen(true);
@@ -158,7 +153,7 @@ function FlightsPageContent() {
       arrival_day_offset: Number(form.arrival_day_offset) || 0,
       aircraft_code: form.aircraft_code.trim() || null,
       cabin_class: form.cabin_class || null, ticket_type: form.ticket_type || null,
-      amenities: form.amenities.length ? JSON.stringify(form.amenities) : null,
+      amenities: form.amenities.length ? form.amenities : null,
       price_from: form.price_from ? Number(form.price_from) : null,
     };
     const url = modalMode === "create" ? `${API_BASE_URL}/flight-schedule` : `${API_BASE_URL}/flight-schedule/${editingId}`;

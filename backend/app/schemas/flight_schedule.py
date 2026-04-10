@@ -16,7 +16,7 @@ class FlightScheduleBase(BaseModel):
     # Rich fields
     cabin_class: str | None = None      # Economy, Business, First (từ danh mục)
     ticket_type: str | None = None      # Loại vé (từ danh mục)
-    amenities: str | None = None        # JSON: '["Bữa ăn","Wifi"]'
+    amenities: list[str] | None = None
     price_from: float | None = None     # Giá tham khảo chưa VAT
 
 
@@ -35,7 +35,7 @@ class FlightScheduleUpdate(BaseModel):
     aircraft_code: str | None = None
     cabin_class: str | None = None
     ticket_type: str | None = None
-    amenities: str | None = None
+    amenities: list[str] | None = None
     price_from: float | None = None
 
 

@@ -17,11 +17,16 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
+type ItineraryDay = { day: number; title: string; description: string };
+type CostItem = { item: string; amount: string; note: string };
+
 type TourItem = {
   id: string; title: string; type: string; tour_type: string | null;
   city_id: string | null; provider_id: string;
   description: string | null; detail_description: string | null;
-  itinerary: string | null; costs: string | null; images: string | null;
+  itinerary: ItineraryDay[] | null;
+  costs: CostItem[] | null;
+  images: string[] | null;
   duration_days: number | null; created_at: string;
 };
 
@@ -29,9 +34,6 @@ type TourListResponse = { items: TourItem[]; total: number; page: number; page_s
 type ProviderOption = { id: string; display_name: string };
 type CityOption = { id: string; name: string; country_code: string };
 type ModalMode = "create" | "edit";
-
-type ItineraryDay = { day: number; title: string; description: string };
-type CostItem = { item: string; amount: string; note: string };
 
 type TourFormState = {
   title: string; type: string; tour_type: string;
@@ -48,11 +50,6 @@ const emptyForm: TourFormState = {
   title: "", type: "activity", tour_type: "", city_id: "", provider_id: "",
   description: "", detail_description: "", itinerary: [], costs: [], images: "", duration_days: "",
 };
-
-function parseJsonArray<T>(s: string | null): T[] {
-  if (!s) return [];
-  try { return JSON.parse(s) as T[]; } catch { return []; }
-}
 
 function ToursPageContent() {
   const router = useRouter();
@@ -116,9 +113,9 @@ function ToursPageContent() {
       title: item.title, type: item.type, tour_type: item.tour_type ?? "",
       city_id: item.city_id ?? "", provider_id: item.provider_id,
       description: item.description ?? "", detail_description: item.detail_description ?? "",
-      itinerary: parseJsonArray<ItineraryDay>(item.itinerary),
-      costs: parseJsonArray<CostItem>(item.costs),
-      images: parseJsonArray<string>(item.images).join("\n"),
+      itinerary: item.itinerary ?? [],
+      costs: item.costs ?? [],
+      images: (item.images ?? []).join("\n"),
       duration_days: item.duration_days != null ? String(item.duration_days) : "",
     });
     setModalOpen(true);
@@ -135,9 +132,9 @@ function ToursPageContent() {
       city_id: form.city_id || null, provider_id: form.provider_id,
       description: form.description.trim() || null,
       detail_description: form.detail_description.trim() || null,
-      itinerary: form.itinerary.length ? JSON.stringify(form.itinerary) : null,
-      costs: form.costs.length ? JSON.stringify(form.costs) : null,
-      images: imagesArr.length ? JSON.stringify(imagesArr) : null,
+      itinerary: form.itinerary.length ? form.itinerary : null,
+      costs: form.costs.length ? form.costs : null,
+      images: imagesArr.length ? imagesArr : null,
       duration_days: form.duration_days ? Number(form.duration_days) : null,
     };
     const url = modalMode === "create" ? `${API_BASE_URL}/product` : `${API_BASE_URL}/product/${editingId}`;

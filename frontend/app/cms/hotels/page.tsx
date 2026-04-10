@@ -28,8 +28,8 @@ type HotelItem = {
   checkin_time: string | null;
   checkout_time: string | null;
   description: string | null;
-  images: string | null;
-  amenities: string | null;
+  images: string[] | null;
+  amenities: string[] | null;
   usp: string | null;
   room_count: number | null;
   lat: string | null;
@@ -57,11 +57,6 @@ const emptyForm: HotelFormState = {
   checkin_time: "", checkout_time: "", description: "", images: "",
   amenities: [], usp: "", room_count: "", lat: "", lng: "",
 };
-
-function parseJsonArray(s: string | null): string[] {
-  if (!s) return [];
-  try { return JSON.parse(s) as string[]; } catch { return []; }
-}
 
 function HotelsPageContent() {
   const router = useRouter();
@@ -153,8 +148,8 @@ function HotelsPageContent() {
       star_rating: item.star_rating ?? "", city_id: item.city_id,
       provider_id: item.provider_id, checkin_time: item.checkin_time ?? "",
       checkout_time: item.checkout_time ?? "", description: item.description ?? "",
-      images: parseJsonArray(item.images).join("\n"),
-      amenities: parseJsonArray(item.amenities),
+      images: (item.images ?? []).join("\n"),
+      amenities: item.amenities ?? [],
       usp: item.usp ?? "", room_count: item.room_count != null ? String(item.room_count) : "",
       lat: item.lat ?? "", lng: item.lng ?? "",
     });
@@ -174,8 +169,8 @@ function HotelsPageContent() {
       star_rating: form.star_rating ? Number(form.star_rating) : null,
       checkin_time: form.checkin_time || null, checkout_time: form.checkout_time || null,
       description: form.description.trim() || null,
-      images: imagesArr.length ? JSON.stringify(imagesArr) : null,
-      amenities: form.amenities.length ? JSON.stringify(form.amenities) : null,
+      images: imagesArr.length ? imagesArr : null,
+      amenities: form.amenities.length ? form.amenities : null,
       usp: form.usp.trim() || null,
       room_count: form.room_count ? Number(form.room_count) : null,
       lat: form.lat ? Number(form.lat) : null, lng: form.lng ? Number(form.lng) : null,
