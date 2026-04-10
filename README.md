@@ -1,4 +1,6 @@
-# AI_hotel
+# Talk to Book - Đặt khách sạn vé máy bay bằng giọng nói
+## Demo 1
+https://github.com/user-attachments/assets/e44602cc-9d20-455d-a4d6-e8a57554dc8b
 ## 1. Thành viên 
 - Nguyễn Văn Lâm Hùng
 - Lê Sỹ Long Nhật

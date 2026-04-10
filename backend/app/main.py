@@ -1,6 +1,7 @@
 import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
@@ -18,7 +19,8 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 def load_function_tool_calls(*keys, file_path: str = "tool_call.json") -> list[str]:
 
     list_tool_calls = []
-    with open(file_path) as f:
+    resolved = Path(__file__).parent / file_path
+    with open(resolved) as f:
         tool_calls = json.load(f)
     for key in keys:
         if key in tool_calls:
@@ -67,5 +69,5 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-mcp =FastApiMCP(app, name="Talk2Book project", include_operations=load_function_tool_calls("search", "city", "country", "airport", "user", "booking"))
+mcp = FastApiMCP(app, name="Talk2Book project", include_operations=load_function_tool_calls("search", "city", "country", "airport", "user", "booking"))
 mcp.mount_http()

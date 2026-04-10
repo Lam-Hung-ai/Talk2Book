@@ -202,12 +202,6 @@ async def create_flight_booking(
     "/hotel-booking",
     response_model=HotelBookingResult,
     status_code=status.HTTP_201_CREATED,
-    summary="Đặt phòng khách sạn từ kết quả search",
-)
-@router.post(
-    "/hotel-booking",
-    response_model=HotelBookingResult,
-    status_code=status.HTTP_201_CREATED,
     summary="Tạo đơn đặt phòng khách sạn (Create Booking)",
 )
 async def create_hotel_booking(
