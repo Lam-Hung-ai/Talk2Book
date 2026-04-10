@@ -7,7 +7,6 @@ if TYPE_CHECKING:
     from app.models.airport import Airport
     from app.models.country import Country
     from app.models.hotel import Hotel
-    from app.models.product import Product
 
 
 class City(SQLModel, table=True):
@@ -26,4 +25,3 @@ class City(SQLModel, table=True):
     country: Optional["Country"] = Relationship(back_populates="cities")
     airports: list["Airport"] = Relationship(back_populates="city")
     hotels: list["Hotel"] = Relationship(back_populates="city")
-    products: list["Product"] = Relationship(back_populates="city")

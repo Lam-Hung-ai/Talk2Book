@@ -2,7 +2,7 @@
 -- =========================================================
 -- Travel Super-App (PostgreSQL) – Full DDL (Singular Naming)
 -- Description: Complete Database Schema with SINGULAR table names
--- Scope: Flight, Hotel, Activity, Booking, Payment, Coupon
+-- Scope: Flight, Hotel, Tour (product), Booking, Payment, Coupon
 -- =========================================================
 
 -- CREATE DATABASE travel_app;
@@ -74,11 +74,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE product_type AS ENUM ('activity','transport');
+  CREATE TYPE product_type AS ENUM ('tour');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE ticket_type AS ENUM ('flight','hotel','activity','transport');
+  CREATE TYPE ticket_type AS ENUM ('flight','hotel','tour');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =========================================================
@@ -271,6 +271,7 @@ CREATE TABLE IF NOT EXISTS seat_inventory (
   total_seats INT NOT NULL,
   held_seats  INT NOT NULL DEFAULT 0,
   sold_seats  INT NOT NULL DEFAULT 0,
+  amenities   JSONB NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (instance_id, cabin, fare_bucket),
   CHECK (held_seats + sold_seats <= total_seats)
 );
@@ -286,14 +287,8 @@ CREATE TABLE IF NOT EXISTS hotel (
   name          TEXT NOT NULL,
   star_rating   NUMERIC(2,1),
   address       TEXT,
-  checkin_time  TIME,
-  checkout_time TIME,
-  lat           NUMERIC(9,6),
-  lng           NUMERIC(9,6),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT chk_hotel_lat CHECK (lat IS NULL OR (lat >= -90 AND lat <= 90)),
-  CONSTRAINT chk_hotel_lng CHECK (lng IS NULL OR (lng >= -180 AND lng <= 180))
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_hotel_city_star ON hotel(city_id, star_rating);
 DROP TRIGGER IF EXISTS trg_hotel_updated_at ON hotel;
@@ -307,6 +302,7 @@ CREATE TABLE IF NOT EXISTS hotel_room (
   code       TEXT,
   capacity   INT NOT NULL,
   bed_config TEXT,
+  amenities  JSONB NOT NULL DEFAULT '{}'::jsonb,
   CONSTRAINT uq_room_hotel_code UNIQUE (hotel_id, code),
   CONSTRAINT chk_room_capacity CHECK (capacity > 0)
 );
@@ -345,18 +341,20 @@ CREATE INDEX IF NOT EXISTS idx_room_inv_date ON room_inventory_daily (stay_date)
 CREATE INDEX IF NOT EXISTS idx_room_inv_room_date ON room_inventory_daily (room_id, stay_date);
 
 -- =========================================================
--- 6) Activity / Transport (Non-Flight)
+-- 6) Tour product (time-slotted inventory)
 -- =========================================================
 CREATE TABLE IF NOT EXISTS product (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   provider_id UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
   type        product_type NOT NULL,
-  city_id     UUID REFERENCES city(id) ON DELETE SET NULL,
   title       TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image_url   TEXT,
+  itinerary   JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_product_city_type ON product(city_id, type);
+CREATE INDEX IF NOT EXISTS idx_product_provider_type ON product(provider_id, type);
 DROP TRIGGER IF EXISTS trg_product_updated_at ON product;
 CREATE TRIGGER trg_product_updated_at
 BEFORE UPDATE ON product

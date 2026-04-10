@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import CheckConstraint, UniqueConstraint
-from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import Column, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.hotel import Hotel
@@ -23,6 +24,7 @@ class HotelRoom(SQLModel, table=True):
     code: str | None = Field(default=None)
     capacity: int = Field(nullable=False)
     bed_config: str | None = Field(default=None)
+    amenities: dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
 
     # Relationships
     hotel: "Hotel" = Relationship(back_populates="rooms")
