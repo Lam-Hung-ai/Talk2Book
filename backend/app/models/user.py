@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from app.models.refresh_token import RefreshToken
     from app.models.review import Review
     from app.models.role import Role
-    from app.models.support_ticket import SupportTicket
     from app.models.user_profile import UserProfile
 
 
@@ -43,4 +42,3 @@ class User(SQLModel, table=True):
     booking_audit_logs: list["BookingAuditLog"] = Relationship(back_populates="actor")
     coupon_redemptions: list["CouponRedemption"] = Relationship(back_populates="user")
     reviews: list["Review"] = Relationship(back_populates="user")
-    support_tickets: list["SupportTicket"] = Relationship(back_populates="user")

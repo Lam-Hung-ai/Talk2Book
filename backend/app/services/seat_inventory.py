@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 from app.models.seat_inventory import SeatInventory
 from app.repositories.seat_inventory import SeatInventoryRepository
 from app.schemas.seat_inventory import (
@@ -80,9 +80,9 @@ class SeatInventoryService:
         }
 
     async def get_inventory(
-        self, instance_id: UUID, cabin: CabinType, fare_bucket: FareBucketType
+        self, instance_id: UUID, cabin: CabinType
     ) -> SeatInventoryRead:
-        obj = await self.repo.get(instance_id, cabin, fare_bucket)
+        obj = await self.repo.get(instance_id, cabin)
         if not obj:
             raise HTTPException(status_code=404, detail="Seat inventory not found")
         return SeatInventoryRead.model_validate(obj, from_attributes=True)
@@ -91,10 +91,9 @@ class SeatInventoryService:
         self,
         instance_id: UUID,
         cabin: CabinType,
-        fare_bucket: FareBucketType,
         payload: SeatInventoryUpdate,
     ) -> SeatInventoryRead:
-        obj = await self.repo.get(instance_id, cabin, fare_bucket)
+        obj = await self.repo.get(instance_id, cabin)
         if not obj:
             raise HTTPException(status_code=404, detail="Seat inventory not found")
 
@@ -109,9 +108,8 @@ class SeatInventoryService:
         return SeatInventoryRead.model_validate(updated, from_attributes=True)
 
     async def delete_inventory(
-        self, instance_id: UUID, cabin: CabinType, fare_bucket: FareBucketType
+        self, instance_id: UUID, cabin: CabinType
     ) -> None:
-        deleted = await self.repo.delete(instance_id, cabin, fare_bucket)
+        deleted = await self.repo.delete(instance_id, cabin)
         if not deleted:
             raise HTTPException(status_code=404, detail="Seat inventory not found")
-

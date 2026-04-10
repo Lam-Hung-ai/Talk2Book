@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script để import seat_inventory thật đa dạng cho các flight_instance đã có.
+Script để import seat_inventory cho các flight_instance đã có.
 
 - Tự động lấy danh sách flight_instance từ API
-- Với mỗi flight_instance, tạo seat_inventory cho nhiều cabin/fare_bucket
+- Với mỗi flight_instance, tạo một bản ghi seat_inventory cho mỗi cabin (economy / premium / business / first)
 - Số ghế total/held/sold được random theo từng chuyến để dữ liệu phong phú
 """
 
@@ -33,7 +33,7 @@ def make_request(method: str, url: str, data: dict | None = None) -> dict[str, A
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as e:
-        # 409: duplicate seat_inventory (instance_id + cabin + fare_bucket)
+        # 409: duplicate seat_inventory (instance_id + cabin)
         if e.response.status_code == 409:
             return {}
         console.print(f"[red]Error {e.response.status_code}: {e.response.text}[/red]")
@@ -78,123 +78,88 @@ def deterministic_rand(instance_id: str, salt: int = 0) -> int:
 
 def build_seat_profiles(instance: dict[str, Any]) -> list[dict[str, Any]]:
     """
-    Tạo danh sách seat_inventory cho 1 flight_instance.
-
-    Logic:
-    - Cabin luôn có: economy
-    - premium/business/first xuất hiện dựa trên hash để tạo sự đa dạng
-    - Mỗi cabin có nhiều fare_bucket với số ghế khác nhau
+    Tạo danh sách seat_inventory cho 1 flight_instance — một dòng cho mỗi cabin.
     """
     instance_id = str(instance["id"])
+    base_rand = deterministic_rand(instance_id)
 
-    # Các fare bucket theo cabin
-    economy_buckets = ["Y", "M", "Q", "L", "T", "N"]
-    premium_buckets = ["S", "V", "R"]  # giả lập premium
-    business_buckets = ["D", "C", "J"]
-    first_buckets = ["F", "P", "Z"]
+    has_premium = (base_rand & 0x1) == 0
+    has_business = (base_rand & 0x2) == 0
+    has_first = (base_rand & 0x4) == 0
 
     profiles: list[dict[str, Any]] = []
 
-    # Xác định cabins được bật cho instance này (ổn định theo hash)
-    base_rand = deterministic_rand(instance_id)
-    has_premium = (base_rand & 0x1) == 0  # ~50%
-    has_business = (base_rand & 0x2) == 0  # ~50%
-    has_first = (base_rand & 0x4) == 0  # ~50%
+    # Economy — luôn có
+    econ_total = 130 + (base_rand % 40)
+    r = deterministic_rand(instance_id, salt=1)
+    utilization = 0.3 + (r % 70) / 100
+    sold = int(econ_total * utilization)
+    held = min(5, r % 6)
+    if held + sold > econ_total:
+        held = 0
+    profiles.append(
+        {
+            "instance_id": instance_id,
+            "cabin": "economy",
+            "total_seats": econ_total,
+            "held_seats": held,
+            "sold_seats": sold,
+        }
+    )
 
-    # Economy cabin
-    econ_base = 130 + (base_rand % 40)  # 130-169 ghế tổng
-    for idx, bucket in enumerate(economy_buckets):
-        bucket_rand = deterministic_rand(instance_id, salt=idx)
-        # Chia đều tổng ghế cho các bucket với chút dao động
-        total = max(10, econ_base // len(economy_buckets) + (bucket_rand % 5) - 2)
-        # Tỷ lệ bán: 30% - 95%
-        utilization = 0.3 + (bucket_rand % 70) / 100
-        sold = int(total * utilization)
-        # Held seats nhỏ
-        held = min(5, bucket_rand % 6)
-
-        if held + sold > total:
+    if has_premium:
+        prem_total = 24 + (base_rand % 12)
+        r = deterministic_rand(instance_id, salt=2)
+        utilization = 0.25 + (r % 60) / 100
+        sold = int(prem_total * utilization)
+        held = min(3, r % 4)
+        if held + sold > prem_total:
             held = 0
-
         profiles.append(
             {
                 "instance_id": instance_id,
-                "cabin": "economy",
-                "fare_bucket": bucket,
-                "total_seats": total,
+                "cabin": "premium",
+                "total_seats": prem_total,
                 "held_seats": held,
                 "sold_seats": sold,
             }
         )
 
-    # Premium cabin
-    if has_premium:
-        prem_base = 24 + (base_rand % 12)  # 24-35 ghế
-        for idx, bucket in enumerate(premium_buckets):
-            bucket_rand = deterministic_rand(instance_id, salt=100 + idx)
-            total = max(4, prem_base // len(premium_buckets) + (bucket_rand % 3) - 1)
-            utilization = 0.25 + (bucket_rand % 60) / 100
-            sold = int(total * utilization)
-            held = min(3, bucket_rand % 4)
-            if held + sold > total:
-                held = 0
-
-            profiles.append(
-                {
-                    "instance_id": instance_id,
-                    "cabin": "premium",
-                    "fare_bucket": bucket,
-                    "total_seats": total,
-                    "held_seats": held,
-                    "sold_seats": sold,
-                }
-            )
-
-    # Business cabin
     if has_business:
-        biz_base = 16 + (base_rand % 8)  # 16-23 ghế
-        for idx, bucket in enumerate(business_buckets):
-            bucket_rand = deterministic_rand(instance_id, salt=200 + idx)
-            total = max(4, biz_base // len(business_buckets) + (bucket_rand % 3) - 1)
-            utilization = 0.2 + (bucket_rand % 50) / 100
-            sold = int(total * utilization)
-            held = min(2, bucket_rand % 3)
-            if held + sold > total:
-                held = 0
+        biz_total = 16 + (base_rand % 8)
+        r = deterministic_rand(instance_id, salt=3)
+        utilization = 0.2 + (r % 50) / 100
+        sold = int(biz_total * utilization)
+        held = min(2, r % 3)
+        if held + sold > biz_total:
+            held = 0
+        profiles.append(
+            {
+                "instance_id": instance_id,
+                "cabin": "business",
+                "total_seats": biz_total,
+                "held_seats": held,
+                "sold_seats": sold,
+            }
+        )
 
-            profiles.append(
-                {
-                    "instance_id": instance_id,
-                    "cabin": "business",
-                    "fare_bucket": bucket,
-                    "total_seats": total,
-                    "held_seats": held,
-                    "sold_seats": sold,
-                }
-            )
-
-    # First cabin
     if has_first:
-        first_base = 8 + (base_rand % 4)  # 8-11 ghế
-        for idx, bucket in enumerate(first_buckets):
-            bucket_rand = deterministic_rand(instance_id, salt=300 + idx)
-            total = max(2, first_base // len(first_buckets) + (bucket_rand % 2) - 1)
-            utilization = 0.1 + (bucket_rand % 40) / 100
-            sold = int(total * utilization)
-            held = min(1, bucket_rand % 2)
-            if held + sold > total:
-                held = 0
-
-            profiles.append(
-                {
-                    "instance_id": instance_id,
-                    "cabin": "first",
-                    "fare_bucket": bucket,
-                    "total_seats": total,
-                    "held_seats": held,
-                    "sold_seats": sold,
-                }
-            )
+        first_total = 8 + (base_rand % 4)
+        r = deterministic_rand(instance_id, salt=4)
+        utilization = 0.1 + (r % 40) / 100
+        sold = int(first_total * utilization)
+        held = min(1, r % 2)
+        if held + sold > first_total:
+            held = 0
+        profiles.append(
+            {
+                "instance_id": instance_id,
+                "cabin": "first",
+                "total_seats": first_total,
+                "held_seats": held,
+                "sold_seats": sold,
+            }
+        )
 
     return profiles
 

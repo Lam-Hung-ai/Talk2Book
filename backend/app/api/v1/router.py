@@ -9,11 +9,9 @@ from app.api.v1.endpoints import (
     booking_item,
     category,
     city,
-    contract,
     country,
     coupon,
     coupon_redemption,
-    exchange_rate,
     flight_instance,
     flight_realtime,
     flight_schedule,
@@ -26,7 +24,6 @@ from app.api.v1.endpoints import (
     product,
     provider,
     refresh_token,
-    refund,
     review,
     role,
     room_inventory_daily,
@@ -35,8 +32,6 @@ from app.api.v1.endpoints import (
     search,
     seat_inventory,
     slot_inventory,
-    support_ticket,
-    tax,
     ticket,
     time_slot,
     user,
@@ -47,7 +42,6 @@ api_router = APIRouter()
 api_router.include_router(user.router, prefix="/user", tags=["User"])
 api_router.include_router(refresh_token.router, prefix="/refresh-token", tags=["Refresh Token"])
 api_router.include_router(role.router, prefix="/role", tags=["Role"])
-api_router.include_router(contract.router, prefix="/contract", tags=["Contract"])
 api_router.include_router(user_profile.router, prefix="/profile", tags=["User Profile"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(geo.router, tags=["Geo"])
@@ -66,8 +60,6 @@ api_router.include_router(room_inventory_daily.router, prefix="/room-inventory-d
 api_router.include_router(product.router, prefix="/product", tags=["Product"])
 api_router.include_router(time_slot.router, prefix="/time-slot", tags=["Time Slot"])
 api_router.include_router(slot_inventory.router, prefix="/slot-inventory", tags=["Slot Inventory"])
-api_router.include_router(tax.router, prefix="/tax", tags=["Tax"])
-api_router.include_router(exchange_rate.router, prefix="/exchange-rate", tags=["Exchange Rate"])
 api_router.include_router(price_quote.router, prefix="/price-quote", tags=["Price Quote"])
 api_router.include_router(coupon.router, prefix="/coupon", tags=["Coupon"])
 api_router.include_router(coupon_redemption.router, prefix="/coupon-redemption", tags=["Coupon Redemption"])
@@ -77,9 +69,7 @@ api_router.include_router(passenger.router, prefix="/passenger", tags=["Passenge
 api_router.include_router(ticket.router, prefix="/ticket", tags=["Ticket"])
 api_router.include_router(booking_audit_log.router, prefix="/booking-audit-log", tags=["Booking Audit Log"])
 api_router.include_router(payment.router, prefix="/payment", tags=["Payment"])
-api_router.include_router(refund.router, prefix="/refund", tags=["Refund"])
 api_router.include_router(review.router, prefix="/review", tags=["Review"])
-api_router.include_router(support_ticket.router, prefix="/support-ticket", tags=["Support Ticket"])
 api_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_router.include_router(category.router, prefix="/category", tags=["Category"])
 api_router.include_router(

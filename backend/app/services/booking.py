@@ -138,11 +138,10 @@ class BookingService:
             )
         instance, schedule, route = row
 
-        # Lấy seat inventory cho cabin + fare_bucket
+        # Lấy seat inventory cho cabin
         seat_stmt = select(SeatInventory).where(
             SeatInventory.instance_id == instance.id,
             SeatInventory.cabin == payload.cabin,
-            SeatInventory.fare_bucket == payload.fare_bucket,
         )
         seat_res = await self.db.exec(seat_stmt)
         seat = seat_res.first()
@@ -190,7 +189,6 @@ class BookingService:
             "dep_datetime": instance.dep_datetime.isoformat(),
             "arr_datetime": instance.arr_datetime.isoformat(),
             "cabin": payload.cabin,
-            "fare_bucket": payload.fare_bucket,
             "passengers": payload.passengers,
             "base_price_per_pax": str(base_price_per_pax),
         }

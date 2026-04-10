@@ -14,7 +14,7 @@ async def create_tables() -> None:
         await conn.run_sync(SQLModel.metadata.create_all)
 
 async def create_role() -> None:
-    DEFAULT_ROLES = ["admin", "partner", "user"]
+    DEFAULT_ROLES = ["admin", "user"]
     async with async_session() as db:
         for role_code in DEFAULT_ROLES:
             role = (await db.exec(select(Role).where(Role.code == role_code))).all()

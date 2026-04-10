@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 from app.schemas.booking import BookingRead
 from app.schemas.booking_item import BookingItemRead
 from app.schemas.ticket import TicketRead
@@ -15,7 +15,6 @@ class FlightBookingRequest(BaseModel):
     user_id: UUID | None = None
     instance_id: UUID
     cabin: CabinType
-    fare_bucket: FareBucketType
     passengers: int = Field(ge=1, description="Số lượng hành khách")
     currency_code: str = Field(default="VND", max_length=3)
 

@@ -14,8 +14,6 @@
 -- ================
 CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE EXTENSION IF NOT EXISTS btree_gist;
-
 -- ================
 -- 0b. Utility Functions
 -- ================
@@ -47,19 +45,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE refund_status      AS ENUM ('pending','approved','processed','failed');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
   CREATE TYPE discount_type      AS ENUM ('percent','amount');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
   CREATE TYPE cabin_type         AS ENUM ('economy','premium','business','first');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-  CREATE TYPE fare_bucket_type   AS ENUM ('Y','B','M','H','Q','K','L','T','N','S','V','R','D','C','J','F','P','Z','U','E');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -193,7 +183,7 @@ CREATE INDEX IF NOT EXISTS idx_refresh_token_lookup ON refresh_token (refresh_to
 CREATE INDEX IF NOT EXISTS idx_refresh_token_user ON refresh_token (user_id);
 
 -- =========================================================
--- 3) Provider & Contract
+-- 3) Provider
 -- =========================================================
 CREATE TABLE IF NOT EXISTS provider (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -209,32 +199,6 @@ DROP TRIGGER IF EXISTS trg_provider_updated_at ON provider;
 CREATE TRIGGER trg_provider_updated_at
 BEFORE UPDATE ON provider
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE TABLE IF NOT EXISTS contract (
-  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider_id    UUID NOT NULL REFERENCES provider(id) ON DELETE CASCADE,
-  effective_from DATE NOT NULL,
-  effective_to   DATE,
-  commission_pct NUMERIC(5,2),
-  currency_code  CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  CONSTRAINT check_commission_pct CHECK (
-    (commission_pct IS NULL) OR (commission_pct >= 0 AND commission_pct <= 100)
-  )
-);
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'contract_no_overlap'
-  ) THEN
-    ALTER TABLE contract
-      ADD CONSTRAINT contract_no_overlap
-      EXCLUDE USING GIST (
-        provider_id WITH =,
-        daterange(effective_from, COALESCE(effective_to, 'infinity'::date), '[]') WITH &&
-      );
-  END IF;
-END$$;
 
 -- =========================================================
 -- 4) Flight Inventory
@@ -303,15 +267,14 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TABLE IF NOT EXISTS seat_inventory (
   instance_id UUID NOT NULL REFERENCES flight_instance(id) ON DELETE CASCADE,
   cabin       cabin_type NOT NULL,
-  fare_bucket fare_bucket_type NOT NULL,
   total_seats INT NOT NULL,
   held_seats  INT NOT NULL DEFAULT 0,
   sold_seats  INT NOT NULL DEFAULT 0,
   amenities   JSONB NOT NULL DEFAULT '{}'::jsonb,
   CONSTRAINT chk_si_seats CHECK (held_seats + sold_seats <= total_seats),
-  PRIMARY KEY (instance_id, cabin, fare_bucket)
+  PRIMARY KEY (instance_id, cabin)
 );
-CREATE INDEX IF NOT EXISTS idx_si_instance ON seat_inventory(instance_id, cabin, fare_bucket);
+CREATE INDEX IF NOT EXISTS idx_si_instance ON seat_inventory(instance_id, cabin);
 
 -- =========================================================
 -- 5) Hotel Inventory
@@ -444,33 +407,8 @@ CREATE TABLE IF NOT EXISTS slot_inventory (
 );
 
 -- =========================================================
--- 7) Tax, Exchange Rate, Price Quote
+-- 7) Price Quote
 -- =========================================================
-CREATE TABLE IF NOT EXISTS tax (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  scope         VARCHAR(20) NOT NULL,
-  name          TEXT NOT NULL,
-  rate          NUMERIC(6,3),
-  amount        NUMERIC(12,2),
-  currency_code CHAR(3) REFERENCES currency(code) ON DELETE RESTRICT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT check_tax_rate_or_amount CHECK (
-    (rate IS NOT NULL AND amount IS NULL) OR (rate IS NULL AND amount IS NOT NULL)
-  ),
-  CONSTRAINT check_tax_rate_range CHECK (rate IS NULL OR (rate >= 0 AND rate <= 1)),
-  CONSTRAINT check_tax_amount_positive CHECK (amount IS NULL OR amount >= 0)
-);
-
-CREATE TABLE IF NOT EXISTS exchange_rate (
-  rate_date DATE NOT NULL,
-  base      CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  quote     CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  rate      NUMERIC(18,8) NOT NULL,
-  CONSTRAINT uq_exrates_date_base_quote PRIMARY KEY (rate_date, base, quote),
-  CONSTRAINT check_exrates_base_neq_quote CHECK (base <> quote),
-  CONSTRAINT check_exrates_rate_positive CHECK (rate > 0)
-);
-
 CREATE TABLE IF NOT EXISTS price_quote (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       UUID REFERENCES "user"(id) ON DELETE SET NULL,
@@ -624,7 +562,7 @@ CREATE TABLE IF NOT EXISTS ticket (
 );
 
 -- =========================================================
--- 10) Payment & Refund
+-- 10) Payment
 -- =========================================================
 CREATE TABLE IF NOT EXISTS payment (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -638,17 +576,6 @@ CREATE TABLE IF NOT EXISTS payment (
   CONSTRAINT chk_payment_amount CHECK (amount > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_payment_booking_created ON payment(booking_id, created_at);
-
-CREATE TABLE IF NOT EXISTS refund (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  booking_id UUID NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
-  amount     NUMERIC(12,2) NOT NULL,
-  reason     TEXT,
-  status     refund_status NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT chk_refund_amount CHECK (amount > 0)
-);
-CREATE INDEX IF NOT EXISTS idx_refund_booking_created ON refund(booking_id, created_at);
 
 -- =========================================================
 -- 11) Review & Support

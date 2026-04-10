@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from app.models.passenger import Passenger
     from app.models.payment import Payment
     from app.models.price_quote import PriceQuote
-    from app.models.refund import Refund
-    from app.models.support_ticket import SupportTicket
     from app.models.user import User
 
 
@@ -71,5 +69,3 @@ class Booking(SQLModel, table=True):
     quote: Optional["PriceQuote"] = Relationship(back_populates="bookings")
     audit_logs: list["BookingAuditLog"] = Relationship(back_populates="booking")
     payments: list["Payment"] = Relationship(back_populates="booking")
-    refunds: list["Refund"] = Relationship(back_populates="booking")
-    support_tickets: list["SupportTicket"] = Relationship(back_populates="booking")

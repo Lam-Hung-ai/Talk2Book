@@ -17,9 +17,11 @@ class Passenger(SQLModel, table=True):
     )
     full_name: str = Field(nullable=False)
     nationality: str | None = Field(
-        default=None, foreign_key="country.code", max_length=2, ondelete="RESTRICT"
+        default=None,
+        max_length=2,
+        foreign_key="country.code",
+        ondelete="RESTRICT",
     )
 
-    # Relationships
     booking: "Booking" = Relationship(back_populates="passengers")
     country: Optional["Country"] = Relationship(back_populates="passengers")

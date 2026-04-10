@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 
 
 # ========== Flight Search ==========
@@ -14,7 +14,6 @@ class FlightSearchRequest(BaseModel):
     destination: str = Field(..., min_length=3, max_length=3, description="IATA code của sân bay đến")
     flight_date: date = Field(..., description="Ngày bay")
     cabin: CabinType | None = Field(default=None, description="Loại cabin (optional)")
-    fare_bucket: FareBucketType | None = Field(default=None, description="Fare bucket (optional)")
 
 
 class FlightSearchResult(BaseModel):
@@ -29,7 +28,6 @@ class FlightSearchResult(BaseModel):
     status: str
     available_seats: int = Field(description="Số ghế còn trống (total - sold)")
     cabin: CabinType | None = None
-    fare_bucket: FareBucketType | None = None
     total_seats: int | None = None
     sold_seats: int | None = None
 

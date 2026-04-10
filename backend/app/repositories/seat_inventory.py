@@ -14,11 +14,10 @@ class SeatInventoryRepository(SearchableRepository):
         self.db = db
         SearchableRepository.__init__(self, SeatInventory, db)
 
-    async def get(self, instance_id: UUID, cabin, fare_bucket) -> SeatInventory | None:
+    async def get(self, instance_id: UUID, cabin) -> SeatInventory | None:
         stmt = select(SeatInventory).where(
             SeatInventory.instance_id == instance_id,
             SeatInventory.cabin == cabin,
-            SeatInventory.fare_bucket == fare_bucket,
         )
         result = await self.db.exec(stmt)
         return result.first()
@@ -49,11 +48,10 @@ class SeatInventoryRepository(SearchableRepository):
         await self.db.refresh(db_obj)
         return db_obj
 
-    async def delete(self, instance_id: UUID, cabin, fare_bucket) -> bool:
-        obj = await self.get(instance_id, cabin, fare_bucket)
+    async def delete(self, instance_id: UUID, cabin) -> bool:
+        obj = await self.get(instance_id, cabin)
         if not obj:
             return False
         await self.db.delete(obj)
         await self.db.commit()
         return True
-

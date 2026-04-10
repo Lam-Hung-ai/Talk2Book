@@ -9,7 +9,6 @@ from sqlmodel import DateTime, Field, Relationship, SQLModel
 from app.models.enums import ProviderType, UserStatus
 
 if TYPE_CHECKING:
-    from app.models.contract import Contract
     from app.models.country import Country
     from app.models.flight_schedule import FlightSchedule
     from app.models.hotel import Hotel
@@ -46,7 +45,6 @@ class Provider(SQLModel, table=True):
         ),
     )
 
-    contracts: list["Contract"] = Relationship(back_populates="provider")
     country: "Country" = Relationship(back_populates="providers")
     flight_schedules: list["FlightSchedule"] = Relationship(back_populates="provider")
     hotels: list["Hotel"] = Relationship(back_populates="provider")

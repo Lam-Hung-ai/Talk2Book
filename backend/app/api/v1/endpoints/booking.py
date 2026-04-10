@@ -114,7 +114,7 @@ async def create_flight_booking(
     """
     Tạo một đơn đặt vé mới (Booking) dựa trên chuyến bay đã chọn.
 
-    Hàm này nhận thông tin từ kết quả tìm kiếm (`instance_id`, `fare_bucket`...) và
+    Hàm này nhận thông tin từ kết quả tìm kiếm (`instance_id`, `cabin`...) và
     tạo ra booking ở trạng thái chờ thanh toán (`pending_payment`). Nó cũng tạm thời
     giữ chỗ (reserve seats) và sinh mã vé.
 
@@ -127,7 +127,6 @@ async def create_flight_booking(
             "user_id": UUID,        # ID người dùng (VD: "3e7dbe94...")
             "instance_id": UUID,    # ID chuyến bay từ bước search (VD: "de60971e...")
             "cabin": str,           # Hạng ghế (VD: "economy")
-            "fare_bucket": str,     # Nhóm giá (VD: "Y")
             "passengers": int,      # Số khách (VD: 1)
             "currency_code": str    # Tiền tệ (VD: "VND")
         }
@@ -173,7 +172,6 @@ async def create_flight_booking(
                         "distance_km": 1730
                     },
                     "passengers": 1,
-                    "fare_bucket": "Y",
                     "flight_date": "2025-12-20",
                     "arr_datetime": "2025-12-20T01:15:00+00:00",
                     "dep_datetime": "2025-12-19T23:00:00+00:00",

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 from app.schemas.search import (
     FlightSearchRequest,
     FlightSearchResponse,
@@ -37,7 +37,6 @@ def get_search_service(db: AsyncSession = Depends(get_async_session)) -> SearchS
     - **destination**: IATA code của sân bay đến (3 ký tự)
     - **flight_date**: Ngày bay
     - **cabin**: (Optional) Loại cabin để filter
-    - **fare_bucket**: (Optional) Fare bucket để filter
     """,
 )
 async def search_flights(
@@ -45,7 +44,6 @@ async def search_flights(
     destination: str = Query(..., min_length=3, max_length=3, description="Mã IATA sân bay đến (VD: SGN)"),
     flight_date: str = Query(..., description="Ngày bay định dạng YYYY-MM-DD"),
     cabin: CabinType | None = Query(None, description="Hạng ghế: economy, premium, business, first"),
-    fare_bucket: FareBucketType | None = Query(None, description="Mã nhóm giá vé (Fare Bucket)"),
     page: int = Query(1, ge=1, description="Số trang kết quả"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng kết quả mỗi trang"),
     service: SearchService = Depends(get_search_service),
@@ -62,7 +60,6 @@ async def search_flights(
         flight_date (str): Ngày bay mong muốn, bắt buộc theo định dạng "YYYY-MM-DD".
                            Ví dụ: "2025-12-20".
         cabin (str, optional): Lọc theo hạng ghế. Các giá trị: "economy", "premium", "business", "first".
-        fare_bucket (str, optional): Lọc theo mã nhóm giá (Fare Bucket), ví dụ: "Y", "C".
         page (int): Trang hiện tại (mặc định: 1).
         page_size (int): Số lượng bản ghi/trang (mặc định: 20).
 
@@ -84,7 +81,6 @@ async def search_flights(
                     "status": str,             # Trạng thái (VD: "scheduled")
                     "available_seats": int,    # Số ghế còn trống thực tế
                     "cabin": str,              # Hạng ghế
-                    "fare_bucket": str,        # Mã nhóm giá
                     "total_seats": int,        # Tổng số ghế thiết kế
                     "sold_seats": int          # Số ghế đã bán
                 }
@@ -110,7 +106,6 @@ async def search_flights(
                     "status": "scheduled",
                     "available_seats": 10,
                     "cabin": "economy",
-                    "fare_bucket": "Y",
                     "total_seats": 25,
                     "sold_seats": 12
                 }
@@ -142,23 +137,11 @@ async def search_flights(
                 detail=f"Loại cabin không hợp lệ: {cabin}",
             )
 
-    fare_bucket_enum = None
-    if fare_bucket:
-        try:
-            fare_bucket_enum = FareBucketType(fare_bucket)
-        except ValueError:
-
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Fare bucket không hợp lệ: {fare_bucket}",
-            )
-
     request = FlightSearchRequest(
         origin=origin.upper(),
         destination=destination.upper(),
         flight_date=flight_date_parsed,
         cabin=cabin_enum,
-        fare_bucket=fare_bucket_enum,
     )
 
     return await service.search_flights(request, page=page, page_size=page_size)

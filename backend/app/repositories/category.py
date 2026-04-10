@@ -1,5 +1,5 @@
 from sqlalchemy import or_
-from sqlmodel import func, select
+from sqlmodel import col, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.category import Category
@@ -30,7 +30,7 @@ class CategoryRepository(BaseCRUD[Category, CategoryCreate, CategoryUpdate]):
         result = await self.db.exec(
             select(Category)
             .where(Category.group_name == group_name)
-            .order_by(Category.sort_order.asc(), Category.value.asc())
+            .order_by(col(Category.sort_order).asc(), col(Category.value).asc())
             .offset(skip)
             .limit(limit)
         )
@@ -62,7 +62,11 @@ class CategoryRepository(BaseCRUD[Category, CategoryCreate, CategoryUpdate]):
             )
 
         query = (
-            query.order_by(Category.group_name.asc(), Category.sort_order.asc(), Category.value.asc())
+            query.order_by(
+                col(Category.group_name).asc(),
+                col(Category.sort_order).asc(),
+                col(Category.value).asc(),
+            )
             .offset(skip)
             .limit(limit)
         )
