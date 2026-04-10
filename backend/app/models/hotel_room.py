@@ -34,6 +34,16 @@ class HotelRoom(SQLModel, table=True):
     description: str | None = Field(default=None)            # Mô tả phòng
     images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
 
+    # Rich fields
+    room_type: str | None = Field(default=None)              # Loại phòng (từ danh mục)
+    area_sqm: float | None = Field(default=None)             # Diện tích m²
+    view_type: str | None = Field(default=None)              # Tầm nhìn (từ danh mục)
+    amenities: str | None = Field(default=None)              # JSON: ["Bồn tắm","Ban công",...]
+    service_package: str | None = Field(default=None)        # Gói dịch vụ (từ danh mục)
+    cancellation_policy: str | None = Field(default=None)    # Chính sách hoàn hủy
+    description: str | None = Field(default=None)            # Mô tả phòng
+    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
+
     # Relationships
     hotel: "Hotel" = Relationship(back_populates="rooms")
     inventory_items: list["RoomInventoryDaily"] = Relationship(back_populates="room")
