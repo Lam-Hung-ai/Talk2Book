@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     booking,
     booking_audit_log,
     booking_item,
+    category,
     city,
     contract,
     country,
@@ -14,6 +15,7 @@ from app.api.v1.endpoints import (
     coupon_redemption,
     exchange_rate,
     flight_instance,
+    flight_realtime,
     flight_schedule,
     geo,
     hotel,
@@ -79,3 +81,9 @@ api_router.include_router(refund.router, prefix="/refund", tags=["Refund"])
 api_router.include_router(review.router, prefix="/review", tags=["Review"])
 api_router.include_router(support_ticket.router, prefix="/support-ticket", tags=["Support Ticket"])
 api_router.include_router(search.router, prefix="/search", tags=["Search"])
+api_router.include_router(category.router, prefix="/category", tags=["Category"])
+api_router.include_router(
+    flight_realtime.router,
+    prefix="/flight-realtime",
+    tags=["Flight Realtime"],
+)

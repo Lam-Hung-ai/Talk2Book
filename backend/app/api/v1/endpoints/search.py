@@ -40,12 +40,6 @@ def get_search_service(db: AsyncSession = Depends(get_async_session)) -> SearchS
     - **fare_bucket**: (Optional) Fare bucket để filter
     """,
 )
-@router.get(
-    "/flights",
-    response_model=FlightSearchResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Tìm kiếm chuyến bay (Flight Search)",
-)
 async def search_flights(
     origin: str = Query(..., min_length=3, max_length=3, description="Mã IATA sân bay đi (VD: HAN)"),
     destination: str = Query(..., min_length=3, max_length=3, description="Mã IATA sân bay đến (VD: SGN)"),
@@ -178,19 +172,13 @@ async def search_flights(
     description="""
     Tìm khách sạn theo thành phố, ngày check-in/check-out và số khách.
     Backend sẽ quét RoomInventoryDaily trong khoảng ngày để tìm các khách sạn có phòng còn trống liên tiếp.
-    
+
     - **city_id**: ID của thành phố
     - **check_in**: Ngày check-in (YYYY-MM-DD)
     - **check_out**: Ngày check-out (YYYY-MM-DD)
     - **guests**: Số lượng khách
     - **rooms**: Số lượng phòng cần đặt (mặc định: 1)
     """,
-)
-@router.get(
-    "/hotels",
-    response_model=HotelSearchResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Tìm kiếm khách sạn (Hotel Search)",
 )
 async def search_hotels(
     city_id: UUID = Query(..., description="ID thành phố (Lấy từ API get_cities)"),
@@ -304,12 +292,6 @@ async def search_hotels(
     - **check_in**: Ngày check-in (YYYY-MM-DD)
     - **check_out**: Ngày check-out (YYYY-MM-DD)
     """,
-)
-@router.get(
-    "/hotels/{hotel_id}/availability", # Gợi ý: Nên để hotel_id trong path cho chuẩn RESTful
-    response_model=HotelAvailabilityResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Xem chi tiết phòng và giá (Room Availability)",
 )
 async def get_hotel_availability(
     hotel_id: UUID = Path(..., description="ID khách sạn (Lấy từ kết quả search_hotels)"),

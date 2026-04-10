@@ -1,7 +1,15 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
-from sqlmodel import CheckConstraint, Field, Relationship, SQLModel, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import (
+    CheckConstraint,
+    Column,
+    Field,
+    Relationship,
+    SQLModel,
+    UniqueConstraint,
+)
 
 from app.models.enums import CabinType, FareBucketType
 
@@ -27,6 +35,7 @@ class SeatInventory(SQLModel, table=True):
     total_seats: int = Field(nullable=False)
     held_seats: int = Field(default=0, nullable=False)
     sold_seats: int = Field(default=0, nullable=False)
+    amenities: dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
 
     # Relationships
     flight_instance: "FlightInstance" = Relationship(back_populates="seat_inventory")

@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import CheckConstraint, UniqueConstraint
-from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import Column, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.hotel import Hotel
@@ -23,6 +24,25 @@ class HotelRoom(SQLModel, table=True):
     code: str | None = Field(default=None)
     capacity: int = Field(nullable=False)
     bed_config: str | None = Field(default=None)
+    # Rich fields
+    room_type: str | None = Field(default=None)              # Loại phòng (từ danh mục)
+    area_sqm: float | None = Field(default=None)             # Diện tích m²
+    view_type: str | None = Field(default=None)              # Tầm nhìn (từ danh mục)
+    amenities: str | None = Field(default=None)              # JSON: ["Bồn tắm","Ban công",...]
+    service_package: str | None = Field(default=None)        # Gói dịch vụ (từ danh mục)
+    cancellation_policy: str | None = Field(default=None)    # Chính sách hoàn hủy
+    description: str | None = Field(default=None)            # Mô tả phòng
+    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
+
+    # Rich fields
+    room_type: str | None = Field(default=None)              # Loại phòng (từ danh mục)
+    area_sqm: float | None = Field(default=None)             # Diện tích m²
+    view_type: str | None = Field(default=None)              # Tầm nhìn (từ danh mục)
+    amenities: str | None = Field(default=None)              # JSON: ["Bồn tắm","Ban công",...]
+    service_package: str | None = Field(default=None)        # Gói dịch vụ (từ danh mục)
+    cancellation_policy: str | None = Field(default=None)    # Chính sách hoàn hủy
+    description: str | None = Field(default=None)            # Mô tả phòng
+    images: str | None = Field(default=None)                 # JSON: ["url1","url2",...]
 
     # Relationships
     hotel: "Hotel" = Relationship(back_populates="rooms")

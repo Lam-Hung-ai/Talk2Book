@@ -93,6 +93,7 @@ class GenderType(str, Enum):
 
 
 class ProductType(str, Enum):
+    tour = "tour"
     activity = "activity"
     transport = "transport"
 
@@ -100,5 +101,4 @@ class ProductType(str, Enum):
 class TicketType(str, Enum):
     flight = "flight"
     hotel = "hotel"
-    activity = "activity"
-    transport = "transport"
+    tour = "tour"

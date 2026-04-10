@@ -2,6 +2,7 @@ from app.models.airport import Airport
 from app.models.booking import Booking
 from app.models.booking_audit_log import BookingAuditLog
 from app.models.booking_item import BookingItem
+from app.models.category import Category
 from app.models.city import City
 from app.models.contract import Contract
 from app.models.country import Country
@@ -37,6 +38,7 @@ from app.models.user_role import UserRole
 
 __all__ = [
     "Airport",
+    "Category",
     "City",
     "Country",
     "Currency",

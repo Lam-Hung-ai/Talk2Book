@@ -4,6 +4,7 @@ Script để import flight instances từ ngày hiện tại trở đi
 Tự động tạo instances dựa trên flight schedules đã có
 """
 import json
+import os
 import sys
 from datetime import date, datetime, timedelta, time
 from pathlib import Path
@@ -13,7 +14,7 @@ import httpx
 from rich.console import Console
 
 console = Console()
-BASE_URL = "http://127.0.0.1:8000/api/v1"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/api/v1")
 
 
 def make_request(method: str, url: str, data: dict | None = None) -> dict[str, Any]:
@@ -221,4 +222,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

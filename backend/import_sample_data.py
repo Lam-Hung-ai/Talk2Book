@@ -3,6 +3,7 @@
 Script để import dữ liệu mẫu từ JSON vào database thông qua API
 """
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,7 @@ import httpx
 from rich.console import Console
 
 console = Console()
-BASE_URL = "http://127.0.0.1:8000/api/v1"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000/api/v1")
 
 # Cache để lưu mapping từ name -> id
 cache: dict[str, dict[str, str]] = {
@@ -45,6 +46,7 @@ def make_request(method: str, url: str, data: dict | None = None) -> dict[str, A
     except Exception as e:
         console.print(f"[red]Request failed: {e}[/red]")
         raise
+
 def import_currencies(file_path: Path) -> None:
     """Import currencies"""
     console.print("[bold blue]Importing currencies...[/bold blue]")
@@ -330,4 +332,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
