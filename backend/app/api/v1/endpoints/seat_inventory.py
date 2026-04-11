@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 from app.schemas.seat_inventory import (
     SeatInventoryCreate,
     SeatInventoryRead,
@@ -47,47 +47,43 @@ async def list_seat_inventory(
 
 
 @router.get(
-    "/{instance_id}/{cabin}/{fare_bucket}",
+    "/{instance_id}/{cabin}",
     response_model=SeatInventoryRead,
     summary="Chi tiết seat inventory",
 )
 async def get_seat_inventory(
     instance_id: UUID,
     cabin: CabinType = Path(...),
-    fare_bucket: FareBucketType = Path(...),
     service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    return await service.get_inventory(instance_id, cabin, fare_bucket)
+    return await service.get_inventory(instance_id, cabin)
 
 
 @router.put(
-    "/{instance_id}/{cabin}/{fare_bucket}",
+    "/{instance_id}/{cabin}",
     response_model=SeatInventoryRead,
     summary="Cập nhật seat inventory",
 )
 async def update_seat_inventory(
     instance_id: UUID,
-    cabin: CabinType,
-    fare_bucket: FareBucketType,
-    payload: SeatInventoryUpdate,
+    cabin: CabinType = Path(...),
+    payload: SeatInventoryUpdate = Body(...),
     service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
     return await service.update_inventory(
-        instance_id, cabin, fare_bucket, payload
+        instance_id, cabin, payload
     )
 
 
 @router.delete(
-    "/{instance_id}/{cabin}/{fare_bucket}",
+    "/{instance_id}/{cabin}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Xóa seat inventory",
 )
 async def delete_seat_inventory(
     instance_id: UUID,
-    cabin: CabinType,
-    fare_bucket: FareBucketType,
+    cabin: CabinType = Path(...),
     service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    await service.delete_inventory(instance_id, cabin, fare_bucket)
+    await service.delete_inventory(instance_id, cabin)
     return None
-

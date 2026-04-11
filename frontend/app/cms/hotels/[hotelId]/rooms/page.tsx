@@ -21,8 +21,8 @@ import {
 type RoomItem = {
   id: string; hotel_id: string; code: string | null; capacity: number;
   bed_config: string | null; room_type: string | null; area_sqm: number | null;
-  view_type: string | null; amenities: string | null; service_package: string | null;
-  cancellation_policy: string | null; description: string | null; images: string | null;
+  view_type: string | null; amenities: string[] | null; service_package: string | null;
+  cancellation_policy: string | null; description: string | null; images: string[] | null;
 };
 
 type RoomListResponse = { items: RoomItem[]; total: number; page: number; page_size: number; total_pages: number };
@@ -42,11 +42,6 @@ const emptyForm: RoomFormState = {
   code: "", capacity: "1", bed_config: "", room_type: "", area_sqm: "",
   view_type: "", amenities: [], service_package: "", cancellation_policy: "", description: "", images: "",
 };
-
-function parseJsonArray(s: string | null): string[] {
-  if (!s) return [];
-  try { return JSON.parse(s) as string[]; } catch { return []; }
-}
 
 function RoomsPageContent() {
   const { hotelId } = useParams<{ hotelId: string }>();
@@ -97,9 +92,9 @@ function RoomsPageContent() {
     setForm({
       code: item.code ?? "", capacity: String(item.capacity), bed_config: item.bed_config ?? "",
       room_type: item.room_type ?? "", area_sqm: item.area_sqm != null ? String(item.area_sqm) : "",
-      view_type: item.view_type ?? "", amenities: parseJsonArray(item.amenities),
+      view_type: item.view_type ?? "", amenities: item.amenities ?? [],
       service_package: item.service_package ?? "", cancellation_policy: item.cancellation_policy ?? "",
-      description: item.description ?? "", images: parseJsonArray(item.images).join("\n"),
+      description: item.description ?? "", images: (item.images ?? []).join("\n"),
     });
     setModalOpen(true);
   }
@@ -114,11 +109,11 @@ function RoomsPageContent() {
       bed_config: form.bed_config.trim() || null,
       room_type: form.room_type || null, area_sqm: form.area_sqm ? Number(form.area_sqm) : null,
       view_type: form.view_type || null,
-      amenities: form.amenities.length ? JSON.stringify(form.amenities) : null,
+      amenities: form.amenities.length ? form.amenities : null,
       service_package: form.service_package || null,
       cancellation_policy: form.cancellation_policy.trim() || null,
       description: form.description.trim() || null,
-      images: imagesArr.length ? JSON.stringify(imagesArr) : null,
+      images: imagesArr.length ? imagesArr : null,
     };
     const url = modalMode === "create" ? `${API_BASE_URL}/hotel-room` : `${API_BASE_URL}/hotel-room/${editingId}`;
     try {

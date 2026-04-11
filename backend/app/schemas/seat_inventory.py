@@ -2,13 +2,12 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import CabinType, FareBucketType
+from app.models.enums import CabinType
 
 
 class SeatInventoryBase(BaseModel):
     instance_id: UUID
     cabin: CabinType
-    fare_bucket: FareBucketType
     total_seats: int = Field(ge=0)
     held_seats: int = Field(default=0, ge=0)
     sold_seats: int = Field(default=0, ge=0)
@@ -27,4 +26,3 @@ class SeatInventoryUpdate(BaseModel):
 class SeatInventoryRead(SeatInventoryBase):
     class Config:
         from_attributes = True
-

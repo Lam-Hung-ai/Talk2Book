@@ -18,8 +18,8 @@ class HotelBase(BaseModel):
     lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
     # Rich fields
     description: str | None = None
-    images: str | None = None          # JSON array string: '["url1","url2"]'
-    amenities: str | None = None       # JSON array string: '["Hồ bơi","Gym"]'
+    images: list[str] | None = None
+    amenities: list[str] | None = None
     usp: str | None = None
     room_count: int | None = None
 
@@ -39,8 +39,8 @@ class HotelUpdate(BaseModel):
     lat: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-90, le=90)
     lng: Decimal | None = Field(default=None, max_digits=9, decimal_places=6, ge=-180, le=180)
     description: str | None = None
-    images: str | None = None
-    amenities: str | None = None
+    images: list[str] | None = None
+    amenities: list[str] | None = None
     usp: str | None = None
     room_count: int | None = None
 

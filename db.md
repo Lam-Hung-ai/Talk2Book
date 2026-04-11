@@ -8,12 +8,11 @@
 
 ---
 
-## 🏢 2. Nhóm **Nhà cung cấp & Hợp đồng (Providers & Contracts)**
+## 🏢 2. Nhóm **Nhà cung cấp (Providers)**
 
 | Bảng          | Mục đích                                                                                                                     |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **providers** | Thông tin đối tác cung cấp dịch vụ (hãng bay, khách sạn, tour operator, đơn vị vận chuyển...).                               |
-| **contracts** | Hợp đồng giữa nền tảng và nhà cung cấp, ghi nhận thời hạn, phần trăm hoa hồng, loại tiền tệ. Dùng để tính doanh thu chia sẻ. |
 
 ---
 
@@ -24,7 +23,7 @@
 | **routes**           | Tuyến bay: điểm đi (`origin`), điểm đến (`destination`), khoảng cách.                                   |
 | **flight_schedules** | Lịch trình cố định của hãng (ví dụ “VN123 SGN-HAN mỗi ngày 8h sáng”).                                   |
 | **flight_instances** | Chuyến bay thực tế theo ngày cụ thể (ví dụ VN123 ngày 12/12/2025). Có giờ cất/hạ cánh thực, trạng thái. |
-| **seat_inventory**   | Quản lý tồn kho ghế theo cabin (eco/business) và hạng giá (fare bucket). Ghi nhận tổng, đã giữ, đã bán. |
+| **seat_inventory**   | Quản lý tồn kho ghế theo cabin (economy/premium/business/first). Ghi nhận tổng, đã giữ, đã bán. |
 
 Cụm này cho phép tính năng tìm chuyến bay, giữ chỗ, bán vé, và cập nhật trạng thái thời gian thực.
 

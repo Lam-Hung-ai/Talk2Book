@@ -30,7 +30,7 @@ class BookingAuditLog(SQLModel, table=True):
         sa_type=DateTime(timezone=True),
         nullable=False,
     )
-    meta: dict[str, Any] | None = Field(default=None, sa_column=Column(JSONB))
+    meta: dict[str, Any] | None = Field(default=None, sa_column=Column[Any](JSONB))
 
     # Relationships
     booking: "Booking" = Relationship(back_populates="audit_logs")

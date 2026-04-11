@@ -30,13 +30,6 @@ class PaymentStatus(str, Enum):
     refunded = "refunded"
 
 
-class RefundStatus(str, Enum):
-    pending = "pending"
-    approved = "approved"
-    processed = "processed"
-    failed = "failed"
-
-
 class DiscountType(str, Enum):
     percent = "percent"
     amount = "amount"
@@ -47,36 +40,6 @@ class CabinType(str, Enum):
     premium = "premium"
     business = "business"
     first = "first"
-
-
-class FareBucketType(str, Enum):
-    Y = "Y"
-    B = "B"
-    M = "M"
-    H = "H"
-    Q = "Q"
-    K = "K"
-    L = "L"
-    T = "T"
-    N = "N"
-    S = "S"
-    V = "V"
-    R = "R"
-    D = "D"
-    C = "C"
-    J = "J"
-    F = "F"
-    P = "P"
-    Z = "Z"
-    U = "U"
-    E = "E"
-
-
-class SupportStatus(str, Enum):
-    open = "open"
-    pending = "pending"
-    resolved = "resolved"
-    closed = "closed"
 
 
 class ReviewTargetType(str, Enum):

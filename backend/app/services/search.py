@@ -111,8 +111,6 @@ class SearchService:
             seat_stmt = select(SeatInventory).where(SeatInventory.instance_id == instance.id)
             if request.cabin:
                 seat_stmt = seat_stmt.where(SeatInventory.cabin == request.cabin)
-            if request.fare_bucket:
-                seat_stmt = seat_stmt.where(SeatInventory.fare_bucket == request.fare_bucket)
             seats = await self.db.exec(seat_stmt)
             seat_list = seats.all()
 
@@ -137,7 +135,6 @@ class SearchService:
                             status=instance.status,
                             available_seats=available,
                             cabin=seat.cabin,
-                            fare_bucket=seat.fare_bucket,
                             total_seats=seat.total_seats,
                             sold_seats=seat.sold_seats,
                         )
