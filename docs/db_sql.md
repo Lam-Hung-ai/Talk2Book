@@ -4,6 +4,7 @@
 -- Description: Complete Database Schema with SINGULAR table names
 -- Scope: Flight, Hotel, Tour (product), Booking, Payment, Coupon
 -- Aligned with: backend/app/models (SQLModel)
+-- Auth: Better Auth (user / session / account / verification)
 -- =========================================================
 
 -- CREATE DATABASE travel_app;
@@ -14,6 +15,7 @@
 -- ================
 CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- ================
 -- 0b. Utility Functions
 -- ================
@@ -53,10 +55,6 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE support_status     AS ENUM ('open','pending','resolved','closed');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
   CREATE TYPE review_target_type AS ENUM ('hotel','product','flight','airport');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
@@ -81,7 +79,7 @@ CREATE TABLE IF NOT EXISTS currency (
 );
 
 CREATE TABLE IF NOT EXISTS country (
-  code  CHAR(2) PRIMARY KEY,
+  code          CHAR(2) PRIMARY KEY,
   name          TEXT NOT NULL,
   currency_code CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT
 );
@@ -123,42 +121,79 @@ BEFORE UPDATE ON category
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- =========================================================
--- 2) User, Profile & Role
+-- 2) User, Profile & Role  (Better Auth schema)
 -- =========================================================
--- "user" is a reserved keyword in Postgres, so we must quote it
+-- "user" is a reserved keyword in Postgres, so we must quote it.
+-- id is TEXT (string) as required by Better Auth.
 CREATE TABLE IF NOT EXISTS "user" (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email         CITEXT UNIQUE NOT NULL,
-  phone         VARCHAR(32) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  status        user_status NOT NULL DEFAULT 'active',
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  id             TEXT PRIMARY KEY,
+  name           TEXT NOT NULL,
+  email          CITEXT UNIQUE NOT NULL,
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  image          TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Better Auth: session tokens
+CREATE TABLE IF NOT EXISTS session (
+  id         TEXT PRIMARY KEY,
+  expires_at TIMESTAMPTZ NOT NULL,
+  token      TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ip_address TEXT,
+  user_agent TEXT,
+  user_id    TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS session_userId_idx ON session (user_id);
+
+-- Better Auth: linked OAuth / credential accounts
+CREATE TABLE IF NOT EXISTS account (
+  id                        TEXT PRIMARY KEY,
+  account_id                TEXT NOT NULL,
+  provider_id               TEXT NOT NULL,
+  user_id                   TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  access_token              TEXT,
+  refresh_token             TEXT,
+  id_token                  TEXT,
+  access_token_expires_at   TIMESTAMPTZ,
+  refresh_token_expires_at  TIMESTAMPTZ,
+  scope                     TEXT,
+  password                  TEXT,
+  created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at                TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS account_userId_idx ON account (user_id);
+
+-- Better Auth: email / phone verification tokens
+CREATE TABLE IF NOT EXISTS verification (
+  id         TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value      TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS verification_identifier_idx ON verification (identifier);
+
+-- Domain profile (separate from auth identity)
 CREATE TABLE IF NOT EXISTS user_profile (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-  full_name    TEXT NOT NULL,
-  gender       gender_type,
-  birthday     DATE,
-  nationality  CHAR(2) REFERENCES country(code) ON DELETE RESTRICT,
-  avatar_url   TEXT,
-  address      TEXT,
-  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  gender      gender_type,
+  birthday    DATE,
+  nationality CHAR(2) REFERENCES country(code) ON DELETE RESTRICT,
+  address     TEXT,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
-CREATE OR REPLACE FUNCTION set_user_profile_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 DROP TRIGGER IF EXISTS trg_user_profile_updated_at ON user_profile;
 CREATE TRIGGER trg_user_profile_updated_at
 BEFORE UPDATE ON user_profile
-FOR EACH ROW EXECUTE FUNCTION set_user_profile_updated_at();
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- DB cũ có cột full_name: ALTER TABLE user_profile DROP COLUMN IF EXISTS full_name;
+-- (bảng SQLModel mặc định có thể tên userprofile)
 
 -- "role" is also a reserved keyword
 CREATE TABLE IF NOT EXISTS "role" (
@@ -166,21 +201,12 @@ CREATE TABLE IF NOT EXISTS "role" (
   code TEXT UNIQUE NOT NULL
 );
 
+-- user_id is TEXT to match "user".id
 CREATE TABLE IF NOT EXISTS user_role (
-  user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   role_id UUID NOT NULL REFERENCES "role"(id) ON DELETE CASCADE,
   PRIMARY KEY (user_id, role_id)
 );
-
-CREATE TABLE IF NOT EXISTS refresh_token (
-  jti            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id        UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-  refresh_token  TEXT NOT NULL,
-  revoked        BOOLEAN NOT NULL DEFAULT FALSE,
-  expires_at     TIMESTAMPTZ NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_refresh_token_lookup ON refresh_token (refresh_token);
-CREATE INDEX IF NOT EXISTS idx_refresh_token_user ON refresh_token (user_id);
 
 -- =========================================================
 -- 3) Provider
@@ -210,7 +236,7 @@ CREATE TABLE IF NOT EXISTS route (
   distance_km INT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT chk_route_origin_dest CHECK (origin <> destination),
+  CONSTRAINT chk_route_origin_dest CHECK (origin != destination),
   CONSTRAINT chk_route_distance CHECK (distance_km IS NULL OR distance_km > 0),
   CONSTRAINT uq_route_od UNIQUE (origin, destination)
 );
@@ -224,7 +250,7 @@ CREATE TABLE IF NOT EXISTS flight_schedule (
   provider_id        UUID NOT NULL REFERENCES provider(id) ON DELETE RESTRICT,
   route_id           UUID NOT NULL REFERENCES route(id) ON DELETE CASCADE,
   flight_number      TEXT NOT NULL,
-  dow                VARCHAR(7) NOT NULL,
+  dow                VARCHAR(7) NOT NULL,   -- bitstring 7 ký tự, e.g. '1000000'
   dep_time           TIME NOT NULL,
   arr_time           TIME NOT NULL,
   arrival_day_offset SMALLINT NOT NULL DEFAULT 0,
@@ -258,14 +284,13 @@ CREATE TABLE IF NOT EXISTS flight_instance (
   CONSTRAINT chk_fi_time CHECK (dep_datetime < arr_datetime)
 );
 CREATE INDEX IF NOT EXISTS idx_flight_instance_date ON flight_instance (flight_date);
-
 DROP TRIGGER IF EXISTS trg_flight_instance_updated_at ON flight_instance;
 CREATE TRIGGER trg_flight_instance_updated_at
 BEFORE UPDATE ON flight_instance
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS seat_inventory (
-  instance_id UUID NOT NULL REFERENCES flight_instance(id) ON DELETE CASCADE,
+  instance_id UUID      NOT NULL REFERENCES flight_instance(id) ON DELETE CASCADE,
   cabin       cabin_type NOT NULL,
   total_seats INT NOT NULL,
   held_seats  INT NOT NULL DEFAULT 0,
@@ -322,14 +347,14 @@ CREATE TABLE IF NOT EXISTS hotel_room (
 CREATE INDEX IF NOT EXISTS idx_hotel_room_hotel ON hotel_room(hotel_id);
 
 CREATE TABLE IF NOT EXISTS room_rate_plan (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  hotel_id      UUID NOT NULL REFERENCES hotel(id) ON DELETE CASCADE,
-  name          TEXT NOT NULL,
-  meal_plan     VARCHAR(20),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  hotel_id            UUID NOT NULL REFERENCES hotel(id) ON DELETE CASCADE,
+  name                TEXT NOT NULL,
+  meal_plan           VARCHAR(20),
   cancellation_policy JSONB,
-  currency_code CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  currency_code       CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT uq_rrp_hotel_name UNIQUE (hotel_id, name)
 );
 DROP TRIGGER IF EXISTS trg_room_rate_plan_updated_at ON room_rate_plan;
@@ -337,6 +362,7 @@ CREATE TRIGGER trg_room_rate_plan_updated_at
 BEFORE UPDATE ON room_rate_plan
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- Composite PK: (room_id, rate_plan_id, stay_date) — bảng không có surrogate key
 CREATE TABLE IF NOT EXISTS room_inventory_daily (
   room_id      UUID NOT NULL REFERENCES hotel_room(id) ON DELETE CASCADE,
   rate_plan_id UUID NOT NULL REFERENCES room_rate_plan(id) ON DELETE CASCADE,
@@ -354,7 +380,7 @@ CREATE INDEX IF NOT EXISTS idx_room_inv_date ON room_inventory_daily (stay_date)
 CREATE INDEX IF NOT EXISTS idx_room_inv_room_date ON room_inventory_daily (room_id, stay_date);
 
 -- =========================================================
--- 6) Tour product (time-slotted inventory)
+-- 6) Tour / Activity / Transport (time-slotted inventory)
 -- =========================================================
 CREATE TABLE IF NOT EXISTS product (
   id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -393,6 +419,7 @@ CREATE TRIGGER trg_time_slot_updated_at
 BEFORE UPDATE ON time_slot
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- slot_id là PK (1 suất = 1 dòng tồn kho)
 CREATE TABLE IF NOT EXISTS slot_inventory (
   slot_id       UUID PRIMARY KEY REFERENCES time_slot(id) ON DELETE CASCADE,
   capacity      INT NOT NULL,
@@ -407,9 +434,10 @@ CREATE TABLE IF NOT EXISTS slot_inventory (
 -- =========================================================
 -- 7) Price Quote
 -- =========================================================
+-- user_id là TEXT để khớp "user".id (Better Auth)
 CREATE TABLE IF NOT EXISTS price_quote (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       UUID REFERENCES "user"(id) ON DELETE SET NULL,
+  user_id       TEXT REFERENCES "user"(id) ON DELETE SET NULL,
   vertical      VARCHAR(20) NOT NULL,
   payload       JSONB NOT NULL,
   currency_code CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
@@ -454,7 +482,6 @@ CREATE TABLE IF NOT EXISTS coupon (
     (discount_type = 'amount'  AND discount_value >= 0 AND currency_code IS NOT NULL)
   )
 );
-
 DROP TRIGGER IF EXISTS trg_coupon_updated_at ON coupon;
 CREATE TRIGGER trg_coupon_updated_at
 BEFORE UPDATE ON coupon
@@ -463,9 +490,10 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 -- =========================================================
 -- 9) Booking & Transaction
 -- =========================================================
+-- user_id là TEXT để khớp "user".id (Better Auth)
 CREATE TABLE IF NOT EXISTS booking (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       UUID REFERENCES "user"(id) ON DELETE SET NULL,
+  user_id       TEXT REFERENCES "user"(id) ON DELETE SET NULL,
   state         booking_state NOT NULL,
   currency_code CHAR(3) NOT NULL REFERENCES currency(code) ON DELETE RESTRICT,
   total_amount  NUMERIC(12,2) NOT NULL,
@@ -480,11 +508,12 @@ CREATE TRIGGER trg_booking_updated_at
 BEFORE UPDATE ON booking
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- actor_id là TEXT để khớp "user".id (Better Auth)
 CREATE TABLE IF NOT EXISTS booking_audit_log (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   booking_id  UUID NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
   actor_type  TEXT,
-  actor_id    UUID REFERENCES "user"(id) ON DELETE SET NULL,
+  actor_id    TEXT REFERENCES "user"(id) ON DELETE SET NULL,
   action      TEXT NOT NULL,
   from_state  TEXT,
   to_state    TEXT,
@@ -494,10 +523,11 @@ CREATE TABLE IF NOT EXISTS booking_audit_log (
 CREATE INDEX IF NOT EXISTS idx_booking_audit_log_booking ON booking_audit_log (booking_id);
 CREATE INDEX IF NOT EXISTS idx_booking_audit_log_actor ON booking_audit_log (actor_id);
 
+-- user_id là TEXT để khớp "user".id (Better Auth)
 CREATE TABLE IF NOT EXISTS coupon_redemption (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   coupon_id       UUID NOT NULL REFERENCES coupon(id) ON DELETE RESTRICT,
-  user_id         UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  user_id         TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   booking_id      UUID NOT NULL REFERENCES booking(id) ON DELETE CASCADE,
 
   discount_amount NUMERIC(12,2) NOT NULL,
@@ -508,10 +538,10 @@ CREATE TABLE IF NOT EXISTS coupon_redemption (
   CONSTRAINT uq_redemption_booking UNIQUE (booking_id, coupon_id),
   CONSTRAINT chk_redemption_amount CHECK (discount_amount > 0)
 );
-
 CREATE INDEX IF NOT EXISTS idx_redemption_user_coupon ON coupon_redemption(user_id, coupon_id);
 CREATE INDEX IF NOT EXISTS idx_redemption_coupon ON coupon_redemption(coupon_id);
 
+-- Trigger tự động cập nhật current_uses trên coupon
 CREATE OR REPLACE FUNCTION update_coupon_usage_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -576,11 +606,12 @@ CREATE TABLE IF NOT EXISTS payment (
 CREATE INDEX IF NOT EXISTS idx_payment_booking_created ON payment(booking_id, created_at);
 
 -- =========================================================
--- 11) Review & Support
+-- 11) Review
 -- =========================================================
+-- user_id là TEXT để khớp "user".id (Better Auth)
 CREATE TABLE IF NOT EXISTS review (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  user_id     TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   target_type review_target_type NOT NULL,
   target_key  TEXT NOT NULL,
   rating      INT NOT NULL,
@@ -590,8 +621,6 @@ CREATE TABLE IF NOT EXISTS review (
   CONSTRAINT uq_review_once UNIQUE (user_id, target_type, target_key)
 );
 CREATE INDEX IF NOT EXISTS idx_review_target ON review (target_type, target_key);
-
-
 
 -- =========================================================
 -- 12) Additional Performance Indexes
