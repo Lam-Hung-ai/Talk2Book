@@ -89,7 +89,7 @@ async def delete_user_profile(
 
 @router.get("/search/mixin", response_model=dict, summary="Tìm kiếm hồ sơ")
 async def search_user_profiles(
-    q: str = Query(..., min_length=1, description="Tìm theo tên, địa chỉ, quốc tịch"),
+    q: str = Query(..., min_length=1, description="Tìm theo địa chỉ, quốc tịch"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     exact_match: bool = Query(False),
