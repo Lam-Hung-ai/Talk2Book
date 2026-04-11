@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class PriceQuoteBase(BaseModel):
-    user_id: UUID | None = None
+    user_id: str | None = None
     vertical: str = Field(max_length=20)
     payload: dict[str, Any]
     currency_code: str = Field(max_length=3)
@@ -21,7 +21,7 @@ class PriceQuoteCreate(PriceQuoteBase):
 
 
 class PriceQuoteUpdate(BaseModel):
-    user_id: UUID | None = None
+    user_id: str | None = None
     vertical: str | None = Field(default=None, max_length=20)
     payload: dict[str, Any] | None = None
     currency_code: str | None = Field(default=None, max_length=3)
@@ -35,4 +35,3 @@ class PriceQuoteRead(PriceQuoteBase):
 
     class Config:
         from_attributes = True
-

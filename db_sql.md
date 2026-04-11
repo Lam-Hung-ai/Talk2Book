@@ -286,8 +286,6 @@ CREATE TABLE IF NOT EXISTS hotel (
   name          TEXT NOT NULL,
   star_rating   NUMERIC(2,1),
   address       TEXT,
-  checkin_time  TIMESTAMPTZ,
-  checkout_time TIMESTAMPTZ,
   lat           NUMERIC(9,6),
   lng           NUMERIC(9,6),
   description   TEXT,
@@ -593,19 +591,7 @@ CREATE TABLE IF NOT EXISTS review (
 );
 CREATE INDEX IF NOT EXISTS idx_review_target ON review (target_type, target_key);
 
-CREATE TABLE IF NOT EXISTS support_ticket (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-  booking_id UUID REFERENCES booking(id) ON DELETE SET NULL,
-  subject    TEXT NOT NULL,
-  status     support_status NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-DROP TRIGGER IF EXISTS trg_support_ticket_updated_at ON support_ticket;
-CREATE TRIGGER trg_support_ticket_updated_at
-BEFORE UPDATE ON support_ticket
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 
 -- =========================================================
 -- 12) Additional Performance Indexes

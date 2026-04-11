@@ -19,7 +19,7 @@ class BookingAuditLog(SQLModel, table=True):
         nullable=False, foreign_key="booking.id", ondelete="CASCADE"
     )
     actor_type: str | None = Field(default=None)
-    actor_id: UUID | None = Field(
+    actor_id: str | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )
     action: str = Field(nullable=False)

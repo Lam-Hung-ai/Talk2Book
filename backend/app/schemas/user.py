@@ -1,36 +1,36 @@
-# app/schemas/user.py
+# app/schemas/user.py — aligned with Better Auth user + app profile
 from datetime import date, datetime
-from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
-from app.models.enums import GenderType, UserStatus
+from app.models.enums import GenderType
 
 
 class UserRead(BaseModel):
-    id: UUID
+    id: str
+    name: str
     email: str
-    phone: str
-    status: UserStatus
+    email_verified: bool
+    image: str | None
     created_at: datetime
+    updated_at: datetime
 
-class UserCreate(BaseModel):
-    email: EmailStr
-    phone: str = Field(max_length=32)
-    password: str = Field(min_length=6)
 
 class UserUpdate(BaseModel):
+    name: str | None = None
     email: EmailStr | None = None
-    phone: str | None = Field(default=None, max_length=32)
-    password: str | None = Field(default=None, min_length=6)
-    status: UserStatus | None = None
+    email_verified: bool | None = None
+    image: str | None = None
+
 
 class AllUserInfor(BaseModel):
-    user_id: UUID
+    user_id: str
+    name: str
     email: str
-    phone: str
-    status: UserStatus
+    email_verified: bool
+    image: str | None
     created_at: datetime
+    updated_at: datetime
 
     full_name: str | None = None
     gender: GenderType | None = None
@@ -38,6 +38,6 @@ class AllUserInfor(BaseModel):
     nationality: str | None = None
     avatar_url: str | None = None
     address: str | None = None
-    updated_at: datetime | None = None
+    profile_updated_at: datetime | None = None
 
     roles: list[str]

@@ -18,13 +18,18 @@ class CouponRedemptionRepository(
         BaseCRUD.__init__(self, CouponRedemption, db)
         SearchableRepository.__init__(self, CouponRedemption, db)
 
-    async def get_by_coupon(self, coupon_id: UUID, *, skip: int = 0, limit: int = 100) -> Sequence[CouponRedemption]:
+    async def get_by_coupon(
+        self, coupon_id: UUID, *, skip: int = 0, limit: int = 100
+    ) -> Sequence[CouponRedemption]:
         return await self.get_multi(skip=skip, limit=limit, coupon_id=coupon_id)
 
-    async def get_by_user(self, user_id: UUID, *, skip: int = 0, limit: int = 100) -> Sequence[CouponRedemption]:
+    async def get_by_user(
+        self, user_id: str, *, skip: int = 0, limit: int = 100
+    ) -> Sequence[CouponRedemption]:
         return await self.get_multi(skip=skip, limit=limit, user_id=user_id)
 
     async def exists_for_booking(self, booking_id: UUID) -> bool:
-        result = await self.db.exec(select(CouponRedemption.id).where(CouponRedemption.booking_id == booking_id))
+        result = await self.db.exec(
+            select(CouponRedemption.id).where(CouponRedemption.booking_id == booking_id)
+        )
         return result.first() is not None
-

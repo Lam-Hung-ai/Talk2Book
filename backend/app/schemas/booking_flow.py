@@ -12,7 +12,7 @@ from app.schemas.ticket import TicketRead
 class FlightBookingRequest(BaseModel):
     """Request đặt vé máy bay dựa trên FlightInstance đã search được."""
 
-    user_id: UUID | None = None
+    user_id: str | None = None
     instance_id: UUID
     cabin: CabinType
     passengers: int = Field(ge=1, description="Số lượng hành khách")
@@ -28,7 +28,7 @@ class FlightBookingResult(BaseModel):
 class HotelBookingRequest(BaseModel):
     """Request đặt phòng sau khi đã xem availability."""
 
-    user_id: UUID | None = None
+    user_id: str | None = None
     hotel_id: UUID
     room_id: UUID
     rate_plan_id: UUID
@@ -42,5 +42,3 @@ class HotelBookingRequest(BaseModel):
 class HotelBookingResult(BaseModel):
     booking: BookingRead
     item: BookingItemRead
-
-

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class UserProfile(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    user_id: str = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     full_name: str = Field(nullable=False)
     gender: GenderType | None = Field(default=None)
     birthday: date | None = Field(default=None)

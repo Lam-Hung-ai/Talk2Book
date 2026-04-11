@@ -1,7 +1,7 @@
 # Talk to Book - Đặt khách sạn vé máy bay bằng giọng nói
 ## Demo 1
 https://github.com/user-attachments/assets/e44602cc-9d20-455d-a4d6-e8a57554dc8b
-## 1. Thành viên 
+## 1. Thành viên
 - Nguyễn Văn Lâm Hùng
 - Lê Sỹ Long Nhật
 - Lê Nguyệt Anh
@@ -40,11 +40,16 @@ cd /backend
 uv venv
 uv sync
 ```
+- **Pre-commit (nên làm một lần sau khi clone):** Cài hook Git để mỗi lần `git commit` tự chạy kiểm tra định dạng (Ruff), YAML, gitleaks, v.v. theo `.pre-commit-config.yaml` ở thư mục gốc repo. Gói `pre-commit` nằm trong nhóm `dev` của backend. Đứng ở **thư mục gốc** của repo (cùng cấp với `backend/` và `frontend/`), chạy:
+```cmd
+uv sync --project backend --group dev
+uv run --project backend pre-commit install
+```
 - Kích hoạt môi trường ảo
 ```cmd
 .venv\Scripts\activate
 ```
-- chạy backend 
+- chạy backend
 ```cmd
 cd backend/app
 fastapi run main.py
