@@ -26,12 +26,6 @@ async def get_current_user_info():
     )
 
 
-@router.get("/{user_id}", response_model=UserRead, summary="Lấy thông tin user theo ID")
-async def get_user(user_id: str, service: UserService = Depends(get_user_service)):
-    user = await service.get_user_by_id(user_id)
-    return UserRead.model_validate(user, from_attributes=True)
-
-
 @router.get("/", response_model=dict, summary="Danh sách users có phân trang")
 async def get_users(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
@@ -39,32 +33,6 @@ async def get_users(
     service: UserService = Depends(get_user_service),
 ):
     return await service.get_users_paginated(page=page, page_size=page_size)
-
-
-@router.get(
-    "/all_user_info/{user_id}",
-    response_model=AllUserInfor,
-    summary="Chi tiết user (user + role + profile)",
-)
-async def get_detail_user_info_by_id(
-    user_id: str, service: UserService = Depends(get_user_service)
-):
-    return await service.get_all_info_by_id(user_id)
-
-
-@router.put("/{user_id}", response_model=UserRead, summary="Cập nhật thông tin user")
-async def update_user(
-    user_id: str, user_in: UserUpdate, service: UserService = Depends(get_user_service)
-):
-    db_user = await service.get_user_by_id(user_id)
-    updated_user = await service.repo.update(db_user, user_in)
-    return UserRead.model_validate(updated_user, from_attributes=True)
-
-
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa user")
-async def delete_user(user_id: str, service: UserService = Depends(get_user_service)):
-    await service.delete_user(user_id)
-    return None
 
 
 @router.get(
@@ -87,3 +55,35 @@ async def search_users(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
+
+
+@router.get(
+    "/all_user_info/{user_id}",
+    response_model=AllUserInfor,
+    summary="Chi tiết user (user + role + profile)",
+)
+async def get_detail_user_info_by_id(
+    user_id: str, service: UserService = Depends(get_user_service)
+):
+    return await service.get_all_info_by_id(user_id)
+
+
+@router.get("/{user_id}", response_model=UserRead, summary="Lấy thông tin user theo ID")
+async def get_user(user_id: str, service: UserService = Depends(get_user_service)):
+    user = await service.get_user_by_id(user_id)
+    return UserRead.model_validate(user, from_attributes=True)
+
+
+@router.put("/{user_id}", response_model=UserRead, summary="Cập nhật thông tin user")
+async def update_user(
+    user_id: str, user_in: UserUpdate, service: UserService = Depends(get_user_service)
+):
+    db_user = await service.get_user_by_id(user_id)
+    updated_user = await service.repo.update(db_user, user_in)
+    return UserRead.model_validate(updated_user, from_attributes=True)
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa user")
+async def delete_user(user_id: str, service: UserService = Depends(get_user_service)):
+    await service.delete_user(user_id)
+    return None

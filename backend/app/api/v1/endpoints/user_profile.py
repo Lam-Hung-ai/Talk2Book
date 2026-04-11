@@ -97,7 +97,7 @@ async def search_user_profiles(
     service: UserProfileService = Depends(get_profile_service),
 ):
     """
-    Tìm kiếm trong các cột: full_name, address, nationality
+    Tìm kiếm trong các cột: address, nationality
     """
     return await service.search_profiles(
         q=q,

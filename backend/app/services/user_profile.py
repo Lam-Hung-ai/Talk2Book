@@ -57,7 +57,7 @@ class UserProfileService:
     ):
         skip = (page - 1) * page_size
         # Chỉ định các cột cho phép tìm kiếm
-        search_columns = ["full_name", "address", "nationality"]
+        search_columns = ["address", "nationality"]
 
         results = await self.repo.search(
             query=q,

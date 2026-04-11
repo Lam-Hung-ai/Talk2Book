@@ -32,11 +32,9 @@ class AllUserInfor(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    full_name: str | None = None
     gender: GenderType | None = None
     birthday: date | None = None
     nationality: str | None = None
-    avatar_url: str | None = None
     address: str | None = None
     profile_updated_at: datetime | None = None
 
