@@ -34,17 +34,6 @@ async def create_payment(
     return await service.create_payment(payment_data)
 
 
-@router.get("/{payment_id}", response_model=PaymentRead, summary="Lấy thông tin payment theo ID")
-async def get_payment(
-    payment_id: UUID, service: PaymentService = Depends(get_payment_service)
-):
-    """
-    Lấy thông tin payment theo ID. Ném 404 nếu không tồn tại
-    """
-    payment = await service.get_payment_by_id(payment_id)
-    return PaymentRead.model_validate(payment, from_attributes=True)
-
-
 @router.get("/", response_model=dict, summary="Danh sách payments có phân trang")
 async def get_payments(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
@@ -58,13 +47,34 @@ async def get_payments(
     Lấy danh sách payments với phân trang và filter
     """
     return await service.get_payments_paginated(
-        page=page, page_size=page_size, booking_id=booking_id, status=status, provider=provider
+        page=page,
+        page_size=page_size,
+        booking_id=booking_id,
+        status=status,
+        provider=provider,
     )
 
 
-@router.put("/{payment_id}", response_model=PaymentRead, summary="Cập nhật thông tin payment")
+@router.get(
+    "/{payment_id}", response_model=PaymentRead, summary="Lấy thông tin payment theo ID"
+)
+async def get_payment(
+    payment_id: UUID, service: PaymentService = Depends(get_payment_service)
+):
+    """
+    Lấy thông tin payment theo ID. Ném 404 nếu không tồn tại
+    """
+    payment = await service.get_payment_by_id(payment_id)
+    return PaymentRead.model_validate(payment, from_attributes=True)
+
+
+@router.put(
+    "/{payment_id}", response_model=PaymentRead, summary="Cập nhật thông tin payment"
+)
 async def update_payment(
-    payment_id: UUID, payment_data: PaymentUpdate, service: PaymentService = Depends(get_payment_service)
+    payment_id: UUID,
+    payment_data: PaymentUpdate,
+    service: PaymentService = Depends(get_payment_service),
 ):
     """
     Cập nhật payment
@@ -72,7 +82,9 @@ async def update_payment(
     return await service.update_payment(payment_id, payment_data)
 
 
-@router.delete("/{payment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa payment")
+@router.delete(
+    "/{payment_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa payment"
+)
 async def delete_payment(
     payment_id: UUID, service: PaymentService = Depends(get_payment_service)
 ):
@@ -83,9 +95,7 @@ async def delete_payment(
     return None
 
 
-@router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm payments"
-)
+@router.get("/search/mixin", response_model=dict, summary="Tìm kiếm payments")
 async def search_payments(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     page: int = Query(1, ge=1),

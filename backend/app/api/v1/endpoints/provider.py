@@ -11,7 +11,9 @@ from app.services.provider import ProviderService
 router = APIRouter()
 
 
-def get_provider_service(db: AsyncSession = Depends(get_async_session)) -> ProviderService:
+def get_provider_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> ProviderService:
     return ProviderService(db)
 
 
@@ -22,9 +24,32 @@ def get_provider_service(db: AsyncSession = Depends(get_async_session)) -> Provi
     summary="Tạo provider mới",
 )
 async def create_provider(
-    provider_in: ProviderCreate, service: ProviderService = Depends(get_provider_service)
+    provider_in: ProviderCreate,
+    service: ProviderService = Depends(get_provider_service),
 ):
     return await service.create_provider(provider_in)
+
+
+@router.get(
+    "/",
+    response_model=dict,
+    summary="Danh sách provider có phân trang",
+)
+async def list_providers(
+    page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
+    page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
+    type_filter: str | None = Query(None, description="Lọc theo type"),
+    country_code: str | None = Query(None, description="Lọc theo country_code"),
+    status_filter: str | None = Query(None, description="Lọc theo status"),
+    service: ProviderService = Depends(get_provider_service),
+):
+    return await service.get_providers_paginated(
+        page=page,
+        page_size=page_size,
+        type_filter=type_filter,
+        country_code=country_code,
+        status_filter=status_filter,
+    )
 
 
 @router.get(
@@ -60,28 +85,6 @@ async def get_provider(
     return await service.get_provider(provider_id)
 
 
-@router.get(
-    "/",
-    response_model=dict,
-    summary="Danh sách provider có phân trang",
-)
-async def list_providers(
-    page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
-    page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
-    type_filter: str | None = Query(None, description="Lọc theo type"),
-    country_code: str | None = Query(None, description="Lọc theo country_code"),
-    status_filter: str | None = Query(None, description="Lọc theo status"),
-    service: ProviderService = Depends(get_provider_service),
-):
-    return await service.get_providers_paginated(
-        page=page,
-        page_size=page_size,
-        type_filter=type_filter,
-        country_code=country_code,
-        status_filter=status_filter,
-    )
-
-
 @router.put(
     "/{provider_id}",
     response_model=ProviderRead,
@@ -105,4 +108,3 @@ async def delete_provider(
 ):
     await service.delete_provider(provider_id)
     return None
-

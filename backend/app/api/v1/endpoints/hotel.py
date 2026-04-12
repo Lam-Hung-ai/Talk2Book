@@ -28,15 +28,6 @@ async def create_hotel(
     return await service.create_hotel(hotel_in)
 
 
-@router.get("/{hotel_id}", response_model=HotelRead, summary="Lấy thông tin hotel theo ID")
-async def get_hotel(
-    hotel_id: UUID, service: HotelService = Depends(get_hotel_service)
-):
-    """Lấy thông tin hotel theo ID. Ném 404 nếu không tồn tại"""
-    hotel = await service.get_hotel_by_id(hotel_id)
-    return HotelRead.model_validate(hotel, from_attributes=True)
-
-
 @router.get("/", response_model=dict, summary="Danh sách hotels có phân trang")
 async def get_hotels(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
@@ -49,6 +40,15 @@ async def get_hotels(
     return await service.get_hotels_paginated(
         page=page, page_size=page_size, city_id=city_id, provider_id=provider_id
     )
+
+
+@router.get(
+    "/{hotel_id}", response_model=HotelRead, summary="Lấy thông tin hotel theo ID"
+)
+async def get_hotel(hotel_id: UUID, service: HotelService = Depends(get_hotel_service)):
+    """Lấy thông tin hotel theo ID. Ném 404 nếu không tồn tại"""
+    hotel = await service.get_hotel_by_id(hotel_id)
+    return HotelRead.model_validate(hotel, from_attributes=True)
 
 
 @router.put("/{hotel_id}", response_model=HotelRead, summary="Cập nhật thông tin hotel")
@@ -73,7 +73,9 @@ async def delete_hotel(
 
 
 @router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm hotels theo name hoặc address"
+    "/search/mixin",
+    response_model=dict,
+    summary="Tìm kiếm hotels theo name hoặc address",
 )
 async def search_mixin_hotels(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
@@ -91,4 +93,3 @@ async def search_mixin_hotels(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

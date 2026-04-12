@@ -16,6 +16,7 @@ from app.core.logging import setup_logging
 def custom_generate_unique_id(route: APIRoute) -> str:
     return route.name
 
+
 def load_function_tool_calls(*keys, file_path: str = "tool_call.json") -> list[str]:
 
     list_tool_calls = []
@@ -27,8 +28,11 @@ def load_function_tool_calls(*keys, file_path: str = "tool_call.json") -> list[s
             list_tool_calls.extend(tool_calls[key])
     return list_tool_calls
 
+
 setup_logging()
 logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -45,18 +49,19 @@ async def lifespan(app: FastAPI):
     logger.info("Server shutting down...")
     # before stop
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     lifespan=lifespan,
-    openapi_url=f"/{settings.API_V1_STR}/openapi.json", # API_ENDPOINT: http://127.0.0.1:8000/docs  OPENAPI URL: http://127.0.0.1:8000/api/v1/openapi.json
-    generate_unique_id_function=custom_generate_unique_id
+    openapi_url=f"/{settings.API_V1_STR}/openapi.json",  # API_ENDPOINT: http://127.0.0.1:8000/docs  OPENAPI URL: http://127.0.0.1:8000/api/v1/openapi.json
+    generate_unique_id_function=custom_generate_unique_id,
 )
+
 
 @app.get("/")
 async def project_info():
-    return {
-        "message": "Talk 2 Book Project"
-    }
+    return {"message": "Talk 2 Book Project"}
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -69,5 +74,11 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-mcp = FastApiMCP(app, name="Talk2Book project", include_operations=load_function_tool_calls("search", "city", "country", "airport", "user", "booking"))
+mcp = FastApiMCP(
+    app,
+    name="Talk2Book project",
+    include_operations=load_function_tool_calls(
+        "search", "city", "country", "airport", "user", "booking"
+    ),
+)
 mcp.mount_http()

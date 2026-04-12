@@ -26,17 +26,12 @@ class Product(SQLModel, table=True):
     title: str = Field(nullable=False)
 
     # Rich fields
-    tour_type: str | None = Field(default=None)              # Loại tour (từ danh mục)
-    description: str | None = Field(default=None)            # Giới thiệu chung
-    detail_description: str | None = Field(default=None)     # Giới thiệu chi tiết
+    description: str | None = Field(default=None)  # Giới thiệu chung
     itinerary: list[dict[str, Any]] | None = Field(
         default=None, sa_column=Column[Any](JSONB)
     )
-    costs: list[dict[str, Any]] | None = Field(
-        default=None, sa_column=Column[Any](JSONB)
-    )
     images: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
-    duration_days: int | None = Field(default=None)          # Số ngày
+    duration_days: int | None = Field(default=None)  # Số ngày
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),

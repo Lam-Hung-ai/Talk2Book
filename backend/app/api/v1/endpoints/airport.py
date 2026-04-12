@@ -9,7 +9,9 @@ from app.services.airport import AirportService
 router = APIRouter()
 
 
-def get_airport_service(db: AsyncSession = Depends(get_async_session)) -> AirportService:
+def get_airport_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> AirportService:
     return AirportService(db)
 
 
@@ -27,17 +29,6 @@ async def create_airport(
     Endpoint tạo airport mới với validation unique constraint (city_id, name) và unique iata/icao
     """
     return await service.create_airport(airport_in)
-
-
-@router.get("/{iata}", response_model=AirportRead, summary="Lấy thông tin airport theo IATA code")
-async def get_airport(
-    iata: str, service: AirportService = Depends(get_airport_service)
-):
-    """
-    Lấy thông tin airport theo IATA code. Ném 404 nếu không tồn tại
-    """
-    airport = await service.get_airport_by_iata(iata)
-    return AirportRead.model_validate(airport, from_attributes=True)
 
 
 @router.get("/", response_model=dict, summary="Danh sách airports có phân trang")
@@ -97,15 +88,33 @@ async def get_airports(
         }
     """
     from uuid import UUID
+
     city_uuid = UUID(city_id) if city_id else None
     return await service.get_airports_paginated(
         page=page, page_size=page_size, city_id=city_uuid
     )
 
 
+@router.get(
+    "/{iata}",
+    response_model=AirportRead,
+    summary="Lấy thông tin airport theo IATA code",
+)
+async def get_airport(
+    iata: str, service: AirportService = Depends(get_airport_service)
+):
+    """
+    Lấy thông tin airport theo IATA code. Ném 404 nếu không tồn tại
+    """
+    airport = await service.get_airport_by_iata(iata)
+    return AirportRead.model_validate(airport, from_attributes=True)
+
+
 @router.put("/{iata}", response_model=AirportRead, summary="Cập nhật thông tin airport")
 async def update_airport(
-    iata: str, airport_in: AirportUpdate, service: AirportService = Depends(get_airport_service)
+    iata: str,
+    airport_in: AirportUpdate,
+    service: AirportService = Depends(get_airport_service),
 ):
     """
     Cập nhật airport theo IATA code
@@ -125,7 +134,9 @@ async def delete_airport(
 
 
 @router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm airports theo name, iata hoặc icao"
+    "/search/mixin",
+    response_model=dict,
+    summary="Tìm kiếm airports theo name, iata hoặc icao",
 )
 async def search_airports(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
@@ -150,4 +161,3 @@ async def search_airports(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

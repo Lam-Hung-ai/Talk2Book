@@ -31,22 +31,16 @@ async def create_city(
     return await service.create_city(city_in)
 
 
-@router.get("/{city_id}", response_model=CityRead, summary="Lấy thông tin city theo ID")
-async def get_city(
-    city_id: UUID, service: CityService = Depends(get_city_service)
-):
-    """
-    Lấy thông tin city theo ID. Ném 404 nếu không tồn tại
-    """
-    city = await service.get_city_by_id(city_id)
-    return CityRead.model_validate(city, from_attributes=True)
-
-
 @router.get("/", response_model=dict, summary="Danh sách cities có phân trang")
 async def get_cities(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
-    country_code: str | None = Query(None, min_length=2, max_length=2, description="Lọc theo mã quốc gia (ISO 3166-1 alpha-2), ví dụ: 'VN'"),
+    country_code: str | None = Query(
+        None,
+        min_length=2,
+        max_length=2,
+        description="Lọc theo mã quốc gia (ISO 3166-1 alpha-2), ví dụ: 'VN'",
+    ),
     service: CityService = Depends(get_city_service),
 ):
     """
@@ -104,6 +98,15 @@ async def get_cities(
     )
 
 
+@router.get("/{city_id}", response_model=CityRead, summary="Lấy thông tin city theo ID")
+async def get_city(city_id: UUID, service: CityService = Depends(get_city_service)):
+    """
+    Lấy thông tin city theo ID. Ném 404 nếu không tồn tại
+    """
+    city = await service.get_city_by_id(city_id)
+    return CityRead.model_validate(city, from_attributes=True)
+
+
 @router.put("/{city_id}", response_model=CityRead, summary="Cập nhật thông tin city")
 async def update_city(
     city_id: UUID, city_in: CityUpdate, service: CityService = Depends(get_city_service)
@@ -115,9 +118,7 @@ async def update_city(
 
 
 @router.delete("/{city_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa city")
-async def delete_city(
-    city_id: UUID, service: CityService = Depends(get_city_service)
-):
+async def delete_city(city_id: UUID, service: CityService = Depends(get_city_service)):
     """
     Xóa city (hard delete). Có thể đổi thành soft delete nếu cần
     """
@@ -126,7 +127,9 @@ async def delete_city(
 
 
 @router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm cities theo name hoặc country_code"
+    "/search/mixin",
+    response_model=dict,
+    summary="Tìm kiếm cities theo name hoặc country_code",
 )
 async def search_cities(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
@@ -151,4 +154,3 @@ async def search_cities(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

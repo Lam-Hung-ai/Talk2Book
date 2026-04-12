@@ -59,7 +59,7 @@ Cụm này cho phép tìm chuyến bay, giữ chỗ, bán vé và cập nhật t
 
 | Bảng               | Mục đích                                                                                                                                                      |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **product**        | Sản phẩm du lịch. `type` enum: `tour \| activity \| transport`. Có `title`, `tour_type`, `description`, `detail_description`, `itinerary` JSONB, `costs` JSONB, `images` JSONB, `duration_days`. |
+| **product**        | Sản phẩm du lịch. `type` enum: `tour \| activity \| transport`. Có `title`, `description`, `itinerary` JSONB, `costs` JSONB, `images` JSONB, `duration_days`. |
 | **time_slot**      | Suất thời gian của sản phẩm (`start_datetime`, `end_datetime`). Unique `(product_id, start_datetime, end_datetime)`.                                          |
 | **slot_inventory** | Tồn kho theo suất. PK là `slot_id` (1:1 với `time_slot`). Có `capacity`, `sold`, `price`, `currency_code`.                                                   |
 

@@ -11,7 +11,9 @@ from app.services.product import ProductService
 router = APIRouter()
 
 
-def get_product_service(db: AsyncSession = Depends(get_async_session)) -> ProductService:
+def get_product_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> ProductService:
     return ProductService(db)
 
 
@@ -33,8 +35,9 @@ async def list_products(
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
     q: str | None = Query(None, description="Tìm kiếm theo title"),
     provider_id: UUID | None = Query(None, description="Lọc theo provider"),
-    city_id: UUID | None = Query(None, description="Lọc theo city"),
-    type: str | None = Query(None, description="Lọc theo type (activity/transport)"),
+    type: str | None = Query(
+        None, description="Lọc theo type (tour/activity/transport)"
+    ),
     service: ProductService = Depends(get_product_service),
 ):
     return await service.list_products(
@@ -42,7 +45,6 @@ async def list_products(
         page_size=page_size,
         q=q,
         provider_id=provider_id,
-        city_id=city_id,
         type=type,
     )
 
@@ -73,4 +75,3 @@ async def delete_product(
 ):
     await service.delete_product(product_id)
     return None
-
