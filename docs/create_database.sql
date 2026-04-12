@@ -1,14 +1,6 @@
-```sql
--- =========================================================
--- Travel Super-App (PostgreSQL) – Full DDL (Singular Naming)
--- Description: Complete Database Schema with SINGULAR table names
--- Scope: Flight, Hotel, Tour (product), Booking, Payment, Coupon
--- Aligned with: backend/app/models (SQLModel)
--- Auth: Better Auth (user / session / account / verification)
--- =========================================================
-
--- CREATE DATABASE travel_app;
--- \c travel_app
+-- =============================================================================
+-- Talk2Book — PostgreSQL create database
+-- =============================================================================
 
 -- ================
 -- 0. Extensions
@@ -255,7 +247,6 @@ CREATE TABLE IF NOT EXISTS flight_schedule (
   arr_time           TIME NOT NULL,
   arrival_day_offset SMALLINT NOT NULL DEFAULT 0,
   amenities          JSONB,
-  price_from         DOUBLE PRECISION,
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT chk_fs_dow_bits CHECK (
@@ -269,15 +260,15 @@ BEFORE UPDATE ON flight_schedule
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS flight_instance (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  schedule_id  UUID NOT NULL REFERENCES flight_schedule(id) ON DELETE CASCADE,
-  flight_date    DATE NOT NULL,
-  dep_datetime   TIMESTAMPTZ NOT NULL,
-  arr_datetime   TIMESTAMPTZ NOT NULL,
-  aircraft_code  TEXT,
-  status         VARCHAR(20) NOT NULL DEFAULT 'scheduled',
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  schedule_id     UUID NOT NULL REFERENCES flight_schedule(id) ON DELETE CASCADE,
+  flight_date     DATE NOT NULL,
+  dep_datetime    TIMESTAMPTZ NOT NULL,
+  arr_datetime    TIMESTAMPTZ NOT NULL,
+  aircraft_code   TEXT,
+  status          VARCHAR(20) NOT NULL DEFAULT 'scheduled',
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT uq_fi_schedule_date UNIQUE (schedule_id, flight_date),
   CONSTRAINT chk_fi_time CHECK (dep_datetime < arr_datetime)
 );
@@ -288,13 +279,16 @@ BEFORE UPDATE ON flight_instance
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS seat_inventory (
-  instance_id UUID      NOT NULL REFERENCES flight_instance(id) ON DELETE CASCADE,
-  cabin       cabin_type NOT NULL,
-  total_seats INT NOT NULL,
-  held_seats  INT NOT NULL DEFAULT 0,
-  sold_seats  INT NOT NULL DEFAULT 0,
-  amenities   JSONB NOT NULL DEFAULT '{}'::jsonb,
+  instance_id   UUID          NOT NULL REFERENCES flight_instance(id) ON DELETE CASCADE,
+  cabin         cabin_type    NOT NULL,
+  total_seats   INT           NOT NULL,
+  held_seats    INT           NOT NULL DEFAULT 0,
+  sold_seats    INT           NOT NULL DEFAULT 0,
+  price         NUMERIC(12,2) NOT NULL DEFAULT 0,
+  currency_code CHAR(3)       NOT NULL DEFAULT 'VND' REFERENCES currency(code) ON DELETE RESTRICT,
+  amenities     JSONB         NOT NULL DEFAULT '{}'::jsonb,
   CONSTRAINT chk_si_seats CHECK (held_seats + sold_seats <= total_seats),
+  CONSTRAINT chk_si_price CHECK (price >= 0),
   PRIMARY KEY (instance_id, cabin)
 );
 CREATE INDEX IF NOT EXISTS idx_si_instance ON seat_inventory(instance_id, cabin);
@@ -640,15 +634,3 @@ INSERT INTO currency(code, name) VALUES
   ('EUR','Euro'),
   ('VND','Vietnamese Dong')
 ON CONFLICT (code) DO NOTHING;
-
--- =========================================================
--- 14) Migration: flight_schedule / flight_instance (cabin & equipment)
--- Run on existing DBs that still have old columns on flight_schedule.
--- =========================================================
--- ALTER TABLE flight_schedule
---   DROP COLUMN IF EXISTS cabin_class,
---   DROP COLUMN IF EXISTS ticket_type,
---   DROP COLUMN IF EXISTS aircraft_code;
--- ALTER TABLE flight_instance
---   ADD COLUMN IF NOT EXISTS aircraft_code TEXT;
-```

@@ -31,10 +31,12 @@ class FlightSearchResult(BaseModel):
     flight_date: date
     aircraft_code: str | None = None
     status: str
-    available_seats: int = Field(description="Số ghế còn trống (total - sold)")
+    available_seats: int = Field(description="Số ghế còn trống (total - held - sold)")
     cabin: CabinType | None = None
     total_seats: int | None = None
     sold_seats: int | None = None
+    price: Decimal | None = Field(default=None, description="Giá vé theo hạng cabin")
+    currency_code: str | None = Field(default=None, description="Đơn vị tiền tệ")
 
     class Config:
         from_attributes = True

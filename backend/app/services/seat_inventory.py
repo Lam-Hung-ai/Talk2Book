@@ -28,11 +28,17 @@ class SeatInventoryService:
             raise HTTPException(status_code=400, detail="held_seats must be >= 0")
         if sold is not None and sold < 0:
             raise HTTPException(status_code=400, detail="sold_seats must be >= 0")
-        if total is not None and held is not None and held > total:
+        if total is not None and held is not None and sold is not None:
+            if held + sold > total:
+                raise HTTPException(
+                    status_code=400,
+                    detail="held_seats + sold_seats cannot exceed total_seats",
+                )
+        elif total is not None and held is not None and held > total:
             raise HTTPException(
                 status_code=400, detail="held_seats cannot exceed total_seats"
             )
-        if total is not None and sold is not None and sold > total:
+        elif total is not None and sold is not None and sold > total:
             raise HTTPException(
                 status_code=400, detail="sold_seats cannot exceed total_seats"
             )

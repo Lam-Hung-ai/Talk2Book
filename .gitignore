@@ -9,3 +9,6 @@ backend/log/*
 /node_modules/
 /frontend/.next/
 .pnpm-store/
+tmp/
+add_data_into_database/
+docs/migrations/

@@ -141,6 +141,8 @@ class SearchService:
                             cabin=seat.cabin,
                             total_seats=seat.total_seats,
                             sold_seats=seat.sold_seats,
+                            price=seat.price,
+                            currency_code=seat.currency_code,
                         )
                     )
                     break  # Chỉ lấy 1 record đầu tiên có ghế trống
