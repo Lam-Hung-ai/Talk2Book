@@ -10,8 +10,12 @@ from app.models.enums import CabinType
 
 # ========== Flight Search ==========
 class FlightSearchRequest(BaseModel):
-    origin: str = Field(..., min_length=3, max_length=3, description="IATA code của sân bay đi")
-    destination: str = Field(..., min_length=3, max_length=3, description="IATA code của sân bay đến")
+    origin: str = Field(
+        ..., min_length=3, max_length=3, description="IATA code của sân bay đi"
+    )
+    destination: str = Field(
+        ..., min_length=3, max_length=3, description="IATA code của sân bay đến"
+    )
     flight_date: date = Field(..., description="Ngày bay")
     cabin: CabinType | None = Field(default=None, description="Loại cabin (optional)")
 
@@ -25,6 +29,7 @@ class FlightSearchResult(BaseModel):
     dep_datetime: datetime
     arr_datetime: datetime
     flight_date: date
+    aircraft_code: str | None = None
     status: str
     available_seats: int = Field(description="Số ghế còn trống (total - sold)")
     cabin: CabinType | None = None
@@ -62,7 +67,9 @@ class HotelSearchResult(BaseModel):
     lat: Decimal | None
     lng: Decimal | None
     available_rooms: int = Field(description="Số phòng còn trống trong khoảng ngày")
-    min_price: Decimal | None = Field(description="Giá thấp nhất cho khoảng ngày (tổng)")
+    min_price: Decimal | None = Field(
+        description="Giá thấp nhất cho khoảng ngày (tổng)"
+    )
     currency_code: str | None
 
     class Config:
@@ -111,4 +118,3 @@ class HotelAvailabilityResponse(BaseModel):
 
     class Config:
         from_attributes = True
-

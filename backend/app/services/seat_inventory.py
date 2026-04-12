@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -29,14 +29,18 @@ class SeatInventoryService:
         if sold is not None and sold < 0:
             raise HTTPException(status_code=400, detail="sold_seats must be >= 0")
         if total is not None and held is not None and held > total:
-            raise HTTPException(status_code=400, detail="held_seats cannot exceed total_seats")
+            raise HTTPException(
+                status_code=400, detail="held_seats cannot exceed total_seats"
+            )
         if total is not None and sold is not None and sold > total:
-            raise HTTPException(status_code=400, detail="sold_seats cannot exceed total_seats")
+            raise HTTPException(
+                status_code=400, detail="sold_seats cannot exceed total_seats"
+            )
 
-    async def create_inventory(
-        self, payload: SeatInventoryCreate
-    ) -> SeatInventoryRead:
-        self._validate_counts(payload.total_seats, payload.held_seats, payload.sold_seats)
+    async def create_inventory(self, payload: SeatInventoryCreate) -> SeatInventoryRead:
+        self._validate_counts(
+            payload.total_seats, payload.held_seats, payload.sold_seats
+        )
         obj = await self.repo.create(payload)
         return SeatInventoryRead.model_validate(obj, from_attributes=True)
 
@@ -72,7 +76,9 @@ class SeatInventoryService:
             total = await self.repo.get_count()
 
         return {
-            "items": [SeatInventoryRead.model_validate(i, from_attributes=True) for i in items],
+            "items": [
+                SeatInventoryRead.model_validate(i, from_attributes=True) for i in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -107,9 +113,7 @@ class SeatInventoryService:
         updated = await self.repo.update(obj, payload)
         return SeatInventoryRead.model_validate(updated, from_attributes=True)
 
-    async def delete_inventory(
-        self, instance_id: UUID, cabin: CabinType
-    ) -> None:
+    async def delete_inventory(self, instance_id: UUID, cabin: CabinType) -> None:
         deleted = await self.repo.delete(instance_id, cabin)
         if not deleted:
             raise HTTPException(status_code=404, detail="Seat inventory not found")

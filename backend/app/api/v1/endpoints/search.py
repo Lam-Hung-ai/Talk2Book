@@ -40,10 +40,16 @@ def get_search_service(db: AsyncSession = Depends(get_async_session)) -> SearchS
     """,
 )
 async def search_flights(
-    origin: str = Query(..., min_length=3, max_length=3, description="Mã IATA sân bay đi (VD: HAN)"),
-    destination: str = Query(..., min_length=3, max_length=3, description="Mã IATA sân bay đến (VD: SGN)"),
+    origin: str = Query(
+        ..., min_length=3, max_length=3, description="Mã IATA sân bay đi (VD: HAN)"
+    ),
+    destination: str = Query(
+        ..., min_length=3, max_length=3, description="Mã IATA sân bay đến (VD: SGN)"
+    ),
     flight_date: str = Query(..., description="Ngày bay định dạng YYYY-MM-DD"),
-    cabin: CabinType | None = Query(None, description="Hạng ghế: economy, premium, business, first"),
+    cabin: CabinType | None = Query(
+        None, description="Hạng ghế: economy, premium, business, first"
+    ),
     page: int = Query(1, ge=1, description="Số trang kết quả"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng kết quả mỗi trang"),
     service: SearchService = Depends(get_search_service),
@@ -131,7 +137,6 @@ async def search_flights(
         try:
             cabin_enum = CabinType(cabin)
         except ValueError:
-
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Loại cabin không hợp lệ: {cabin}",
@@ -245,7 +250,6 @@ async def search_hotels(
         check_in_parsed = datetime.strptime(check_in, "%Y-%m-%d").date()
         check_out_parsed = datetime.strptime(check_out, "%Y-%m-%d").date()
     except ValueError:
-
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Định dạng ngày không hợp lệ. Sử dụng YYYY-MM-DD",
@@ -268,16 +272,18 @@ async def search_hotels(
     status_code=status.HTTP_200_OK,
     summary="Chi tiết phòng & Giá của khách sạn",
     description="""
-    Khi user bấm vào khách sạn, cần list các loại phòng (Room) + Giá tổng (base_price * số đêm) 
+    Khi user bấm vào khách sạn, cần list các loại phòng (Room) + Giá tổng (base_price * số đêm)
     cho khoảng ngày đã chọn.
-    
+
     - **hotel_id**: ID của khách sạn
     - **check_in**: Ngày check-in (YYYY-MM-DD)
     - **check_out**: Ngày check-out (YYYY-MM-DD)
     """,
 )
 async def get_hotel_availability(
-    hotel_id: UUID = Path(..., description="ID khách sạn (Lấy từ kết quả search_hotels)"),
+    hotel_id: UUID = Path(
+        ..., description="ID khách sạn (Lấy từ kết quả search_hotels)"
+    ),
     check_in: str = Query(..., description="Ngày check-in (YYYY-MM-DD)"),
     check_out: str = Query(..., description="Ngày check-out (YYYY-MM-DD)"),
     service: SearchService = Depends(get_search_service),
@@ -286,7 +292,7 @@ async def get_hotel_availability(
     Lấy danh sách các loại phòng và gói giá (Rate Plan) khả dụng của một khách sạn cụ thể.
 
     API này trả về chi tiết từng option có thể đặt (bookable options).
-    Lưu ý: Cùng một loại phòng (VD: Standard) có thể xuất hiện nhiều lần với các gói giá khác nhau 
+    Lưu ý: Cùng một loại phòng (VD: Standard) có thể xuất hiện nhiều lần với các gói giá khác nhau
     (VD: Giá cơ bản vs Giá bao gồm ăn sáng).
 
     **Hướng dẫn cho AI Agent:**
@@ -355,7 +361,6 @@ async def get_hotel_availability(
         check_in_parsed = datetime.strptime(check_in, "%Y-%m-%d").date()
         check_out_parsed = datetime.strptime(check_out, "%Y-%m-%d").date()
     except ValueError:
-
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Định dạng ngày không hợp lệ. Sử dụng YYYY-MM-DD",
@@ -367,4 +372,3 @@ async def get_hotel_availability(
     )
 
     return await service.get_hotel_availability(hotel_id, request)
-

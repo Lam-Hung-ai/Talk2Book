@@ -1,20 +1,19 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     active = "active"
     suspended = "suspended"
     deleted = "deleted"
 
 
-class ProviderType(str, Enum):
+class ProviderType(StrEnum):
     airline = "airline"
     hotel = "hotel"
-    operator = "operator"
-    transport = "transport"
+    tour = "tour"
 
 
-class BookingState(str, Enum):
+class BookingState(StrEnum):
     draft = "draft"
     pending_payment = "pending_payment"
     confirmed = "confirmed"
@@ -22,7 +21,7 @@ class BookingState(str, Enum):
     refunded = "refunded"
 
 
-class PaymentStatus(str, Enum):
+class PaymentStatus(StrEnum):
     pending = "pending"
     authorized = "authorized"
     captured = "captured"
@@ -30,38 +29,38 @@ class PaymentStatus(str, Enum):
     refunded = "refunded"
 
 
-class DiscountType(str, Enum):
+class DiscountType(StrEnum):
     percent = "percent"
     amount = "amount"
 
 
-class CabinType(str, Enum):
+class CabinType(StrEnum):
     economy = "economy"
     premium = "premium"
     business = "business"
     first = "first"
 
 
-class ReviewTargetType(str, Enum):
+class ReviewTargetType(StrEnum):
     hotel = "hotel"
     product = "product"
     flight = "flight"
     airport = "airport"
 
 
-class GenderType(str, Enum):
+class GenderType(StrEnum):
     M = "M"
     F = "F"
-    O = "O"
+    other = "O"
 
 
-class ProductType(str, Enum):
+class ProductType(StrEnum):
     tour = "tour"
     activity = "activity"
     transport = "transport"
 
 
-class TicketType(str, Enum):
+class TicketType(StrEnum):
     flight = "flight"
     hotel = "hotel"
     tour = "tour"

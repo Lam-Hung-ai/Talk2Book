@@ -35,7 +35,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE provider_type      AS ENUM ('airline','hotel','operator','transport');
+  CREATE TYPE provider_type      AS ENUM ('airline','hotel','tour');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -254,9 +254,6 @@ CREATE TABLE IF NOT EXISTS flight_schedule (
   dep_time           TIME NOT NULL,
   arr_time           TIME NOT NULL,
   arrival_day_offset SMALLINT NOT NULL DEFAULT 0,
-  aircraft_code      TEXT,
-  cabin_class        TEXT,
-  ticket_type        TEXT,
   amenities          JSONB,
   price_from         DOUBLE PRECISION,
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -274,10 +271,11 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TABLE IF NOT EXISTS flight_instance (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   schedule_id  UUID NOT NULL REFERENCES flight_schedule(id) ON DELETE CASCADE,
-  flight_date  DATE NOT NULL,
-  dep_datetime TIMESTAMPTZ NOT NULL,
-  arr_datetime TIMESTAMPTZ NOT NULL,
-  status       VARCHAR(20) NOT NULL DEFAULT 'scheduled',
+  flight_date    DATE NOT NULL,
+  dep_datetime   TIMESTAMPTZ NOT NULL,
+  arr_datetime   TIMESTAMPTZ NOT NULL,
+  aircraft_code  TEXT,
+  status         VARCHAR(20) NOT NULL DEFAULT 'scheduled',
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT uq_fi_schedule_date UNIQUE (schedule_id, flight_date),
@@ -642,4 +640,15 @@ INSERT INTO currency(code, name) VALUES
   ('EUR','Euro'),
   ('VND','Vietnamese Dong')
 ON CONFLICT (code) DO NOTHING;
+
+-- =========================================================
+-- 14) Migration: flight_schedule / flight_instance (cabin & equipment)
+-- Run on existing DBs that still have old columns on flight_schedule.
+-- =========================================================
+-- ALTER TABLE flight_schedule
+--   DROP COLUMN IF EXISTS cabin_class,
+--   DROP COLUMN IF EXISTS ticket_type,
+--   DROP COLUMN IF EXISTS aircraft_code;
+-- ALTER TABLE flight_instance
+--   ADD COLUMN IF NOT EXISTS aircraft_code TEXT;
 ```

@@ -46,7 +46,10 @@ class BookingAuditLogService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [BookingAuditLogRead.model_validate(l, from_attributes=True) for l in logs],
+            "items": [
+                BookingAuditLogRead.model_validate(entry, from_attributes=True)
+                for entry in logs
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -89,10 +92,12 @@ class BookingAuditLogService:
         )
 
         return {
-            "items": [BookingAuditLogRead.model_validate(l, from_attributes=True) for l in logs],
+            "items": [
+                BookingAuditLogRead.model_validate(entry, from_attributes=True)
+                for entry in logs
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

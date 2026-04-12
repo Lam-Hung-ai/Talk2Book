@@ -4,7 +4,6 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -99,7 +98,9 @@ class SearchService:
         )
         # Phân trang
         skip = (page - 1) * page_size
-        instances_stmt = instances_stmt.offset(skip).limit(page_size * 2)  # Lấy thêm để filter sau
+        instances_stmt = instances_stmt.offset(skip).limit(
+            page_size * 2
+        )  # Lấy thêm để filter sau
 
         results = await self.db.exec(instances_stmt)
         instances_data = results.all()
@@ -108,7 +109,9 @@ class SearchService:
         items: list[FlightSearchResult] = []
         for instance, schedule, provider, route_obj in instances_data:
             # Lấy seat inventory với filter
-            seat_stmt = select(SeatInventory).where(SeatInventory.instance_id == instance.id)
+            seat_stmt = select(SeatInventory).where(
+                SeatInventory.instance_id == instance.id
+            )
             if request.cabin:
                 seat_stmt = seat_stmt.where(SeatInventory.cabin == request.cabin)
             seats = await self.db.exec(seat_stmt)
@@ -132,6 +135,7 @@ class SearchService:
                             dep_datetime=instance.dep_datetime,
                             arr_datetime=instance.arr_datetime,
                             flight_date=instance.flight_date,
+                            aircraft_code=instance.aircraft_code,
                             status=instance.status,
                             available_seats=available,
                             cabin=seat.cabin,
@@ -152,7 +156,7 @@ class SearchService:
             total_pages=(len(items) + page_size - 1) // page_size if items else 0,
         )
 
-    async def search_hotels(
+    async def search_hotels(  # noqa: C901
         self, request: HotelSearchRequest, page: int = 1, page_size: int = 20
     ) -> HotelSearchResponse:
         """
@@ -171,9 +175,6 @@ class SearchService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Không tìm thấy thành phố với ID {request.city_id}",
             )
-
-        # Tính số đêm
-        nights = (request.check_out - request.check_in).days
 
         # Lấy tất cả hotels trong city
         hotels_stmt = select(Hotel).where(Hotel.city_id == request.city_id)
@@ -204,7 +205,9 @@ class SearchService:
 
             for room in room_list:
                 # Lấy tất cả rate plans cho room này
-                rate_plans_stmt = select(RoomRatePlan).where(RoomRatePlan.hotel_id == hotel.id)
+                rate_plans_stmt = select(RoomRatePlan).where(
+                    RoomRatePlan.hotel_id == hotel.id
+                )
                 rate_plans = await self.db.exec(rate_plans_stmt)
                 rate_plan_list = rate_plans.all()
 
@@ -281,7 +284,7 @@ class SearchService:
             total_pages=(len(items) + page_size - 1) // page_size if items else 0,
         )
 
-    async def get_hotel_availability(
+    async def get_hotel_availability(  # noqa: C901
         self, hotel_id: UUID, request: HotelAvailabilityRequest
     ) -> HotelAvailabilityResponse:
         """
@@ -313,7 +316,9 @@ class SearchService:
 
         for room in room_list:
             # Lấy tất cả rate plans cho room này
-            rate_plans_stmt = select(RoomRatePlan).where(RoomRatePlan.hotel_id == hotel_id)
+            rate_plans_stmt = select(RoomRatePlan).where(
+                RoomRatePlan.hotel_id == hotel_id
+            )
             rate_plans = await self.db.exec(rate_plans_stmt)
             rate_plan_list = rate_plans.all()
 
@@ -377,7 +382,9 @@ class SearchService:
                             rate_plan_id=rate_plan.id,
                             rate_plan_name=rate_plan.name,
                             meal_plan=rate_plan.meal_plan,
-                            available_rooms=int(min_available) if min_available != float("inf") else 0,
+                            available_rooms=int(min_available)
+                            if min_available != float("inf")
+                            else 0,
                             total_price=total_price,
                             price_per_night=price_per_night,
                             currency_code=rate_plan.currency_code,
@@ -393,4 +400,3 @@ class SearchService:
             nights=nights,
             rooms=room_details,
         )
-

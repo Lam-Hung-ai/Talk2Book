@@ -57,13 +57,13 @@ class FlightScheduleService:
         if q:
             items = await self.repo.search(
                 query=q,
-                search_columns=["flight_number", "aircraft_code"],
+                search_columns=["flight_number"],
                 skip=skip,
                 limit=page_size,
             )
             total = await self.repo.count_search(
                 query=q,
-                search_columns=["flight_number", "aircraft_code"],
+                search_columns=["flight_number"],
             )
         else:
             items = await self.repo.list_filtered(
@@ -76,7 +76,10 @@ class FlightScheduleService:
             total = await self.repo.get_count()
 
         return {
-            "items": [FlightScheduleRead.model_validate(s, from_attributes=True) for s in items],
+            "items": [
+                FlightScheduleRead.model_validate(s, from_attributes=True)
+                for s in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -84,13 +87,17 @@ class FlightScheduleService:
         }
 
     async def get_schedule(self, schedule_id: UUID) -> FlightScheduleRead:
-        schedule = await self.repo.get_or_404(schedule_id, detail="Flight schedule not found")
+        schedule = await self.repo.get_or_404(
+            schedule_id, detail="Flight schedule not found"
+        )
         return FlightScheduleRead.model_validate(schedule, from_attributes=True)
 
     async def update_schedule(
         self, schedule_id: UUID, payload: FlightScheduleUpdate
     ) -> FlightScheduleRead:
-        schedule = await self.repo.get_or_404(schedule_id, detail="Flight schedule not found")
+        schedule = await self.repo.get_or_404(
+            schedule_id, detail="Flight schedule not found"
+        )
 
         data = payload.model_dump(exclude_unset=True)
         if "provider_id" in data:
@@ -103,4 +110,3 @@ class FlightScheduleService:
 
     async def delete_schedule(self, schedule_id: UUID) -> None:
         await self.repo.delete(schedule_id)
-

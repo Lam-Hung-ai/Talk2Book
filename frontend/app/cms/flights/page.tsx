@@ -7,7 +7,6 @@ import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { parseApiError } from "@/lib/api-error";
 import { useCategories } from "@/lib/use-categories";
 import { CmsSidebar } from "@/components/cms/sidebar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
@@ -20,7 +19,6 @@ import {
 type FlightItem = {
   id: string; provider_id: string; route_id: string; flight_number: string;
   dow: string; dep_time: string; arr_time: string; arrival_day_offset: number;
-  aircraft_code: string | null; cabin_class: string | null; ticket_type: string | null;
   amenities: string[] | null; price_from: number | null;
 };
 
@@ -32,7 +30,6 @@ type ModalMode = "create" | "edit";
 type FlightFormState = {
   provider_id: string; route_id: string; flight_number: string;
   dow: string; dep_time: string; arr_time: string; arrival_day_offset: string;
-  aircraft_code: string; cabin_class: string; ticket_type: string;
   amenities: string[]; price_from: string;
 };
 
@@ -41,7 +38,7 @@ const SELECT_CLS = "flex h-9 w-full rounded-md border border-input bg-background
 const emptyForm: FlightFormState = {
   provider_id: "", route_id: "", flight_number: "", dow: "1111100",
   dep_time: "", arr_time: "", arrival_day_offset: "0",
-  aircraft_code: "", cabin_class: "", ticket_type: "", amenities: [], price_from: "",
+  amenities: [], price_from: "",
 };
 
 const DOW_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -72,8 +69,6 @@ function FlightsPageContent() {
   const [form, setForm] = useState<FlightFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const { options: cabinOptions } = useCategories("Hạng ghế");
-  const { options: ticketTypeOptions } = useCategories("Loại vé máy bay");
   const { options: amenityOptions } = useCategories("Tiện nghi chuyến bay");
 
   const syncUrl = useCallback((p: number, q: string) => {
@@ -130,8 +125,6 @@ function FlightsPageContent() {
       flight_number: item.flight_number, dow: item.dow,
       dep_time: item.dep_time, arr_time: item.arr_time,
       arrival_day_offset: String(item.arrival_day_offset),
-      aircraft_code: item.aircraft_code ?? "",
-      cabin_class: item.cabin_class ?? "", ticket_type: item.ticket_type ?? "",
       amenities: item.amenities ?? [],
       price_from: item.price_from != null ? String(item.price_from) : "",
     });
@@ -151,8 +144,6 @@ function FlightsPageContent() {
       flight_number: form.flight_number.trim().toUpperCase(),
       dow: form.dow, dep_time: form.dep_time, arr_time: form.arr_time,
       arrival_day_offset: Number(form.arrival_day_offset) || 0,
-      aircraft_code: form.aircraft_code.trim() || null,
-      cabin_class: form.cabin_class || null, ticket_type: form.ticket_type || null,
       amenities: form.amenities.length ? form.amenities : null,
       price_from: form.price_from ? Number(form.price_from) : null,
     };
@@ -201,7 +192,9 @@ function FlightsPageContent() {
           <Card>
             <CardHeader>
               <CardTitle>Quản lý lịch bay</CardTitle>
-              <CardDescription>Thêm, sửa, xóa lịch bay — hãng bay, tuyến, hạng ghế, tiện ích, giá tham khảo.</CardDescription>
+              <CardDescription>
+                Thêm, sửa, xóa lịch bay — hãng bay, tuyến, tiện ích, giá tham khảo. Hạng ghế và mã máy bay theo từng ngày bay nằm ở flight instance / seat inventory.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-col gap-2 md:flex-row">
@@ -221,14 +214,13 @@ function FlightsPageContent() {
                     <TableHead>Hãng bay</TableHead>
                     <TableHead>Tuyến</TableHead>
                     <TableHead>Giờ bay</TableHead>
-                    <TableHead>Hạng ghế</TableHead>
                     <TableHead>Giá từ</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
                   ) : items.length ? items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
@@ -245,7 +237,6 @@ function FlightsPageContent() {
                         {item.dep_time} → {item.arr_time}
                         {item.arrival_day_offset ? <span className="text-xs text-muted-foreground"> +{item.arrival_day_offset}d</span> : null}
                       </TableCell>
-                      <TableCell>{item.cabin_class ? <Badge variant="secondary">{item.cabin_class}</Badge> : "—"}</TableCell>
                       <TableCell className="text-sm">
                         {item.price_from ? `${Number(item.price_from).toLocaleString("vi-VN")} đ` : "—"}
                       </TableCell>
@@ -257,7 +248,7 @@ function FlightsPageContent() {
                       </TableCell>
                     </TableRow>
                   )) : (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Chưa có lịch bay nào.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Chưa có lịch bay nào.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -316,16 +307,14 @@ function FlightsPageContent() {
                 </select>
               </div>
 
-              {/* Số hiệu + mã máy bay */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Số hiệu chuyến bay *</label>
-                  <Input value={form.flight_number} onChange={(e) => setForm((p) => ({ ...p, flight_number: e.target.value.toUpperCase() }))} placeholder="VN201" className="font-mono" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Mã máy bay</label>
-                  <Input value={form.aircraft_code} onChange={(e) => setForm((p) => ({ ...p, aircraft_code: e.target.value.toUpperCase() }))} placeholder="A321" className="font-mono" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Số hiệu chuyến bay *</label>
+                <Input
+                  value={form.flight_number}
+                  onChange={(e) => setForm((p) => ({ ...p, flight_number: e.target.value.toUpperCase() }))}
+                  placeholder="VN201"
+                  className="font-mono max-w-md"
+                />
               </div>
 
               {/* Ngày bay trong tuần */}
@@ -354,26 +343,6 @@ function FlightsPageContent() {
                 <div className="space-y-1">
                   <label className="text-sm font-medium">Lệch ngày (+)</label>
                   <Input type="number" min="0" value={form.arrival_day_offset} onChange={(e) => setForm((p) => ({ ...p, arrival_day_offset: e.target.value }))} placeholder="0" />
-                </div>
-              </div>
-
-              {/* Hạng ghế + Loại vé */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Hạng ghế</label>
-                  <select value={form.cabin_class} onChange={(e) => setForm((p) => ({ ...p, cabin_class: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn hạng ghế --</option>
-                    {cabinOptions.length > 0
-                      ? cabinOptions.map((o) => <option key={o.id} value={o.value}>{o.value}</option>)
-                      : ["Economy", "Premium Economy", "Business", "First"].map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Loại vé</label>
-                  <select value={form.ticket_type} onChange={(e) => setForm((p) => ({ ...p, ticket_type: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn loại vé --</option>
-                    {ticketTypeOptions.map((o) => <option key={o.id} value={o.value}>{o.value}</option>)}
-                  </select>
                 </div>
               </div>
 

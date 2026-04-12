@@ -36,8 +36,8 @@
 | Bảng                | Mục đích                                                                                                                                          |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **route**           | Tuyến bay: `origin` và `destination` (IATA), `distance_km`. Ràng buộc `origin != destination` và unique `(origin, destination)`.                 |
-| **flight_schedule** | Lịch trình cố định của hãng (ví dụ "VN123 SGN-HAN mỗi thứ 2–6 8h sáng"). Mã hoá ngày bay bằng chuỗi `dow` 7-bit. Có `cabin_class`, `price_from`. |
-| **flight_instance** | Chuyến bay thực tế theo ngày cụ thể. Có `dep_datetime`, `arr_datetime` (TIMESTAMPTZ), `status`.                                                  |
+| **flight_schedule** | Lịch trình cố định của hãng (ví dụ "VN123 SGN-HAN mỗi thứ 2–6 8h sáng"). Mã hoá ngày bay bằng chuỗi `dow` 7-bit. Hạng ghế nằm ở `seat_inventory`; có `price_from` tham khảo. |
+| **flight_instance** | Chuyến bay thực tế theo ngày cụ thể. Có `dep_datetime`, `arr_datetime` (TIMESTAMPTZ), `aircraft_code` (tàu bay thực tế / điều chỉnh sát giờ bay), `status`.                         |
 | **seat_inventory**  | Tồn kho ghế theo cabin (`economy/premium/business/first`). PK composite `(instance_id, cabin)`. Ghi nhận `total_seats`, `held_seats`, `sold_seats`. |
 
 Cụm này cho phép tìm chuyến bay, giữ chỗ, bán vé và cập nhật trạng thái thời gian thực.
