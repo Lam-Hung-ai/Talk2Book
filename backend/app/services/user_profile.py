@@ -19,20 +19,22 @@ class UserProfileService:
         if existing_profile:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User này đã có hồ sơ (Profile)"
+                detail="User này đã có hồ sơ (Profile)",
             )
         return await self.repo.create(profile_in)
 
     async def get_profile(self, profile_id: UUID) -> UserProfile:
         return await self.repo.get_or_404(profile_id, detail="Hồ sơ không tồn tại")
 
-    async def get_profile_by_user_id(self, user_id: UUID) -> UserProfile:
+    async def get_profile_by_user_id(self, user_id: str) -> UserProfile:
         profile = await self.repo.get_by_user_id(user_id)
         if not profile:
             raise HTTPException(status_code=404, detail="User chưa cập nhật hồ sơ")
         return profile
 
-    async def update_profile(self, profile_id: UUID, profile_in: UserProfileUpdate) -> UserProfile:
+    async def update_profile(
+        self, profile_id: UUID, profile_in: UserProfileUpdate
+    ) -> UserProfile:
         db_profile = await self.get_profile(profile_id)
 
         # Tự động cập nhật thời gian updated_at
@@ -51,11 +53,11 @@ class UserProfileService:
         return {"data": profiles, "total": total, "page": page, "page_size": page_size}
 
     async def search_profiles(
-            self, q: str, page: int, page_size: int, exact_match: bool, case_sensitive: bool
+        self, q: str, page: int, page_size: int, exact_match: bool, case_sensitive: bool
     ):
         skip = (page - 1) * page_size
         # Chỉ định các cột cho phép tìm kiếm
-        search_columns = ["full_name", "address", "nationality"]
+        search_columns = ["address", "nationality"]
 
         results = await self.repo.search(
             query=q,
@@ -63,6 +65,6 @@ class UserProfileService:
             exact_match=exact_match,
             case_sensitive=case_sensitive,
             skip=skip,
-            limit=page_size
+            limit=page_size,
         )
         return {"data": results, "page": page, "page_size": page_size}

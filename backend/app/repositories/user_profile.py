@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -11,14 +9,14 @@ from app.schemas.user_profile import UserProfileCreate, UserProfileUpdate
 
 class UserProfileRepository(
     BaseCRUD[UserProfile, UserProfileCreate, UserProfileUpdate],
-    SearchableRepository[UserProfile]
+    SearchableRepository[UserProfile],
 ):
     def __init__(self, db: AsyncSession):
         super().__init__(UserProfile, db)
         # Khởi tạo SearchableRepository với model UserProfile
         SearchableRepository.__init__(self, UserProfile, db)
 
-    async def get_by_user_id(self, user_id: UUID) -> UserProfile | None:
+    async def get_by_user_id(self, user_id: str) -> UserProfile | None:
         """Hàm riêng để tìm profile theo user_id (One-to-One)"""
         statement = select(UserProfile).where(UserProfile.user_id == user_id)
         result = await self.db.exec(statement)

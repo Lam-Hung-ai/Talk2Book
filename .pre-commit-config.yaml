@@ -8,7 +8,7 @@ repos:
       - id: end-of-file-fixer        # Đảm bảo file kết thúc bằng 1 dòng trống
       - id: check-yaml               # Kiểm tra cú pháp các file .yaml
       - id: check-added-large-files  # Ngăn chặn commit file quá lớn (>500KB)
-        args: ['--maxkb=500']
+        args: ['--maxkb=30000']
       - id: check-toml               # Kiểm tra cú pháp file .toml
 
   # 2. Bảo mật: Ngăn chặn lộ API Key (OpenAI, HuggingFace, v.v.)

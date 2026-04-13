@@ -3,15 +3,18 @@ from sqlalchemy.ext.asyncio.session import async_sessionmaker
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+import app.models  # noqa: F401 — đăng ký mọi bảng vào SQLModel.metadata
 from app.core.config import settings
-from app.models import *
+from app.models.role import Role
 
 engine = create_async_engine(settings.database_url, echo=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+
 async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
+
 
 async def create_role() -> None:
     DEFAULT_ROLES = ["admin", "user"]
@@ -27,13 +30,17 @@ async def create_role() -> None:
 
         await db.commit()
 
+
 async def create_super_user() -> None:
     pass
+
 
 async def main() -> None:
     await create_tables()
     await create_role()
 
+
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

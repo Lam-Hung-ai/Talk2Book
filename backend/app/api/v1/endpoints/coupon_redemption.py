@@ -50,7 +50,7 @@ async def list_redemptions(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     coupon_id: UUID | None = Query(None),
-    user_id: UUID | None = Query(None),
+    user_id: str | None = Query(None),
     booking_id: UUID | None = Query(None),
     service: CouponRedemptionService = Depends(get_coupon_redemption_service),
 ):
@@ -105,4 +105,3 @@ async def search_redemptions(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

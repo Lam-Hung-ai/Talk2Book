@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
 
 import { parseApiError } from "@/lib/api-error";
-import { useCategories } from "@/lib/use-categories";
 import { CmsSidebar } from "@/components/cms/sidebar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
@@ -17,29 +15,26 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
-type ItineraryDay = { day: number; title: string; description: string };
-type CostItem = { item: string; amount: string; note: string };
+type ItineraryDay = { day: number; title: string; body: string };
 
 type TourItem = {
-  id: string; title: string; type: string; tour_type: string | null;
-  city_id: string | null; provider_id: string;
-  description: string | null; detail_description: string | null;
+  id: string; title: string; type: string;
+  provider_id: string;
+  description: string | null;
   itinerary: ItineraryDay[] | null;
-  costs: CostItem[] | null;
   images: string[] | null;
   duration_days: number | null; created_at: string;
 };
 
 type TourListResponse = { items: TourItem[]; total: number; page: number; page_size: number; total_pages: number };
-type ProviderOption = { id: string; display_name: string };
-type CityOption = { id: string; name: string; country_code: string };
+type ProviderOption = { id: string; display_name: string; type: string };
 type ModalMode = "create" | "edit";
 
 type TourFormState = {
-  title: string; type: string; tour_type: string;
-  city_id: string; provider_id: string;
-  description: string; detail_description: string;
-  itinerary: ItineraryDay[]; costs: CostItem[];
+  title: string; type: string;
+  provider_id: string;
+  description: string;
+  itinerary: ItineraryDay[];
   images: string; duration_days: string;
 };
 
@@ -47,8 +42,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8
 const SELECT_CLS = "flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm";
 const TEXTAREA_CLS = "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 const emptyForm: TourFormState = {
-  title: "", type: "activity", tour_type: "", city_id: "", provider_id: "",
-  description: "", detail_description: "", itinerary: [], costs: [], images: "", duration_days: "",
+  title: "", type: "tour", provider_id: "",
+  description: "", itinerary: [], images: "", duration_days: "",
 };
 
 function ToursPageContent() {
@@ -65,14 +60,11 @@ function ToursPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [providers, setProviders] = useState<ProviderOption[]>([]);
-  const [cities, setCities] = useState<CityOption[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>("create");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<TourFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
-
-  const { options: tourTypeOptions } = useCategories("Loại tour");
 
   const syncUrl = useCallback((p: number, q: string) => {
     const ps = new URLSearchParams();
@@ -84,7 +76,7 @@ function ToursPageContent() {
   const loadTours = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const ps = new URLSearchParams({ page: String(page), page_size: String(pageSize), type: "activity" });
+      const ps = new URLSearchParams({ page: String(page), page_size: String(pageSize), type: "tour" });
       if (query) ps.set("q", query);
       const res = await fetch(`${API_BASE_URL}/product?${ps.toString()}`);
       if (!res.ok) throw new Error("Không tải được tour");
@@ -95,12 +87,15 @@ function ToursPageContent() {
   }, [page, pageSize, query]);
 
   const loadOptions = useCallback(async () => {
-    const [pRes, cRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/provider?page=1&page_size=200&type_filter=operator`),
-      fetch(`${API_BASE_URL}/city?page=1&page_size=500`),
-    ]);
-    if (pRes.ok) { const d = (await pRes.json()) as { items: ProviderOption[] }; setProviders(d.items ?? []); }
-    if (cRes.ok) { const d = (await cRes.json()) as { items: CityOption[] }; setCities(d.items ?? []); }
+    try {
+      const res = await fetch(`${API_BASE_URL}/provider?page=1&page_size=100`);
+      if (res.ok) {
+        const d = (await res.json()) as { items: ProviderOption[] };
+        setProviders(d.items ?? []);
+      }
+    } catch {
+      // providers sẽ giữ nguyên rỗng, không block UI
+    }
   }, []);
 
   useEffect(() => { void loadTours(); }, [loadTours]);
@@ -110,11 +105,10 @@ function ToursPageContent() {
   function openEditModal(item: TourItem) {
     setModalMode("edit"); setEditingId(item.id);
     setForm({
-      title: item.title, type: item.type, tour_type: item.tour_type ?? "",
-      city_id: item.city_id ?? "", provider_id: item.provider_id,
-      description: item.description ?? "", detail_description: item.detail_description ?? "",
+      title: item.title, type: item.type,
+      provider_id: item.provider_id,
+      description: item.description ?? "",
       itinerary: item.itinerary ?? [],
-      costs: item.costs ?? [],
       images: (item.images ?? []).join("\n"),
       duration_days: item.duration_days != null ? String(item.duration_days) : "",
     });
@@ -128,12 +122,9 @@ function ToursPageContent() {
     const imagesArr = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
     const payload: Record<string, unknown> = {
       title: form.title.trim(), type: form.type,
-      tour_type: form.tour_type || null,
-      city_id: form.city_id || null, provider_id: form.provider_id,
+      provider_id: form.provider_id,
       description: form.description.trim() || null,
-      detail_description: form.detail_description.trim() || null,
       itinerary: form.itinerary.length ? form.itinerary : null,
-      costs: form.costs.length ? form.costs : null,
       images: imagesArr.length ? imagesArr : null,
       duration_days: form.duration_days ? Number(form.duration_days) : null,
     };
@@ -157,20 +148,12 @@ function ToursPageContent() {
   }
 
   // Lộ trình helpers
-  function addDay() { setForm((p) => ({ ...p, itinerary: [...p.itinerary, { day: p.itinerary.length + 1, title: "", description: "" }] })); }
+  function addDay() { setForm((p) => ({ ...p, itinerary: [...p.itinerary, { day: p.itinerary.length + 1, title: "", body: "" }] })); }
   function removeDay(i: number) { setForm((p) => ({ ...p, itinerary: p.itinerary.filter((_, idx) => idx !== i) })); }
   function updateDay(i: number, field: keyof ItineraryDay, val: string) {
     setForm((p) => { const it = [...p.itinerary]; it[i] = { ...it[i], [field]: field === "day" ? Number(val) : val }; return { ...p, itinerary: it }; });
   }
 
-  // Chi phí helpers
-  function addCost() { setForm((p) => ({ ...p, costs: [...p.costs, { item: "", amount: "", note: "" }] })); }
-  function removeCost(i: number) { setForm((p) => ({ ...p, costs: p.costs.filter((_, idx) => idx !== i) })); }
-  function updateCost(i: number, field: keyof CostItem, val: string) {
-    setForm((p) => { const cs = [...p.costs]; cs[i] = { ...cs[i], [field]: val }; return { ...p, costs: cs }; });
-  }
-
-  function cityName(id: string) { const c = cities.find((x) => x.id === id); return c ? c.name : "—"; }
   function provName(id: string) { const p = providers.find((x) => x.id === id); return p ? p.display_name : "—"; }
   function applySearch() { setPage(1); setQuery(searchInput.trim()); syncUrl(1, searchInput.trim()); }
 
@@ -182,7 +165,7 @@ function ToursPageContent() {
           <Card>
             <CardHeader>
               <CardTitle>Quản lý tour</CardTitle>
-              <CardDescription>Thêm, sửa, xóa tour du lịch với lộ trình và chi phí chi tiết.</CardDescription>
+              <CardDescription>Thêm, sửa, xóa tour du lịch với lộ trình chi tiết.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-col gap-2 md:flex-row">
@@ -199,8 +182,6 @@ function ToursPageContent() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tên tour</TableHead>
-                    <TableHead>Loại tour</TableHead>
-                    <TableHead>Thành phố</TableHead>
                     <TableHead>Nhà cung cấp</TableHead>
                     <TableHead>Số ngày</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
@@ -208,15 +189,13 @@ function ToursPageContent() {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
                   ) : items.length ? items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
                         <div className="font-medium">{item.title}</div>
                         {item.description ? <div className="max-w-xs truncate text-xs text-muted-foreground">{item.description}</div> : null}
                       </TableCell>
-                      <TableCell>{item.tour_type ? <Badge variant="secondary">{item.tour_type}</Badge> : "—"}</TableCell>
-                      <TableCell>{item.city_id ? cityName(item.city_id) : "—"}</TableCell>
                       <TableCell>{provName(item.provider_id)}</TableCell>
                       <TableCell>{item.duration_days ? `${item.duration_days} ngày` : "—"}</TableCell>
                       <TableCell className="text-right">
@@ -227,7 +206,7 @@ function ToursPageContent() {
                       </TableCell>
                     </TableRow>
                   )) : (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Chưa có tour nào.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Chưa có tour nào.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -258,35 +237,17 @@ function ToursPageContent() {
                 <Input value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} placeholder="Tour Đà Nẵng - Hội An 3N2Đ" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Loại tour</label>
-                  <select value={form.tour_type} onChange={(e) => setForm((p) => ({ ...p, tour_type: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn loại tour --</option>
-                    {tourTypeOptions.map((o) => <option key={o.id} value={o.value}>{o.value}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Số ngày</label>
-                  <Input type="number" min="1" value={form.duration_days} onChange={(e) => setForm((p) => ({ ...p, duration_days: e.target.value }))} placeholder="3" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Số ngày</label>
+                <Input type="number" min="1" value={form.duration_days} onChange={(e) => setForm((p) => ({ ...p, duration_days: e.target.value }))} placeholder="3" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Thành phố</label>
-                  <select value={form.city_id} onChange={(e) => setForm((p) => ({ ...p, city_id: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn thành phố --</option>
-                    {cities.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.country_code})</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Nhà cung cấp *</label>
-                  <select value={form.provider_id} onChange={(e) => setForm((p) => ({ ...p, provider_id: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn nhà cung cấp --</option>
-                    {providers.map((p) => <option key={p.id} value={p.id}>{p.display_name}</option>)}
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Nhà cung cấp *</label>
+                <select value={form.provider_id} onChange={(e) => setForm((p) => ({ ...p, provider_id: e.target.value }))} className={SELECT_CLS}>
+                  <option value="">-- Chọn nhà cung cấp --</option>
+                  {providers.filter((p) => p.type === "tour").map((p) => <option key={p.id} value={p.id}>{p.display_name}</option>)}
+                </select>
               </div>
 
               {/* Giới thiệu chung */}
@@ -294,13 +255,6 @@ function ToursPageContent() {
                 <label className="text-sm font-medium">Giới thiệu chung</label>
                 <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                   className={`${TEXTAREA_CLS} min-h-[72px]`} placeholder="Tour trải nghiệm 3 ngày 2 đêm tại Đà Nẵng..." />
-              </div>
-
-              {/* Giới thiệu chi tiết */}
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Giới thiệu chi tiết</label>
-                <textarea value={form.detail_description} onChange={(e) => setForm((p) => ({ ...p, detail_description: e.target.value }))}
-                  className={`${TEXTAREA_CLS} min-h-[96px]`} placeholder="Mô tả chi tiết về tour, điểm nổi bật, đặc trưng..." />
               </div>
 
               {/* Lộ trình */}
@@ -316,24 +270,8 @@ function ToursPageContent() {
                       <Button type="button" variant="ghost" size="icon" onClick={() => removeDay(i)} className="size-6"><X className="size-3" /></Button>
                     </div>
                     <Input value={day.title} onChange={(e) => updateDay(i, "title", e.target.value)} placeholder="Tiêu đề ngày (VD: Tham quan Hội An cổ phố)" />
-                    <textarea value={day.description} onChange={(e) => updateDay(i, "description", e.target.value)}
+                    <textarea value={day.body} onChange={(e) => updateDay(i, "body", e.target.value)}
                       className={`${TEXTAREA_CLS} min-h-[56px]`} placeholder="Chi tiết hoạt động trong ngày..." />
-                  </div>
-                ))}
-              </div>
-
-              {/* Chi phí */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Chi phí từng hạng mục</label>
-                  <Button type="button" variant="outline" size="sm" onClick={addCost}><Plus className="size-3" />Thêm hạng mục</Button>
-                </div>
-                {form.costs.map((cost, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-start">
-                    <Input value={cost.item} onChange={(e) => updateCost(i, "item", e.target.value)} placeholder="Hạng mục (VD: Vé máy bay)" />
-                    <Input value={cost.amount} onChange={(e) => updateCost(i, "amount", e.target.value)} placeholder="Số tiền (VD: 2.500.000)" />
-                    <Input value={cost.note} onChange={(e) => updateCost(i, "note", e.target.value)} placeholder="Ghi chú" />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeCost(i)}><X className="size-4" /></Button>
                   </div>
                 ))}
               </div>

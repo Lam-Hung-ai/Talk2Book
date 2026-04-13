@@ -41,7 +41,7 @@ async def get_reviews(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
     target_type: str | None = Query(None, description="Lọc theo loại đối tượng"),
-    user_id: UUID | None = Query(None, description="Lọc theo user_id"),
+    user_id: str | None = Query(None, description="Lọc theo user_id"),
     service: ReviewService = Depends(get_review_service),
 ):
     """Lấy danh sách reviews với phân trang và filter"""
@@ -50,7 +50,9 @@ async def get_reviews(
     )
 
 
-@router.get("/{review_id}", response_model=ReviewRead, summary="Lấy thông tin review theo ID")
+@router.get(
+    "/{review_id}", response_model=ReviewRead, summary="Lấy thông tin review theo ID"
+)
 async def get_review(
     review_id: UUID, service: ReviewService = Depends(get_review_service)
 ):
@@ -59,7 +61,9 @@ async def get_review(
     return ReviewRead.model_validate(review, from_attributes=True)
 
 
-@router.put("/{review_id}", response_model=ReviewRead, summary="Cập nhật thông tin review")
+@router.put(
+    "/{review_id}", response_model=ReviewRead, summary="Cập nhật thông tin review"
+)
 async def update_review(
     review_id: UUID,
     review_data: ReviewUpdate,
@@ -70,7 +74,9 @@ async def update_review(
     return ReviewRead.model_validate(updated_review, from_attributes=True)
 
 
-@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa review")
+@router.delete(
+    "/{review_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Xóa review"
+)
 async def delete_review(
     review_id: UUID, service: ReviewService = Depends(get_review_service)
 ):
@@ -95,14 +101,14 @@ async def search_reviews(
         query=q,
         search_columns=["comment", "target_key"],
         exact_match=exact_match,
-        case_sensitive=case_sensitive
+        case_sensitive=case_sensitive,
     )
     return {
         "items": [ReviewRead.model_validate(r, from_attributes=True) for r in reviews],
         "total": total,
         "page": page,
         "page_size": page_size,
-        "total_pages": (total + page_size - 1) // page_size
+        "total_pages": (total + page_size - 1) // page_size,
     }
 
 
@@ -132,7 +138,7 @@ async def get_target_review_stats(
 
 @router.get("/user/{user_id}", response_model=list[ReviewRead])
 async def get_user_reviews(
-    user_id: UUID,
+    user_id: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     service: ReviewService = Depends(get_review_service),

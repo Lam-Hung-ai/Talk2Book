@@ -1,35 +1,27 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.models.enums import GenderType
 
 
-class UserProfileRead(BaseModel):
+class UserProfileBase(BaseModel):
+    gender: GenderType | None = None
+    birthday: date | None = None
+    nationality: str | None = None
+    address: str | None = None
+
+
+class UserProfileCreate(UserProfileBase):
+    user_id: str
+
+
+class UserProfileUpdate(UserProfileBase):
+    pass
+
+
+class UserProfileRead(UserProfileBase):
     id: UUID
-    user_id: UUID
-    full_name: str
-    gender: GenderType | None
-    birthday: date | None
-    nationality: str | None
-    avatar_url: str | None
-    address: str | None
-    updated_at: datetime
-
-class UserProfileCreate(BaseModel):
-    user_id: UUID
-    full_name: str = Field(..., min_length=1)
-    gender: GenderType | None = None
-    birthday: date | None = None
-    nationality: str | None = Field(default=None, max_length=2)
-    avatar_url: str | None = None
-    address: str | None = None
-
-class UserProfileUpdate(BaseModel):
-    full_name: str | None = Field(default=None, min_length=1)
-    gender: GenderType | None = None
-    birthday: date | None = None
-    nationality: str | None = Field(default=None, max_length=2)
-    avatar_url: str | None = None
-    address: str | None = None
+    user_id: str
+    updated_at: datetime | None = None

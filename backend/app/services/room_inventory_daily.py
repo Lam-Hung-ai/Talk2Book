@@ -85,7 +85,9 @@ class RoomInventoryDailyService:
             if rate_plan_id is not None:
                 filters["rate_plan_id"] = rate_plan_id
 
-            inventories = await self.repo.get_multi(skip=skip, limit=page_size, **filters)
+            inventories = await self.repo.get_multi(
+                skip=skip, limit=page_size, **filters
+            )
             total = await self.repo.get_count(**filters)
 
         return {
@@ -107,10 +109,14 @@ class RoomInventoryDailyService:
         inventory_in: RoomInventoryDailyUpdate,
     ) -> RoomInventoryDailyRead:
         """Cập nhật room inventory daily"""
-        db_inventory = await self.get_room_inventory_daily(room_id, rate_plan_id, stay_date)
+        db_inventory = await self.get_room_inventory_daily(
+            room_id, rate_plan_id, stay_date
+        )
 
         # Kiểm tra constraint: sold <= allotment
-        allotment = inventory_in.allotment if inventory_in.allotment else db_inventory.allotment
+        allotment = (
+            inventory_in.allotment if inventory_in.allotment else db_inventory.allotment
+        )
         sold = inventory_in.sold if inventory_in.sold is not None else db_inventory.sold
         if sold > allotment:
             raise HTTPException(
@@ -127,7 +133,9 @@ class RoomInventoryDailyService:
         self, room_id: UUID, rate_plan_id: UUID, stay_date: date
     ) -> None:
         """Xóa room inventory daily"""
-        db_inventory = await self.get_room_inventory_daily(room_id, rate_plan_id, stay_date)
+        db_inventory = await self.get_room_inventory_daily(
+            room_id, rate_plan_id, stay_date
+        )
         # Vì là composite key, cần xóa bằng cách set primary key
         await self.db.delete(db_inventory)
         await self.db.commit()
@@ -143,8 +151,6 @@ class RoomInventoryDailyService:
         """Tìm kiếm room inventory dailies (không có nhiều text fields để search)"""
         # RoomInventoryDaily không có nhiều text fields, có thể search theo stay_date nếu q là date
         # Tạm thời trả về empty hoặc implement logic riêng
-        skip = (page - 1) * page_size
-
         # Vì không có text fields phù hợp, trả về empty result
         return {
             "items": [],
@@ -153,4 +159,3 @@ class RoomInventoryDailyService:
             "page_size": page_size,
             "total_pages": 0,
         }
-

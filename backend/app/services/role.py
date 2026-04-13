@@ -70,9 +70,7 @@ class RoleService:
         await self.role_repo.delete(role_id)
 
     # --------- USER-ROLE MAPPING ---------
-    async def assign_role_to_user(
-        self, user_id: UUID, role_id: UUID
-    ) -> UserRoleRead:
+    async def assign_role_to_user(self, user_id: str, role_id: UUID) -> UserRoleRead:
         # đảm bảo user & role tồn tại
         await self.user_repo.get_or_404(user_id, detail="User không tồn tại")
         await self.role_repo.get_or_404(role_id, detail="Role không tồn tại")
@@ -80,10 +78,10 @@ class RoleService:
         user_role = await self.user_role_repo.add_role_to_user(user_id, role_id)
         return UserRoleRead.model_validate(user_role, from_attributes=True)
 
-    async def remove_role_from_user(self, user_id: UUID, role_id: UUID) -> None:
+    async def remove_role_from_user(self, user_id: str, role_id: UUID) -> None:
         await self.user_role_repo.remove_role_from_user(user_id, role_id)
 
-    async def get_roles_of_user(self, user_id: UUID) -> list[RoleRead]:
+    async def get_roles_of_user(self, user_id: str) -> list[RoleRead]:
         await self.user_repo.get_or_404(user_id, detail="User không tồn tại")
         roles = await self.user_role_repo.get_roles_for_user(user_id)
         return [RoleRead.model_validate(r, from_attributes=True) for r in roles]

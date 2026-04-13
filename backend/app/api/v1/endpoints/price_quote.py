@@ -32,7 +32,9 @@ async def create_price_quote(
 
 
 @router.get(
-    "/{quote_id}", response_model=PriceQuoteRead, summary="Lấy thông tin price quote theo ID"
+    "/{quote_id}",
+    response_model=PriceQuoteRead,
+    summary="Lấy thông tin price quote theo ID",
 )
 async def get_price_quote(
     quote_id: UUID, service: PriceQuoteService = Depends(get_price_quote_service)
@@ -41,13 +43,11 @@ async def get_price_quote(
     return await service.get_price_quote(quote_id)
 
 
-@router.get(
-    "/", response_model=dict, summary="Danh sách price quotes có phân trang"
-)
+@router.get("/", response_model=dict, summary="Danh sách price quotes có phân trang")
 async def get_price_quotes(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(50, ge=1, le=100, description="Số lượng mỗi trang"),
-    user_id: UUID | None = Query(None, description="Lọc theo user ID"),
+    user_id: str | None = Query(None, description="Lọc theo user ID"),
     vertical: str | None = Query(None, description="Lọc theo vertical"),
     currency_code: str | None = Query(None, description="Lọc theo currency code"),
     service: PriceQuoteService = Depends(get_price_quote_service),
@@ -89,9 +89,7 @@ async def delete_price_quote(
     return None
 
 
-@router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm price quotes"
-)
+@router.get("/search/mixin", response_model=dict, summary="Tìm kiếm price quotes")
 async def search_price_quotes(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     page: int = Query(1, ge=1),
@@ -108,4 +106,3 @@ async def search_price_quotes(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

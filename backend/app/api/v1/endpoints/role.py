@@ -92,7 +92,7 @@ async def delete_role(
 )
 async def assign_role_to_user(
     role_id: UUID,
-    user_id: UUID,
+    user_id: str,
     service: RoleService = Depends(get_role_service),
 ):
     return await service.assign_role_to_user(user_id=user_id, role_id=role_id)
@@ -105,7 +105,7 @@ async def assign_role_to_user(
 )
 async def remove_role_from_user(
     role_id: UUID,
-    user_id: UUID,
+    user_id: str,
     service: RoleService = Depends(get_role_service),
 ):
     await service.remove_role_from_user(user_id=user_id, role_id=role_id)
@@ -118,7 +118,7 @@ async def remove_role_from_user(
     summary="Lấy danh sách role của 1 user",
 )
 async def get_roles_of_user(
-    user_id: UUID,
+    user_id: str,
     service: RoleService = Depends(get_role_service),
 ):
     return await service.get_roles_of_user(user_id)

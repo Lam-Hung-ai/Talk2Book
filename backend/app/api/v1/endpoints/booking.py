@@ -16,7 +16,9 @@ from app.services.booking import BookingService
 router = APIRouter()
 
 
-def get_booking_service(db: AsyncSession = Depends(get_async_session)) -> BookingService:
+def get_booking_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> BookingService:
     return BookingService(db)
 
 
@@ -37,7 +39,9 @@ async def create_booking(
     response_model=BookingRead,
     summary="Lấy booking theo ID",
 )
-async def get_booking(booking_id: UUID, service: BookingService = Depends(get_booking_service)):
+async def get_booking(
+    booking_id: UUID, service: BookingService = Depends(get_booking_service)
+):
     return await service.get_booking(booking_id)
 
 
@@ -45,7 +49,7 @@ async def get_booking(booking_id: UUID, service: BookingService = Depends(get_bo
 async def list_bookings(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
-    user_id: UUID | None = Query(None),
+    user_id: str | None = Query(None),
     state: str | None = Query(None),
     service: BookingService = Depends(get_booking_service),
 ):
@@ -75,7 +79,9 @@ async def update_booking(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Xóa booking",
 )
-async def delete_booking(booking_id: UUID, service: BookingService = Depends(get_booking_service)):
+async def delete_booking(
+    booking_id: UUID, service: BookingService = Depends(get_booking_service)
+):
     await service.delete_booking(booking_id)
     return None
 
@@ -209,11 +215,11 @@ async def create_hotel_booking(
     """
     Tạo booking khách sạn chính thức dựa trên các lựa chọn trước đó.
 
-    Hàm này sẽ khóa phòng (reserve inventory), tạo đơn hàng ở trạng thái `pending_payment` 
+    Hàm này sẽ khóa phòng (reserve inventory), tạo đơn hàng ở trạng thái `pending_payment`
     và trả về mã đơn hàng để tiến hành thanh toán.
 
     **Quy tắc bắt buộc cho AI Agent:**
-    1. **Context Check:** Phải lấy `room_id` và `rate_plan_id` chính xác từ kết quả của tool `get_hotel_availability`. 
+    1. **Context Check:** Phải lấy `room_id` và `rate_plan_id` chính xác từ kết quả của tool `get_hotel_availability`.
        Tuyệt đối không tự bịa ID.
     2. **Consistency:** `check_in`, `check_out`, `guests` phải khớp với thông tin user đã tìm kiếm trước đó.
     3. **Confirmation:** Sau khi gọi tool này thành công, hãy dùng thông tin trong `item.details` (như `hotel_name`, `rate_plan_name`, `total_amount`) để xác nhận lại với người dùng.
@@ -287,5 +293,3 @@ async def create_hotel_booking(
     """
 
     return await service.create_hotel_booking(payload)
-
-

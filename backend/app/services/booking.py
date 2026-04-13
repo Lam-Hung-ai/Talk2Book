@@ -48,7 +48,7 @@ class BookingService:
         self,
         page: int = 1,
         page_size: int = 50,
-        user_id: UUID | None = None,
+        user_id: str | None = None,
         state: str | None = None,
     ) -> dict[str, Any]:
         skip = (page - 1) * page_size
@@ -63,14 +63,18 @@ class BookingService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [BookingRead.model_validate(b, from_attributes=True) for b in bookings],
+            "items": [
+                BookingRead.model_validate(b, from_attributes=True) for b in bookings
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_booking(self, booking_id: UUID, booking_in: BookingUpdate) -> BookingRead:
+    async def update_booking(
+        self, booking_id: UUID, booking_in: BookingUpdate
+    ) -> BookingRead:
         booking = await self.repo.get_or_404(booking_id, detail="Booking not found")
         updated = await self.repo.update(booking, booking_in)
         return BookingRead.model_validate(updated, from_attributes=True)
@@ -104,7 +108,9 @@ class BookingService:
         )
 
         return {
-            "items": [BookingRead.model_validate(b, from_attributes=True) for b in bookings],
+            "items": [
+                BookingRead.model_validate(b, from_attributes=True) for b in bookings
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -205,7 +211,7 @@ class BookingService:
         # (Optional) tạo ticket placeholder cho từng hành khách
         tickets: list[Ticket] = []
         for idx in range(payload.passengers):
-            code = f"{schedule.flight_number}-{instance.flight_date.strftime('%Y%m%d')}-{booking.id.hex[:6]}-{idx+1}"
+            code = f"{schedule.flight_number}-{instance.flight_date.strftime('%Y%m%d')}-{booking.id.hex[:6]}-{idx + 1}"
             ticket = Ticket(
                 item_id=item.id,
                 type=TicketType.flight,
@@ -224,7 +230,9 @@ class BookingService:
         return FlightBookingResult(
             booking=BookingRead.model_validate(booking, from_attributes=True),
             item=BookingItemRead.model_validate(item, from_attributes=True),  # type: ignore[name-defined]
-            tickets=[TicketRead.model_validate(t, from_attributes=True) for t in tickets],  # type: ignore[name-defined]
+            tickets=[
+                TicketRead.model_validate(t, from_attributes=True) for t in tickets
+            ],  # type: ignore[name-defined]
         )
 
     # ---------- FLOW: ĐẶT PHÒNG KHÁCH SẠN ----------
@@ -340,5 +348,3 @@ class BookingService:
             booking=BookingRead.model_validate(booking, from_attributes=True),
             item=BookingItemRead.model_validate(item, from_attributes=True),  # type: ignore[name-defined]
         )
-
-

@@ -1,7 +1,7 @@
 # Talk to Book - Đặt khách sạn vé máy bay bằng giọng nói
 ## Demo 1
 https://github.com/user-attachments/assets/e44602cc-9d20-455d-a4d6-e8a57554dc8b
-## 1. Thành viên 
+## 1. Thành viên
 - Nguyễn Văn Lâm Hùng
 - Lê Sỹ Long Nhật
 - Lê Nguyệt Anh
@@ -30,7 +30,7 @@ git push -u oringin ten_cua_ban     # Đẩy code lên repo với nhánh ten_cua
 ```
 - Khi muốn cập nhật code đồng bộ với repo github:
 ```cmd
-git pull --no-rebase
+git pull origin brach_name --no-rebase
 ```
 
 # 3. Hướng dẫn sử dụng [uv](https://docs.astral.sh/uv/getting-started/installation/) trong dự án
@@ -40,34 +40,32 @@ cd /backend
 uv venv
 uv sync
 ```
+- **Pre-commit (nên làm một lần sau khi clone):** Cài hook Git để mỗi lần `git commit` tự chạy kiểm tra định dạng (Ruff), YAML, gitleaks, v.v. theo `.pre-commit-config.yaml` ở thư mục gốc repo. Gói `pre-commit` nằm trong nhóm `dev` của backend. Đứng ở **thư mục gốc** của repo (cùng cấp với `backend/` và `frontend/`), chạy:
+```cmd
+uv sync --project backend --group dev
+uv run --project backend pre-commit install
+```
 - Kích hoạt môi trường ảo
 ```cmd
 .venv\Scripts\activate
-```
-- chạy backend 
-```cmd
-cd backend/app
-fastapi run main.py
 ```
 
 ## 4. Hướng dẫn tạo cơ sở dữ liệu và dữ liệu mẫu
 - Tải [postgres](https://www.postgresql.org/download/) vào máy tính
 - Đổi tên file backend/.env.example thành backend/.env, đồng thời cấu hình các thông số phù hợp với postgres
-- Vào thư mục backend và chạy chương trình
+- Vào thư mục backend, chạy chương trình tạo bảng và và thêm dữ liệu vào database
 ```cmd
 cd backend
 python -m app.db.init_db
+cd app/db
+unzip add_data_into_database.zip
+sh add_data_into_database/add_data_into_database.sh
 ```
-- tạo dữ liệu mẫu chạy từng file chú ý lúc tạo dữ liệu mẫu thì phải chạy backend
+
+## 5. Cách chạy hệ thống
 - chạy backend
 ```cmd
 cd backend/app
 fastapi run main.py
 ```
-```cmd
-cd backend
-python import_sample_data.py
-python import_room_inventory_daily.py
-python import_flight_instances.py
-python import_seat_inventory.py
-```
+- chạy frontend **(Đang hoàn thiện)**

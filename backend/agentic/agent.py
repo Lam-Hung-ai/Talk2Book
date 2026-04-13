@@ -24,7 +24,6 @@ load_dotenv()
 
 llm_key: str  = getenv("OPENROUTER_API_KEY")
 openai_key: str  = getenv("OPENAI_API_KEY")
-# base_url = "https://api.z.ai/api/paas/v4"
 base_url="https://openrouter.ai/api/v1"
 
 

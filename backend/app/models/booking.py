@@ -28,7 +28,7 @@ class Booking(SQLModel, table=True):
     )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID | None = Field(
+    user_id: str | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )
     state: BookingState = Field(nullable=False)

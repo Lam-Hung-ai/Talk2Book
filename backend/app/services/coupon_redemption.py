@@ -23,8 +23,12 @@ class CouponRedemptionService:
     async def create_redemption(
         self, redemption_in: CouponRedemptionCreate
     ) -> CouponRedemptionRead:
-        await self.coupon_repo.get_or_404(redemption_in.coupon_id, detail="Coupon not found")
-        await self.booking_repo.get_or_404(redemption_in.booking_id, detail="Booking not found")
+        await self.coupon_repo.get_or_404(
+            redemption_in.coupon_id, detail="Coupon not found"
+        )
+        await self.booking_repo.get_or_404(
+            redemption_in.booking_id, detail="Booking not found"
+        )
 
         if await self.repo.exists_for_booking(redemption_in.booking_id):
             raise HTTPException(
@@ -36,7 +40,9 @@ class CouponRedemptionService:
         return CouponRedemptionRead.model_validate(redemption, from_attributes=True)
 
     async def get_redemption(self, redemption_id: UUID) -> CouponRedemptionRead:
-        redemption = await self.repo.get_or_404(redemption_id, detail="Redemption not found")
+        redemption = await self.repo.get_or_404(
+            redemption_id, detail="Redemption not found"
+        )
         return CouponRedemptionRead.model_validate(redemption, from_attributes=True)
 
     async def list_redemptions(
@@ -44,7 +50,7 @@ class CouponRedemptionService:
         page: int = 1,
         page_size: int = 50,
         coupon_id: UUID | None = None,
-        user_id: UUID | None = None,
+        user_id: str | None = None,
         booking_id: UUID | None = None,
     ) -> dict[str, Any]:
         skip = (page - 1) * page_size
@@ -62,7 +68,8 @@ class CouponRedemptionService:
 
         return {
             "items": [
-                CouponRedemptionRead.model_validate(r, from_attributes=True) for r in redemptions
+                CouponRedemptionRead.model_validate(r, from_attributes=True)
+                for r in redemptions
             ],
             "total": total,
             "page": page,
@@ -73,7 +80,9 @@ class CouponRedemptionService:
     async def update_redemption(
         self, redemption_id: UUID, redemption_in: CouponRedemptionUpdate
     ) -> CouponRedemptionRead:
-        redemption = await self.repo.get_or_404(redemption_id, detail="Redemption not found")
+        redemption = await self.repo.get_or_404(
+            redemption_id, detail="Redemption not found"
+        )
         updated = await self.repo.update(redemption, redemption_in)
         return CouponRedemptionRead.model_validate(updated, from_attributes=True)
 
@@ -107,11 +116,11 @@ class CouponRedemptionService:
 
         return {
             "items": [
-                CouponRedemptionRead.model_validate(r, from_attributes=True) for r in results
+                CouponRedemptionRead.model_validate(r, from_attributes=True)
+                for r in results
             ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

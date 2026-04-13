@@ -9,6 +9,7 @@ class FlightInstanceBase(BaseModel):
     flight_date: date
     dep_datetime: datetime
     arr_datetime: datetime
+    aircraft_code: str | None = None
     status: str = Field(default="scheduled", max_length=20)
 
 
@@ -21,6 +22,7 @@ class FlightInstanceUpdate(BaseModel):
     flight_date: date | None = None
     dep_datetime: datetime | None = None
     arr_datetime: datetime | None = None
+    aircraft_code: str | None = None
     status: str | None = Field(default=None, max_length=20)
 
 
@@ -31,4 +33,3 @@ class FlightInstanceRead(FlightInstanceBase):
 
     class Config:
         from_attributes = True
-

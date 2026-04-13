@@ -8,7 +8,7 @@ from app.models.enums import BookingState
 
 
 class BookingBase(BaseModel):
-    user_id: UUID | None = None
+    user_id: str | None = None
     state: BookingState
     currency_code: str = Field(max_length=3)
     total_amount: Decimal = Field(max_digits=12, decimal_places=2)
@@ -21,7 +21,7 @@ class BookingCreate(BookingBase):
 
 
 class BookingUpdate(BaseModel):
-    user_id: UUID | None = None
+    user_id: str | None = None
     state: BookingState | None = None
     currency_code: str | None = Field(default=None, max_length=3)
     total_amount: Decimal | None = Field(default=None, max_digits=12, decimal_places=2)
@@ -36,4 +36,3 @@ class BookingRead(BookingBase):
 
     class Config:
         from_attributes = True
-

@@ -24,6 +24,7 @@ class FlightInstance(SQLModel, table=True):
     flight_date: date = Field(nullable=False)
     dep_datetime: datetime = Field(sa_type=DateTime(timezone=True), nullable=False)
     arr_datetime: datetime = Field(sa_type=DateTime(timezone=True), nullable=False)
+    aircraft_code: str | None = Field(default=None)
     status: str = Field(default="scheduled", max_length=20, nullable=False)
 
     created_at: datetime = Field(

@@ -27,7 +27,7 @@ class PriceQuoteService:
         self,
         page: int = 1,
         page_size: int = 50,
-        user_id: UUID | None = None,
+        user_id: str | None = None,
         vertical: str | None = None,
         currency_code: str | None = None,
     ) -> dict[str, Any]:
@@ -46,7 +46,9 @@ class PriceQuoteService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [PriceQuoteRead.model_validate(q, from_attributes=True) for q in quotes],
+            "items": [
+                PriceQuoteRead.model_validate(q, from_attributes=True) for q in quotes
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -57,7 +59,9 @@ class PriceQuoteService:
         self, quote_id: UUID, quote_in: PriceQuoteUpdate
     ) -> PriceQuoteRead:
         """Cập nhật price quote."""
-        db_quote = await self.repo.get_or_404(quote_id, detail="Price quote không tồn tại")
+        db_quote = await self.repo.get_or_404(
+            quote_id, detail="Price quote không tồn tại"
+        )
         updated = await self.repo.update(db_quote, quote_in)
         return PriceQuoteRead.model_validate(updated, from_attributes=True)
 
@@ -93,10 +97,11 @@ class PriceQuoteService:
         )
 
         return {
-            "items": [PriceQuoteRead.model_validate(q, from_attributes=True) for q in quotes],
+            "items": [
+                PriceQuoteRead.model_validate(q, from_attributes=True) for q in quotes
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

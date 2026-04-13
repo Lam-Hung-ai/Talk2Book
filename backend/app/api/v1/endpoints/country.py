@@ -9,7 +9,9 @@ from app.services.country import CountryService
 router = APIRouter()
 
 
-def get_country_service(db: AsyncSession = Depends(get_async_session)) -> CountryService:
+def get_country_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> CountryService:
     return CountryService(db)
 
 
@@ -29,17 +31,6 @@ async def create_country(
     return await service.create_country(country_in)
 
 
-@router.get("/{code}", response_model=CountryRead, summary="Lấy thông tin country theo code")
-async def get_country(
-    code: str, service: CountryService = Depends(get_country_service)
-):
-    """
-    Lấy thông tin country theo code. Ném 404 nếu không tồn tại
-    """
-    country = await service.get_country_by_code(code)
-    return CountryRead.model_validate(country, from_attributes=True)
-
-
 @router.get("/", response_model=dict, summary="Danh sách countries có phân trang")
 async def get_countries(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
@@ -52,9 +43,24 @@ async def get_countries(
     return await service.get_countries_paginated(page=page, page_size=page_size)
 
 
+@router.get(
+    "/{code}", response_model=CountryRead, summary="Lấy thông tin country theo code"
+)
+async def get_country(
+    code: str, service: CountryService = Depends(get_country_service)
+):
+    """
+    Lấy thông tin country theo code. Ném 404 nếu không tồn tại
+    """
+    country = await service.get_country_by_code(code)
+    return CountryRead.model_validate(country, from_attributes=True)
+
+
 @router.put("/{code}", response_model=CountryRead, summary="Cập nhật thông tin country")
 async def update_country(
-    code: str, country_in: CountryUpdate, service: CountryService = Depends(get_country_service)
+    code: str,
+    country_in: CountryUpdate,
+    service: CountryService = Depends(get_country_service),
 ):
     """
     Cập nhật country theo code
@@ -74,7 +80,9 @@ async def delete_country(
 
 
 @router.get(
-    "/search/mixin", response_model=dict, summary="Tìm kiếm countries theo code hoặc name"
+    "/search/mixin",
+    response_model=dict,
+    summary="Tìm kiếm countries theo code hoặc name",
 )
 async def search_countries(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
@@ -99,4 +107,3 @@ async def search_countries(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

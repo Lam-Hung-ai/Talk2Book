@@ -38,11 +38,7 @@ class FlightSchedule(SQLModel, table=True):
     dep_time: time = Field(nullable=False)
     arr_time: time = Field(nullable=False)
     arrival_day_offset: int = Field(default=0, nullable=False)
-    aircraft_code: str | None = None
-    cabin_class: str | None = Field(default=None)        # Economy, Business, First...
-    ticket_type: str | None = Field(default=None)        # Loại vé (từ danh mục)
-    amenities: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
-    price_from: float | None = Field(default=None)       # Giá tham khảo chưa VAT
+    amenities: dict | None = Field(default=None, sa_column=Column[Any](JSONB))
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(UTC),

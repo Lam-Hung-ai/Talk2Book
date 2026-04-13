@@ -7,7 +7,6 @@ import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { parseApiError } from "@/lib/api-error";
 import { useCategories } from "@/lib/use-categories";
 import { CmsSidebar } from "@/components/cms/sidebar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
@@ -17,11 +16,18 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
+type AmenitiesInfo = {
+  items: string[];
+  carry_on_kg: number | null;
+  checked_baggage_kg: number | null;
+  has_meal: boolean;
+  has_lounge: boolean;
+};
+
 type FlightItem = {
   id: string; provider_id: string; route_id: string; flight_number: string;
   dow: string; dep_time: string; arr_time: string; arrival_day_offset: number;
-  aircraft_code: string | null; cabin_class: string | null; ticket_type: string | null;
-  amenities: string[] | null; price_from: number | null;
+  amenities: AmenitiesInfo | null;
 };
 
 type FlightListResponse = { items: FlightItem[]; total: number; page: number; page_size: number; total_pages: number };
@@ -32,8 +38,11 @@ type ModalMode = "create" | "edit";
 type FlightFormState = {
   provider_id: string; route_id: string; flight_number: string;
   dow: string; dep_time: string; arr_time: string; arrival_day_offset: string;
-  aircraft_code: string; cabin_class: string; ticket_type: string;
-  amenities: string[]; price_from: string;
+  amenity_items: string[];
+  carry_on_kg: string;
+  checked_baggage_kg: string;
+  has_meal: boolean;
+  has_lounge: boolean;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
@@ -41,7 +50,7 @@ const SELECT_CLS = "flex h-9 w-full rounded-md border border-input bg-background
 const emptyForm: FlightFormState = {
   provider_id: "", route_id: "", flight_number: "", dow: "1111100",
   dep_time: "", arr_time: "", arrival_day_offset: "0",
-  aircraft_code: "", cabin_class: "", ticket_type: "", amenities: [], price_from: "",
+  amenity_items: [], carry_on_kg: "", checked_baggage_kg: "", has_meal: false, has_lounge: false,
 };
 
 const DOW_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -72,8 +81,6 @@ function FlightsPageContent() {
   const [form, setForm] = useState<FlightFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const { options: cabinOptions } = useCategories("Hạng ghế");
-  const { options: ticketTypeOptions } = useCategories("Loại vé máy bay");
   const { options: amenityOptions } = useCategories("Tiện nghi chuyến bay");
 
   const syncUrl = useCallback((p: number, q: string) => {
@@ -125,15 +132,17 @@ function FlightsPageContent() {
   function openCreateModal() { setModalMode("create"); setEditingId(null); setForm(emptyForm); setModalOpen(true); }
   function openEditModal(item: FlightItem) {
     setModalMode("edit"); setEditingId(item.id);
+    const am = item.amenities;
     setForm({
       provider_id: item.provider_id, route_id: item.route_id,
       flight_number: item.flight_number, dow: item.dow,
       dep_time: item.dep_time, arr_time: item.arr_time,
       arrival_day_offset: String(item.arrival_day_offset),
-      aircraft_code: item.aircraft_code ?? "",
-      cabin_class: item.cabin_class ?? "", ticket_type: item.ticket_type ?? "",
-      amenities: item.amenities ?? [],
-      price_from: item.price_from != null ? String(item.price_from) : "",
+      amenity_items: am?.items ?? [],
+      carry_on_kg: am?.carry_on_kg != null ? String(am.carry_on_kg) : "",
+      checked_baggage_kg: am?.checked_baggage_kg != null ? String(am.checked_baggage_kg) : "",
+      has_meal: am?.has_meal ?? false,
+      has_lounge: am?.has_lounge ?? false,
     });
     setModalOpen(true);
   }
@@ -146,15 +155,19 @@ function FlightsPageContent() {
     if (form.dow.length !== 7 || !/^[01]{7}$/.test(form.dow)) { setError("DOW phải là 7 ký tự 0/1 (VD: 1111100)"); return; }
 
     setSaving(true); setError(null);
+    const hasAmenities = form.amenity_items.length > 0 || form.carry_on_kg || form.checked_baggage_kg || form.has_meal || form.has_lounge;
     const payload: Record<string, unknown> = {
       provider_id: form.provider_id, route_id: form.route_id,
       flight_number: form.flight_number.trim().toUpperCase(),
       dow: form.dow, dep_time: form.dep_time, arr_time: form.arr_time,
       arrival_day_offset: Number(form.arrival_day_offset) || 0,
-      aircraft_code: form.aircraft_code.trim() || null,
-      cabin_class: form.cabin_class || null, ticket_type: form.ticket_type || null,
-      amenities: form.amenities.length ? form.amenities : null,
-      price_from: form.price_from ? Number(form.price_from) : null,
+      amenities: hasAmenities ? {
+        items: form.amenity_items,
+        carry_on_kg: form.carry_on_kg ? Number(form.carry_on_kg) : null,
+        checked_baggage_kg: form.checked_baggage_kg ? Number(form.checked_baggage_kg) : null,
+        has_meal: form.has_meal,
+        has_lounge: form.has_lounge,
+      } : null,
     };
     const url = modalMode === "create" ? `${API_BASE_URL}/flight-schedule` : `${API_BASE_URL}/flight-schedule/${editingId}`;
     try {
@@ -176,7 +189,7 @@ function FlightsPageContent() {
   }
 
   function toggleAmenity(v: string) {
-    setForm((p) => ({ ...p, amenities: p.amenities.includes(v) ? p.amenities.filter((a) => a !== v) : [...p.amenities, v] }));
+    setForm((p) => ({ ...p, amenity_items: p.amenity_items.includes(v) ? p.amenity_items.filter((a) => a !== v) : [...p.amenity_items, v] }));
   }
   function toggleDow(i: number) {
     setForm((p) => {
@@ -201,7 +214,9 @@ function FlightsPageContent() {
           <Card>
             <CardHeader>
               <CardTitle>Quản lý lịch bay</CardTitle>
-              <CardDescription>Thêm, sửa, xóa lịch bay — hãng bay, tuyến, hạng ghế, tiện ích, giá tham khảo.</CardDescription>
+              <CardDescription>
+                Thêm, sửa, xóa lịch bay — hãng bay, tuyến, tiện ích chuyến bay. Giá vé và hạng ghế theo từng chuyến cụ thể nằm ở seat inventory.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-col gap-2 md:flex-row">
@@ -221,14 +236,13 @@ function FlightsPageContent() {
                     <TableHead>Hãng bay</TableHead>
                     <TableHead>Tuyến</TableHead>
                     <TableHead>Giờ bay</TableHead>
-                    <TableHead>Hạng ghế</TableHead>
-                    <TableHead>Giá từ</TableHead>
+                    <TableHead>Tiện ích</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
                   ) : items.length ? items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
@@ -245,9 +259,15 @@ function FlightsPageContent() {
                         {item.dep_time} → {item.arr_time}
                         {item.arrival_day_offset ? <span className="text-xs text-muted-foreground"> +{item.arrival_day_offset}d</span> : null}
                       </TableCell>
-                      <TableCell>{item.cabin_class ? <Badge variant="secondary">{item.cabin_class}</Badge> : "—"}</TableCell>
-                      <TableCell className="text-sm">
-                        {item.price_from ? `${Number(item.price_from).toLocaleString("vi-VN")} đ` : "—"}
+                      <TableCell className="text-xs text-muted-foreground">
+                        {item.amenities ? (
+                          <div className="flex flex-col gap-0.5">
+                            {item.amenities.checked_baggage_kg != null && <span>🧳 {item.amenities.checked_baggage_kg}kg</span>}
+                            {item.amenities.has_meal && <span>🍽 Bữa ăn</span>}
+                            {item.amenities.has_lounge && <span>🛋 Phòng chờ</span>}
+                            {item.amenities.items.length > 0 && <span>{item.amenities.items.join(", ")}</span>}
+                          </div>
+                        ) : "—"}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="inline-flex gap-1">
@@ -257,7 +277,7 @@ function FlightsPageContent() {
                       </TableCell>
                     </TableRow>
                   )) : (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Chưa có lịch bay nào.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Chưa có lịch bay nào.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -316,16 +336,14 @@ function FlightsPageContent() {
                 </select>
               </div>
 
-              {/* Số hiệu + mã máy bay */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Số hiệu chuyến bay *</label>
-                  <Input value={form.flight_number} onChange={(e) => setForm((p) => ({ ...p, flight_number: e.target.value.toUpperCase() }))} placeholder="VN201" className="font-mono" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Mã máy bay</label>
-                  <Input value={form.aircraft_code} onChange={(e) => setForm((p) => ({ ...p, aircraft_code: e.target.value.toUpperCase() }))} placeholder="A321" className="font-mono" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Số hiệu chuyến bay *</label>
+                <Input
+                  value={form.flight_number}
+                  onChange={(e) => setForm((p) => ({ ...p, flight_number: e.target.value.toUpperCase() }))}
+                  placeholder="VN201"
+                  className="font-mono max-w-md"
+                />
               </div>
 
               {/* Ngày bay trong tuần */}
@@ -357,40 +375,42 @@ function FlightsPageContent() {
                 </div>
               </div>
 
-              {/* Hạng ghế + Loại vé */}
+              {/* Hành lý */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Hạng ghế</label>
-                  <select value={form.cabin_class} onChange={(e) => setForm((p) => ({ ...p, cabin_class: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn hạng ghế --</option>
-                    {cabinOptions.length > 0
-                      ? cabinOptions.map((o) => <option key={o.id} value={o.value}>{o.value}</option>)
-                      : ["Economy", "Premium Economy", "Business", "First"].map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <label className="text-sm font-medium">Hành lý xách tay (kg)</label>
+                  <Input type="number" min="0" step="0.5" value={form.carry_on_kg}
+                    onChange={(e) => setForm((p) => ({ ...p, carry_on_kg: e.target.value }))} placeholder="7" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Loại vé</label>
-                  <select value={form.ticket_type} onChange={(e) => setForm((p) => ({ ...p, ticket_type: e.target.value }))} className={SELECT_CLS}>
-                    <option value="">-- Chọn loại vé --</option>
-                    {ticketTypeOptions.map((o) => <option key={o.id} value={o.value}>{o.value}</option>)}
-                  </select>
+                  <label className="text-sm font-medium">Hành lý ký gửi (kg)</label>
+                  <Input type="number" min="0" step="0.5" value={form.checked_baggage_kg}
+                    onChange={(e) => setForm((p) => ({ ...p, checked_baggage_kg: e.target.value }))} placeholder="23" />
                 </div>
               </div>
 
-              {/* Giá tham khảo */}
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Giá tham khảo (chưa VAT, thuế phí) — VND</label>
-                <Input type="number" min="0" value={form.price_from} onChange={(e) => setForm((p) => ({ ...p, price_from: e.target.value }))} placeholder="1500000" />
+              {/* Bữa ăn & Phòng chờ */}
+              <div className="flex gap-6">
+                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={form.has_meal}
+                    onChange={(e) => setForm((p) => ({ ...p, has_meal: e.target.checked }))} className="accent-primary size-4" />
+                  Có bữa ăn trên chuyến bay
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" checked={form.has_lounge}
+                    onChange={(e) => setForm((p) => ({ ...p, has_lounge: e.target.checked }))} className="accent-primary size-4" />
+                  Phòng chờ thương gia
+                </label>
               </div>
 
-              {/* Tiện ích chuyến bay */}
+              {/* Tiện ích chuyến bay (danh mục) */}
               {amenityOptions.length > 0 ? (
                 <div className="space-y-1">
-                  <label className="text-sm font-medium">Tiện ích chuyến bay</label>
+                  <label className="text-sm font-medium">Tiện ích khác</label>
                   <div className="flex flex-wrap gap-2">
                     {amenityOptions.map((opt) => (
                       <label key={opt.id} className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-sm hover:bg-accent">
-                        <input type="checkbox" checked={form.amenities.includes(opt.value)} onChange={() => toggleAmenity(opt.value)} className="accent-primary" />
+                        <input type="checkbox" checked={form.amenity_items.includes(opt.value)} onChange={() => toggleAmenity(opt.value)} className="accent-primary" />
                         {opt.value}
                       </label>
                     ))}

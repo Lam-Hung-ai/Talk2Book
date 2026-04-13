@@ -26,7 +26,7 @@ class CouponRedemption(SQLModel, table=True):
     coupon_id: UUID = Field(
         nullable=False, foreign_key="coupon.id", ondelete="RESTRICT"
     )
-    user_id: UUID = Field(nullable=False, foreign_key="user.id", ondelete="CASCADE")
+    user_id: str = Field(nullable=False, foreign_key="user.id", ondelete="CASCADE")
     booking_id: UUID = Field(
         nullable=False, foreign_key="booking.id", ondelete="CASCADE"
     )
