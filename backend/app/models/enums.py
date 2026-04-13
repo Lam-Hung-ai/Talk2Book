@@ -35,10 +35,10 @@ class DiscountType(StrEnum):
 
 
 class CabinType(StrEnum):
-    economy = "economy"
-    premium = "premium"
-    business = "business"
-    first = "first"
+    economy = "Phổ thông"
+    premium = "Phổ thông đặc biệt"
+    business = "Thương gia"
+    first = "Hạng nhất"
 
 
 class ReviewTargetType(StrEnum):

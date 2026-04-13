@@ -1,5 +1,20 @@
 -- =============================================================================
--- Talk2Book — PostgreSQL create database
+-- Talk2Book — PostgreSQL Complete Database Setup (Single File)
+-- =============================================================================
+-- Đây là file duy nhất để khởi tạo toàn bộ cơ sở dữ liệu từ đầu.
+-- Không cần chạy migration riêng. Tất cả thay đổi đã được tích hợp vào đây.
+--
+-- HƯỚNG DẪN CHẠY TRÊN MÁY MỚI:
+--   Bước 1 — Tạo database (chỉ chạy 1 lần, dùng account superuser):
+--             createdb -U postgres talk2book
+--        hoặc: psql -U postgres -c "CREATE DATABASE talk2book;"
+--
+--   Bước 2 — Chạy script này vào database vừa tạo:
+--             psql -U postgres -d talk2book -f create_database.sql
+--
+--   Hoặc gộp 2 bước:
+--             psql -U postgres -c "CREATE DATABASE talk2book;" && \
+--             psql -U postgres -d talk2book -f create_database.sql
 -- =============================================================================
 
 -- ================
@@ -170,7 +185,8 @@ CREATE TABLE IF NOT EXISTS verification (
 CREATE INDEX IF NOT EXISTS verification_identifier_idx ON verification (identifier);
 
 -- Domain profile (separate from auth identity)
-CREATE TABLE IF NOT EXISTS user_profile (
+-- NOTE: SQLModel auto-names this table 'userprofile' (no __tablename__ defined in model)
+CREATE TABLE IF NOT EXISTS userprofile (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   gender      gender_type,
@@ -179,13 +195,10 @@ CREATE TABLE IF NOT EXISTS user_profile (
   address     TEXT,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-DROP TRIGGER IF EXISTS trg_user_profile_updated_at ON user_profile;
+DROP TRIGGER IF EXISTS trg_user_profile_updated_at ON userprofile;
 CREATE TRIGGER trg_user_profile_updated_at
-BEFORE UPDATE ON user_profile
+BEFORE UPDATE ON userprofile
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- DB cũ có cột full_name: ALTER TABLE user_profile DROP COLUMN IF EXISTS full_name;
--- (bảng SQLModel mặc định có thể tên userprofile)
 
 -- "role" is also a reserved keyword
 CREATE TABLE IF NOT EXISTS "role" (
@@ -363,6 +376,7 @@ CREATE TABLE IF NOT EXISTS room_inventory_daily (
   sold         INT  NOT NULL DEFAULT 0,
   stop_sell    BOOLEAN NOT NULL DEFAULT FALSE,
   base_price   NUMERIC(12,2) NOT NULL,
+  CONSTRAINT uq_room_rate_date UNIQUE (room_id, rate_plan_id, stay_date),
   CONSTRAINT chk_rid_sold_allotment CHECK (sold <= allotment),
   CONSTRAINT chk_rid_allotment_positive CHECK (allotment > 0),
   CONSTRAINT chk_rid_price_positive CHECK (base_price >= 0),
@@ -381,7 +395,6 @@ CREATE TABLE IF NOT EXISTS product (
   title              TEXT NOT NULL,
   description        TEXT,
   itinerary          JSONB,
-  costs              JSONB,
   images             JSONB,
   duration_days      INT,
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
