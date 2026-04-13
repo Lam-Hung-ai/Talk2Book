@@ -30,7 +30,7 @@ git push -u oringin ten_cua_ban     # Đẩy code lên repo với nhánh ten_cua
 ```
 - Khi muốn cập nhật code đồng bộ với repo github:
 ```cmd
-git pull --no-rebase
+git pull origin brach_name --no-rebase
 ```
 
 # 3. Hướng dẫn sử dụng [uv](https://docs.astral.sh/uv/getting-started/installation/) trong dự án
@@ -49,30 +49,23 @@ uv run --project backend pre-commit install
 ```cmd
 .venv\Scripts\activate
 ```
-- chạy backend
-```cmd
-cd backend/app
-fastapi run main.py
-```
 
 ## 4. Hướng dẫn tạo cơ sở dữ liệu và dữ liệu mẫu
 - Tải [postgres](https://www.postgresql.org/download/) vào máy tính
 - Đổi tên file backend/.env.example thành backend/.env, đồng thời cấu hình các thông số phù hợp với postgres
-- Vào thư mục backend và chạy chương trình
+- Vào thư mục backend, chạy chương trình tạo bảng và và thêm dữ liệu vào database
 ```cmd
 cd backend
 python -m app.db.init_db
+cd app/db
+unzip add_data_into_database.zip
+sh add_data_into_database/add_data_into_database.sh
 ```
-- tạo dữ liệu mẫu chạy từng file chú ý lúc tạo dữ liệu mẫu thì phải chạy backend
+
+## 5. Cách chạy hệ thống
 - chạy backend
 ```cmd
 cd backend/app
 fastapi run main.py
 ```
-```cmd
-cd backend
-python import_sample_data.py
-python import_room_inventory_daily.py
-python import_flight_instances.py
-python import_seat_inventory.py
-```
+- chạy frontend **(Đang hoàn thiện)**
