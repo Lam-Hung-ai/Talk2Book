@@ -11,4 +11,3 @@ backend/log/*
 .pnpm-store/
 tmp/
 add_data_into_database/
-docs/migrations/

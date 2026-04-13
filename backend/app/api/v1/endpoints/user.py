@@ -1,5 +1,5 @@
 # app/api/v1/endpoints/users.py
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.v1.deps import get_async_session
@@ -18,12 +18,15 @@ def get_user_service(db: AsyncSession = Depends(get_async_session)) -> UserServi
     response_model=AllUserInfor,
     summary="Lấy thông tin user hiện đăng nhập",
 )
-async def get_current_user_info():
-    """Gắn user_id từ Better Auth session / API gateway khi tích hợp."""
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Chưa gắn user_id từ Better Auth; dùng GET /user/all_user_info/{user_id} hoặc /user/{user_id}.",
-    )
+async def get_current_user_info(
+    x_user_id: str = Header(
+        ...,
+        alias="X-User-ID",
+        description="User ID được API gateway inject sau khi xác thực Better Auth",
+    ),
+    service: UserService = Depends(get_user_service),
+):
+    return await service.get_all_info_by_id(x_user_id)
 
 
 @router.get("/", response_model=dict, summary="Danh sách users có phân trang")
