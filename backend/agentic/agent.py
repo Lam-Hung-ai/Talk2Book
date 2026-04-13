@@ -22,22 +22,23 @@ from prompt import system_prompt
 
 load_dotenv()
 
-llm_key: str  = getenv("OPENROUTER_API_KEY")
-openai_key: str  = getenv("OPENAI_API_KEY")
-base_url="https://openrouter.ai/api/v1"
+llm_key: str = getenv("OPENROUTER_API_KEY")
+openai_key: str = getenv("OPENAI_API_KEY")
+base_url = "https://openrouter.ai/api/v1"
 
 
 if not llm_key or not openai_key:
     raise Exception("Thiếu API Key. Vui lòng kiểm tra file .env")
 
 llm = ChatOpenAI(
-    api_key=llm_key, # type: ignore
+    api_key=llm_key,  # type: ignore
     base_url=base_url,
     model="qwen/qwen3.5-9b",
-    reasoning_effort="high"
+    reasoning_effort="high",
 )
 
 openai_client = OpenAI(api_key=openai_key)
+
 
 class TextToSpeechStreamer:
     def __init__(self):
@@ -53,7 +54,7 @@ class TextToSpeechStreamer:
             text = text.replace("*", "").replace("#", "")
 
         self.sentence_buffer += text
-        if re.search(r'[.!?\n]', text):
+        if re.search(r"[.!?\n]", text):
             sentence = self.sentence_buffer.strip()
             if sentence:
                 self._process_sentence(sentence)
@@ -65,15 +66,13 @@ class TextToSpeechStreamer:
             self.sentence_buffer = ""
 
     def _process_sentence(self, text):
-        clean_text = re.sub(r'\*.*?\*', '', text).strip()
-        if not clean_text: return
+        clean_text = re.sub(r"\*.*?\*", "", text).strip()
+        if not clean_text:
+            return
 
         try:
             response = openai_client.audio.speech.create(
-                model="tts-1",
-                voice="alloy",
-                input=clean_text,
-                response_format="opus"
+                model="tts-1", voice="alloy", input=clean_text, response_format="opus"
             )
             with tempfile.NamedTemporaryFile(delete=False, suffix=".opus") as tmp:
                 for chunk in response.iter_bytes():
@@ -97,6 +96,7 @@ class TextToSpeechStreamer:
             except Exception as e:
                 print(f"[Lỗi Playback]: {e}")
 
+
 def record_until_enter(fs=44100):
     print("🎙️  Đang khởi tạo microphone...")
     audio_frames = []
@@ -107,15 +107,15 @@ def record_until_enter(fs=44100):
         audio_frames.append(indata.copy())
 
     try:
-        device_info = sd.query_devices(kind='input')
+        device_info = sd.query_devices(kind="input")
         print(f"   [Debug] Đang dùng thiết bị: {device_info['name']}")
     except:
         pass
 
     with sd.InputStream(samplerate=fs, channels=1, callback=callback):
-        print("\n" + "="*40)
+        print("\n" + "=" * 40)
         print("   🔴 ĐANG GHI ÂM... (Nhấn Enter để GỬI)   ")
-        print("="*40 + "\n")
+        print("=" * 40 + "\n")
         input()
         print("⏹️  Đã dừng ghi âm.")
 
@@ -133,6 +133,7 @@ def record_until_enter(fs=44100):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
     wav.write(temp_file.name, fs, (recording * 32767).astype(np.int16))
     return temp_file.name
+
 
 def transcribe_audio(file_path):
     if not file_path or not os.path.exists(file_path):
@@ -152,7 +153,7 @@ def transcribe_audio(file_path):
                 model="gpt-4o-transcribe",
                 file=audio_file,
                 language="vi",
-                prompt="Bạn hãy chuyển đổi giọng nói của tôi thành văn bản tiếng Việt chuẩn xác nhất có thể."
+                prompt="Bạn hãy chuyển đổi giọng nói của tôi thành văn bản tiếng Việt chuẩn xác nhất có thể.",
             )
         os.remove(file_path)
         return res.text
@@ -160,19 +161,20 @@ def transcribe_audio(file_path):
         print(f"\n❌ LỖI API WHISPER: {e}")
         return None
 
+
 async def main():
-    connect = StreamableHttpConnection(transport="streamable_http", url="http://localhost:8000/mcp")
+    connect = StreamableHttpConnection(
+        transport="streamable_http", url="http://localhost:8000/mcp"
+    )
     client = MultiServerMCPClient(connections={"Talk2Book backend": connect})
     try:
         tools = await client.get_tools(server_name="Talk2Book backend")
     except Exception:
         tools = []
 
-    agent = create_agent(model=llm, tools=tools,
-                         system_prompt=system_prompt)
+    agent = create_agent(model=llm, tools=tools, system_prompt=system_prompt)
 
-    chat_history = [
-    ]
+    chat_history = []
 
     print("=== VOICE AGENT (WITH MEMORY) SẴN SÀNG ===")
 
@@ -193,7 +195,9 @@ async def main():
 
         print("🤖 AI: ", end="", flush=True)
         try:
-            async for token, _ in agent.astream({"messages": chat_history}, stream_mode="messages"):
+            async for token, _ in agent.astream(
+                {"messages": chat_history}, stream_mode="messages"
+            ):
                 content = token.content
 
                 if content:
@@ -205,7 +209,7 @@ async def main():
                         pass
 
             tts_streamer.flush()
-            print("\n" + "-"*40)
+            print("\n" + "-" * 40)
 
             chat_history.append(AIMessage(full_response_text))
 
@@ -215,8 +219,9 @@ async def main():
         if len(chat_history) > 11:
             chat_history = [chat_history[0]] + chat_history[-10:]
 
-        if input("Enter để tiếp tục (gõ 'exit' để thoát): ").strip().lower() == 'exit':
+        if input("Enter để tiếp tục (gõ 'exit' để thoát): ").strip().lower() == "exit":
             break
+
 
 if __name__ == "__main__":
     asyncio.run(main())
