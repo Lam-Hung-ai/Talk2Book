@@ -52,7 +52,9 @@ class HotelRoomService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms],
+            "items": [
+                HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -67,7 +69,9 @@ class HotelRoomService:
 
         # Kiểm tra unique constraint nếu code được cập nhật
         if room_in.code and room_in.code != db_room.code:
-            hotel_id = str(room_in.hotel_id) if room_in.hotel_id else str(db_room.hotel_id)
+            hotel_id = (
+                str(room_in.hotel_id) if room_in.hotel_id else str(db_room.hotel_id)
+            )
             existing = await self.repo.get_by_hotel_and_code(hotel_id, room_in.code)
             if existing and existing.id != room_id:
                 raise HTTPException(
@@ -110,10 +114,11 @@ class HotelRoomService:
         )
 
         return {
-            "items": [HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms],
+            "items": [
+                HotelRoomRead.model_validate(r, from_attributes=True) for r in rooms
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

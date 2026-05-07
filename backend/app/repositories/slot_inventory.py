@@ -9,7 +9,10 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.slot_inventory import SlotInventoryCreate, SlotInventoryUpdate
 
 
-class SlotInventoryRepository(BaseCRUD[SlotInventory, SlotInventoryCreate, SlotInventoryUpdate], SearchableRepository):
+class SlotInventoryRepository(
+    BaseCRUD[SlotInventory, SlotInventoryCreate, SlotInventoryUpdate],
+    SearchableRepository,
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, SlotInventory, db)
         SearchableRepository.__init__(self, SlotInventory, db)
@@ -17,4 +20,3 @@ class SlotInventoryRepository(BaseCRUD[SlotInventory, SlotInventoryCreate, SlotI
     async def get_by_slot(self, slot_id: UUID):
         """Lấy slot inventory theo slot_id"""
         return await self.get(slot_id)
-

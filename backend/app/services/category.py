@@ -51,7 +51,9 @@ class CategoryService:
     ) -> dict[str, Any]:
         skip = (page - 1) * page_size
 
-        normalized_group_name = self._normalize_group_name(group_name) if group_name else None
+        normalized_group_name = (
+            self._normalize_group_name(group_name) if group_name else None
+        )
         keyword = q.strip() if q else None
 
         items = await self.repo.get_paginated(
@@ -68,19 +70,26 @@ class CategoryService:
         )
 
         return {
-            "items": [CategoryRead.model_validate(item, from_attributes=True) for item in items],
+            "items": [
+                CategoryRead.model_validate(item, from_attributes=True)
+                for item in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_category(self, category_id: UUID, category_in: CategoryUpdate) -> CategoryRead:
+    async def update_category(
+        self, category_id: UUID, category_in: CategoryUpdate
+    ) -> CategoryRead:
         db_obj = await self.get_category_by_id(category_id)
         update_data = category_in.model_dump(exclude_unset=True)
 
         if "group_name" in update_data and update_data["group_name"] is not None:
-            update_data["group_name"] = self._normalize_group_name(update_data["group_name"])
+            update_data["group_name"] = self._normalize_group_name(
+                update_data["group_name"]
+            )
         if "value" in update_data and update_data["value"] is not None:
             update_data["value"] = self._normalize_value(update_data["value"])
 

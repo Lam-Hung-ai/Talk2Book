@@ -29,8 +29,14 @@ class RouteService:
         if "destination" in data:
             await self._ensure_airport(data["destination"])
             data["destination"] = data["destination"].upper()
-        if "origin" in data and "destination" in data and data["origin"] == data["destination"]:
-            raise HTTPException(status_code=400, detail="Origin and destination must differ")
+        if (
+            "origin" in data
+            and "destination" in data
+            and data["origin"] == data["destination"]
+        ):
+            raise HTTPException(
+                status_code=400, detail="Origin and destination must differ"
+            )
         return data
 
     async def create_route(self, payload: RouteCreate) -> RouteRead:
@@ -93,11 +99,12 @@ class RouteService:
         new_origin = data.get("origin", route.origin)
         new_destination = data.get("destination", route.destination)
         if new_origin == new_destination:
-            raise HTTPException(status_code=400, detail="Origin and destination must differ")
+            raise HTTPException(
+                status_code=400, detail="Origin and destination must differ"
+            )
 
         updated = await self.repo.update(route, data)
         return RouteRead.model_validate(updated, from_attributes=True)
 
     async def delete_route(self, route_id: UUID) -> None:
         await self.repo.delete(route_id)
-

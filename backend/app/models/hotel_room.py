@@ -25,13 +25,13 @@ class HotelRoom(SQLModel, table=True):
     capacity: int = Field(nullable=False)
     bed_config: str | None = Field(default=None)
     # Rich fields
-    room_type: str | None = Field(default=None)              # Loại phòng (từ danh mục)
-    area_sqm: float | None = Field(default=None)             # Diện tích m²
-    view_type: str | None = Field(default=None)              # Tầm nhìn (từ danh mục)
+    room_type: str | None = Field(default=None)  # Loại phòng (từ danh mục)
+    area_sqm: float | None = Field(default=None)  # Diện tích m²
+    view_type: str | None = Field(default=None)  # Tầm nhìn (từ danh mục)
     amenities: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
-    service_package: str | None = Field(default=None)        # Gói dịch vụ (từ danh mục)
-    cancellation_policy: str | None = Field(default=None)    # Chính sách hoàn hủy
-    description: str | None = Field(default=None)            # Mô tả phòng
+    service_package: str | None = Field(default=None)  # Gói dịch vụ (từ danh mục)
+    cancellation_policy: str | None = Field(default=None)  # Chính sách hoàn hủy
+    description: str | None = Field(default=None)  # Mô tả phòng
     images: list[str] | None = Field(default=None, sa_column=Column[Any](JSONB))
 
     # Relationships

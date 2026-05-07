@@ -17,6 +17,7 @@ class BookingItemRepository(
         BaseCRUD.__init__(self, BookingItem, db)
         SearchableRepository.__init__(self, BookingItem, db)
 
-    async def get_by_booking(self, booking_id: UUID, *, skip: int = 0, limit: int = 100) -> Sequence[BookingItem]:
+    async def get_by_booking(
+        self, booking_id: UUID, *, skip: int = 0, limit: int = 100
+    ) -> Sequence[BookingItem]:
         return await self.get_multi(skip=skip, limit=limit, booking_id=booking_id)
-

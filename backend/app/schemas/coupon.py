@@ -47,4 +47,3 @@ class CouponRead(CouponBase):
 
     class Config:
         from_attributes = True
-

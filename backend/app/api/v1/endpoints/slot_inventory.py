@@ -79,4 +79,3 @@ async def delete_slot_inventory(
 ):
     await service.delete_slot_inventory(slot_id)
     return None
-

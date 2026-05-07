@@ -34,4 +34,3 @@ class ProviderRead(ProviderBase):
 
     class Config:
         from_attributes = True
-

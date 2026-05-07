@@ -44,7 +44,9 @@ class SlotInventoryService:
         if capacity is not None and sold is not None and sold > capacity:
             raise HTTPException(status_code=400, detail="sold cannot exceed capacity")
 
-    async def create_slot_inventory(self, payload: SlotInventoryCreate) -> SlotInventoryRead:
+    async def create_slot_inventory(
+        self, payload: SlotInventoryCreate
+    ) -> SlotInventoryRead:
         await self._ensure_time_slot(payload.slot_id)
         await self._ensure_currency(payload.currency_code)
         self._validate_counts(payload.capacity, payload.sold)
@@ -86,7 +88,8 @@ class SlotInventoryService:
 
         return {
             "items": [
-                SlotInventoryRead.model_validate(si, from_attributes=True) for si in items
+                SlotInventoryRead.model_validate(si, from_attributes=True)
+                for si in items
             ],
             "total": total,
             "page": page,
@@ -131,4 +134,3 @@ class SlotInventoryService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Slot inventory not found"
             )
         await self.repo.delete(slot_id)
-

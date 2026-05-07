@@ -7,7 +7,11 @@ from sqlmodel import SQLModel, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-class BaseCRUD[ModelType: SQLModel, CreateSchemaType: BaseModel, UpdateSchemaType: BaseModel]:
+class BaseCRUD[
+    ModelType: SQLModel,
+    CreateSchemaType: BaseModel,
+    UpdateSchemaType: BaseModel,
+]:
     def __init__(self, model: type[ModelType], db: AsyncSession):
         self.model = model
         self.db = db

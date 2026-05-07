@@ -54,7 +54,9 @@ class FlightRealtimeService:
 
         timeout = aiohttp.ClientTimeout(total=15)
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(settings.AVIATIONSTACK_BASE_URL, params=params) as resp:
+            async with session.get(
+                settings.AVIATIONSTACK_BASE_URL, params=params
+            ) as resp:
                 if resp.status >= 400:
                     detail = await resp.text()
                     raise HTTPException(
@@ -84,7 +86,9 @@ class FlightRealtimeService:
             items.append(
                 FlightRealtimeItem(
                     provider="aviationstack",
-                    flight_number=flight.get("iata") or flight.get("number") or "UNKNOWN",
+                    flight_number=flight.get("iata")
+                    or flight.get("number")
+                    or "UNKNOWN",
                     airline_name=airline.get("name"),
                     departure_airport=departure.get("iata"),
                     arrival_airport=arrival.get("iata"),
@@ -97,7 +101,9 @@ class FlightRealtimeService:
                 )
             )
 
-        return FlightRealtimeResponse(provider="aviationstack", total=len(items), items=items)
+        return FlightRealtimeResponse(
+            provider="aviationstack", total=len(items), items=items
+        )
 
     async def _search_opensky(
         self,
@@ -141,7 +147,9 @@ class FlightRealtimeService:
                     latitude=row[6],
                     altitude_m=row[7],
                     speed_kmh=(row[9] * 3.6) if row[9] is not None else None,
-                    observed_at=datetime.fromtimestamp(row[4], tz=UTC) if row[4] else None,
+                    observed_at=datetime.fromtimestamp(row[4], tz=UTC)
+                    if row[4]
+                    else None,
                 )
             )
             if len(items) >= limit:

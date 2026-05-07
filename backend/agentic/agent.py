@@ -106,11 +106,8 @@ def record_until_enter(fs=44100):
             print(f"Status Audio: {status}", file=sys.stderr)
         audio_frames.append(indata.copy())
 
-    try:
         device_info = sd.query_devices(kind="input")
         print(f"   [Debug] Đang dùng thiết bị: {device_info['name']}")
-    except:
-        pass
 
     with sd.InputStream(samplerate=fs, channels=1, callback=callback):
         print("\n" + "=" * 40)

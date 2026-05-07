@@ -13,17 +13,20 @@ class CityRepository(BaseCRUD[City, CityCreate, CityUpdate], SearchableRepositor
         BaseCRUD.__init__(self, City, db)
         SearchableRepository.__init__(self, City, db)
 
-    async def get_by_country_code_and_name(self, country_code: str, name: str) -> City | None:
+    async def get_by_country_code_and_name(
+        self, country_code: str, name: str
+    ) -> City | None:
         """Tìm city theo country_code và name (unique constraint)"""
         result = await self.db.exec(
             select(City).where(
-                City.country_code == country_code.upper(),
-                City.name == name
+                City.country_code == country_code.upper(), City.name == name
             )
         )
         return result.first()
 
-    async def get_by_country_code(self, country_code: str, skip: int = 0, limit: int = 100) -> list[City]:
+    async def get_by_country_code(
+        self, country_code: str, skip: int = 0, limit: int = 100
+    ) -> list[City]:
         """Lấy danh sách cities theo country_code"""
         result = await self.db.exec(
             select(City)
@@ -32,4 +35,3 @@ class CityRepository(BaseCRUD[City, CityCreate, CityUpdate], SearchableRepositor
             .limit(limit)
         )
         return list(result.all())
-

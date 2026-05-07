@@ -21,13 +21,13 @@ class AirportService:
         if not iata:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="IATA code không được để trống"
+                detail="IATA code không được để trống",
             )
         airport = await self.repo.get_by_iata(iata.upper())
         if not airport:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Airport với IATA code '{iata}' không tồn tại"
+                detail=f"Airport với IATA code '{iata}' không tồn tại",
             )
         return airport
 
@@ -38,14 +38,14 @@ class AirportService:
         if not city:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"City với ID '{airport_in.city_id}' không tồn tại"
+                detail=f"City với ID '{airport_in.city_id}' không tồn tại",
             )
 
         # Kiểm tra unique constraint (city_id, name)
         if await self.repo.get_by_city_id_and_name(airport_in.city_id, airport_in.name):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Airport '{airport_in.name}' đã tồn tại trong city này"
+                detail=f"Airport '{airport_in.name}' đã tồn tại trong city này",
             )
 
         # Kiểm tra IATA unique nếu có
@@ -54,7 +54,7 @@ class AirportService:
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"IATA code '{airport_in.iata}' đã tồn tại"
+                    detail=f"IATA code '{airport_in.iata}' đã tồn tại",
                 )
 
         # Kiểm tra ICAO unique nếu có
@@ -63,7 +63,7 @@ class AirportService:
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"ICAO code '{airport_in.icao}' đã tồn tại"
+                    detail=f"ICAO code '{airport_in.icao}' đã tồn tại",
                 )
 
         airport_data = airport_in.model_dump()
@@ -97,11 +97,13 @@ class AirportService:
             total = await self.repo.get_count(**filters)
 
         return {
-            "items": [AirportRead.model_validate(a, from_attributes=True) for a in airports],
+            "items": [
+                AirportRead.model_validate(a, from_attributes=True) for a in airports
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
 
     async def update_airport(self, iata: str, airport_in: AirportUpdate) -> AirportRead:
@@ -116,18 +118,20 @@ class AirportService:
             if not city:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"City với ID '{update_data['city_id']}' không tồn tại"
+                    detail=f"City với ID '{update_data['city_id']}' không tồn tại",
                 )
 
         # Kiểm tra unique constraint nếu có update name hoặc city_id
         if "name" in update_data or "city_id" in update_data:
             final_city_id = update_data.get("city_id", db_airport.city_id)
             final_name = update_data.get("name", db_airport.name)
-            existing_airport = await self.repo.get_by_city_id_and_name(final_city_id, final_name)
+            existing_airport = await self.repo.get_by_city_id_and_name(
+                final_city_id, final_name
+            )
             if existing_airport and existing_airport.iata != db_airport.iata:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"Airport '{final_name}' đã tồn tại trong city này"
+                    detail=f"Airport '{final_name}' đã tồn tại trong city này",
                 )
 
         # Kiểm tra IATA unique nếu có update
@@ -138,7 +142,7 @@ class AirportService:
                 if existing:
                     raise HTTPException(
                         status_code=status.HTTP_409_CONFLICT,
-                        detail=f"IATA code '{update_data['iata']}' đã tồn tại"
+                        detail=f"IATA code '{update_data['iata']}' đã tồn tại",
                     )
 
         # Kiểm tra ICAO unique nếu có update
@@ -148,7 +152,7 @@ class AirportService:
             if existing and existing.iata != db_airport.iata:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"ICAO code '{update_data['icao']}' đã tồn tại"
+                    detail=f"ICAO code '{update_data['icao']}' đã tồn tại",
                 )
 
         updated_airport = await self.repo.update(db_airport, update_data)
@@ -156,7 +160,9 @@ class AirportService:
 
     async def delete_airport(self, iata: str) -> None:
         """Xóa airport"""
-        await self.repo.get_or_404(iata.upper(), detail=f"Airport với IATA code '{iata}' không tồn tại")
+        await self.repo.get_or_404(
+            iata.upper(), detail=f"Airport với IATA code '{iata}' không tồn tại"
+        )
         await self.repo.delete(iata.upper())
 
     async def search_airports(
@@ -165,7 +171,7 @@ class AirportService:
         page: int = 1,
         page_size: int = 20,
         exact_match: bool = False,
-        case_sensitive: bool = False
+        case_sensitive: bool = False,
     ) -> dict[str, Any]:
         """Tìm kiếm airports theo name, iata, hoặc icao"""
         skip = (page - 1) * page_size
@@ -176,21 +182,22 @@ class AirportService:
             exact_match=exact_match,
             case_sensitive=case_sensitive,
             skip=skip,
-            limit=page_size
+            limit=page_size,
         )
 
         total = await self.repo.count_search(
             query=q,
             search_columns=["name", "iata", "icao"],
             exact_match=exact_match,
-            case_sensitive=case_sensitive
+            case_sensitive=case_sensitive,
         )
 
         return {
-            "items": [AirportRead.model_validate(a, from_attributes=True) for a in airports],
+            "items": [
+                AirportRead.model_validate(a, from_attributes=True) for a in airports
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
-

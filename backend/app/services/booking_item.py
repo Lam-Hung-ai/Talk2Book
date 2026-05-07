@@ -45,14 +45,18 @@ class BookingItemService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [BookingItemRead.model_validate(i, from_attributes=True) for i in items],
+            "items": [
+                BookingItemRead.model_validate(i, from_attributes=True) for i in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_item(self, item_id: UUID, item_in: BookingItemUpdate) -> BookingItemRead:
+    async def update_item(
+        self, item_id: UUID, item_in: BookingItemUpdate
+    ) -> BookingItemRead:
         item = await self.repo.get_or_404(item_id, detail="Booking item not found")
         updated = await self.repo.update(item, item_in)
         return BookingItemRead.model_validate(updated, from_attributes=True)
@@ -84,10 +88,11 @@ class BookingItemService:
             case_sensitive=case_sensitive,
         )
         return {
-            "items": [BookingItemRead.model_validate(i, from_attributes=True) for i in items],
+            "items": [
+                BookingItemRead.model_validate(i, from_attributes=True) for i in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

@@ -13,7 +13,10 @@ from app.schemas.room_inventory_daily import (
 )
 
 
-class RoomInventoryDailyRepository(BaseCRUD[RoomInventoryDaily, RoomInventoryDailyCreate, RoomInventoryDailyUpdate], SearchableRepository):
+class RoomInventoryDailyRepository(
+    BaseCRUD[RoomInventoryDaily, RoomInventoryDailyCreate, RoomInventoryDailyUpdate],
+    SearchableRepository,
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, RoomInventoryDaily, db)
         SearchableRepository.__init__(self, RoomInventoryDaily, db)
@@ -22,7 +25,9 @@ class RoomInventoryDailyRepository(BaseCRUD[RoomInventoryDaily, RoomInventoryDai
         self, room_id: str, rate_plan_id: str, skip: int = 0, limit: int = 100
     ):
         """Lấy danh sách inventory theo room_id và rate_plan_id"""
-        return await self.get_multi(skip=skip, limit=limit, room_id=room_id, rate_plan_id=rate_plan_id)
+        return await self.get_multi(
+            skip=skip, limit=limit, room_id=room_id, rate_plan_id=rate_plan_id
+        )
 
     async def get_by_date_range(
         self, stay_date_from: date, stay_date_to: date, skip: int = 0, limit: int = 100
@@ -53,4 +58,3 @@ class RoomInventoryDailyRepository(BaseCRUD[RoomInventoryDaily, RoomInventoryDai
                 )
             )
         ).first()
-

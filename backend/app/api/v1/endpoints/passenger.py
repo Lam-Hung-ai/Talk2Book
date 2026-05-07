@@ -10,7 +10,9 @@ from app.services.passenger import PassengerService
 router = APIRouter()
 
 
-def get_passenger_service(db: AsyncSession = Depends(get_async_session)) -> PassengerService:
+def get_passenger_service(
+    db: AsyncSession = Depends(get_async_session),
+) -> PassengerService:
     return PassengerService(db)
 
 
@@ -21,7 +23,8 @@ def get_passenger_service(db: AsyncSession = Depends(get_async_session)) -> Pass
     summary="Tạo passenger",
 )
 async def create_passenger(
-    passenger_in: PassengerCreate, service: PassengerService = Depends(get_passenger_service)
+    passenger_in: PassengerCreate,
+    service: PassengerService = Depends(get_passenger_service),
 ):
     return await service.create_passenger(passenger_in)
 
@@ -92,4 +95,3 @@ async def search_passengers(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

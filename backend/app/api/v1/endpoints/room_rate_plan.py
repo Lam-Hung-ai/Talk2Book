@@ -49,9 +49,7 @@ async def get_room_rate_plan(
     return RoomRatePlanRead.model_validate(rate_plan, from_attributes=True)
 
 
-@router.get(
-    "/", response_model=dict, summary="Danh sách room rate plans có phân trang"
-)
+@router.get("/", response_model=dict, summary="Danh sách room rate plans có phân trang")
 async def get_room_rate_plans(
     page: int = Query(1, ge=1, description="Số trang, bắt đầu từ 1"),
     page_size: int = Query(20, ge=1, le=100, description="Số lượng mỗi trang"),
@@ -113,4 +111,3 @@ async def search_room_rate_plans(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

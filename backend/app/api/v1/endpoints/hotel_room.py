@@ -32,7 +32,9 @@ async def create_hotel_room(
 
 
 @router.get(
-    "/{room_id}", response_model=HotelRoomRead, summary="Lấy thông tin hotel room theo ID"
+    "/{room_id}",
+    response_model=HotelRoomRead,
+    summary="Lấy thông tin hotel room theo ID",
 )
 async def get_hotel_room(
     room_id: UUID, service: HotelRoomService = Depends(get_hotel_room_service)
@@ -101,4 +103,3 @@ async def search_hotel_rooms(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

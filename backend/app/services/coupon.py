@@ -43,14 +43,18 @@ class CouponService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [CouponRead.model_validate(c, from_attributes=True) for c in coupons],
+            "items": [
+                CouponRead.model_validate(c, from_attributes=True) for c in coupons
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_coupon(self, coupon_id: UUID, coupon_in: CouponUpdate) -> CouponRead:
+    async def update_coupon(
+        self, coupon_id: UUID, coupon_in: CouponUpdate
+    ) -> CouponRead:
         coupon = await self.repo.get_or_404(coupon_id, detail="Coupon not found")
 
         if coupon_in.code and coupon_in.code != coupon.code:
@@ -93,10 +97,11 @@ class CouponService:
         )
 
         return {
-            "items": [CouponRead.model_validate(c, from_attributes=True) for c in coupons],
+            "items": [
+                CouponRead.model_validate(c, from_attributes=True) for c in coupons
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

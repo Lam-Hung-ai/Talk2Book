@@ -71,7 +71,9 @@ class TimeSlotService:
             total = await self.repo.get_count(**filters)
 
         return {
-            "items": [TimeSlotRead.model_validate(ts, from_attributes=True) for ts in items],
+            "items": [
+                TimeSlotRead.model_validate(ts, from_attributes=True) for ts in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -79,13 +81,17 @@ class TimeSlotService:
         }
 
     async def get_time_slot(self, time_slot_id: UUID) -> TimeSlotRead:
-        time_slot = await self.repo.get_or_404(time_slot_id, detail="Time slot not found")
+        time_slot = await self.repo.get_or_404(
+            time_slot_id, detail="Time slot not found"
+        )
         return TimeSlotRead.model_validate(time_slot, from_attributes=True)
 
     async def update_time_slot(
         self, time_slot_id: UUID, payload: TimeSlotUpdate
     ) -> TimeSlotRead:
-        time_slot = await self.repo.get_or_404(time_slot_id, detail="Time slot not found")
+        time_slot = await self.repo.get_or_404(
+            time_slot_id, detail="Time slot not found"
+        )
         data = payload.model_dump(exclude_unset=True)
 
         if "product_id" in data:
@@ -101,4 +107,3 @@ class TimeSlotService:
 
     async def delete_time_slot(self, time_slot_id: UUID) -> None:
         await self.repo.delete(time_slot_id)
-

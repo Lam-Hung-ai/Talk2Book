@@ -7,7 +7,9 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.country import CountryCreate, CountryUpdate
 
 
-class CountryRepository(BaseCRUD[Country, CountryCreate, CountryUpdate], SearchableRepository):
+class CountryRepository(
+    BaseCRUD[Country, CountryCreate, CountryUpdate], SearchableRepository
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, Country, db)
         SearchableRepository.__init__(self, Country, db)
@@ -15,4 +17,3 @@ class CountryRepository(BaseCRUD[Country, CountryCreate, CountryUpdate], Searcha
     async def get_by_code(self, code: str) -> Country | None:
         """Tìm country theo code (primary key)"""
         return await self.db.get(Country, code.upper())
-

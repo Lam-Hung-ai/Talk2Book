@@ -37,7 +37,9 @@ class SeatInventoryRepository(SearchableRepository):
         self, db_obj: SeatInventory, obj_in: SeatInventoryUpdate | dict
     ) -> SeatInventory:
         update_data = (
-            obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
+            obj_in
+            if isinstance(obj_in, dict)
+            else obj_in.model_dump(exclude_unset=True)
         )
         for key, value in update_data.items():
             if hasattr(db_obj, key):

@@ -25,7 +25,9 @@ class ProviderService:
         return ProviderRead.model_validate(provider, from_attributes=True)
 
     async def get_provider(self, provider_id: UUID) -> ProviderRead:
-        provider = await self.repo.get_or_404(provider_id, detail="Provider không tồn tại")
+        provider = await self.repo.get_or_404(
+            provider_id, detail="Provider không tồn tại"
+        )
         return ProviderRead.model_validate(provider, from_attributes=True)
 
     async def get_providers_paginated(
@@ -50,15 +52,21 @@ class ProviderService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [ProviderRead.model_validate(p, from_attributes=True) for p in providers],
+            "items": [
+                ProviderRead.model_validate(p, from_attributes=True) for p in providers
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_provider(self, provider_id: UUID, provider_in: ProviderUpdate) -> ProviderRead:
-        db_provider = await self.repo.get_or_404(provider_id, detail="Provider không tồn tại")
+    async def update_provider(
+        self, provider_id: UUID, provider_in: ProviderUpdate
+    ) -> ProviderRead:
+        db_provider = await self.repo.get_or_404(
+            provider_id, detail="Provider không tồn tại"
+        )
         updated = await self.repo.update(db_provider, provider_in)
         return ProviderRead.model_validate(updated, from_attributes=True)
 
@@ -92,10 +100,11 @@ class ProviderService:
         )
 
         return {
-            "items": [ProviderRead.model_validate(p, from_attributes=True) for p in providers],
+            "items": [
+                ProviderRead.model_validate(p, from_attributes=True) for p in providers
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-
