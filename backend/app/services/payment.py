@@ -21,7 +21,9 @@ class PaymentService:
         """Tạo payment mới"""
         # Kiểm tra idempotency_key nếu có
         if payment_data.idempotency_key:
-            existing = await self.repo.get_by_idempotency_key(payment_data.idempotency_key)
+            existing = await self.repo.get_by_idempotency_key(
+                payment_data.idempotency_key
+            )
             if existing:
                 return PaymentRead.model_validate(existing, from_attributes=True)
 
@@ -38,7 +40,7 @@ class PaymentService:
         page_size: int = 20,
         booking_id: UUID | None = None,
         status: PaymentStatus | None = None,
-        provider: str | None = None
+        provider: str | None = None,
     ) -> dict[str, Any]:
         """Lấy danh sách payments có phân trang và filter"""
         skip = (page - 1) * page_size
@@ -55,17 +57,17 @@ class PaymentService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [PaymentRead.model_validate(p, from_attributes=True) for p in payments],
+            "items": [
+                PaymentRead.model_validate(p, from_attributes=True) for p in payments
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
 
     async def update_payment(
-        self,
-        payment_id: UUID,
-        payment_data: PaymentUpdate
+        self, payment_id: UUID, payment_data: PaymentUpdate
     ) -> PaymentRead:
         """Cập nhật payment"""
         payment = await self.get_payment_by_id(payment_id)
@@ -82,7 +84,7 @@ class PaymentService:
         page: int = 1,
         page_size: int = 20,
         exact_match: bool = False,
-        case_sensitive: bool = False
+        case_sensitive: bool = False,
     ) -> dict[str, Any]:
         """Tìm kiếm payments theo provider, currency_code, hoặc status"""
         skip = (page - 1) * page_size
@@ -93,20 +95,22 @@ class PaymentService:
             exact_match=exact_match,
             case_sensitive=case_sensitive,
             skip=skip,
-            limit=page_size
+            limit=page_size,
         )
 
         total = await self.repo.count_search(
             query=q,
             search_columns=["provider", "currency_code"],
             exact_match=exact_match,
-            case_sensitive=case_sensitive
+            case_sensitive=case_sensitive,
         )
 
         return {
-            "items": [PaymentRead.model_validate(p, from_attributes=True) for p in payments],
+            "items": [
+                PaymentRead.model_validate(p, from_attributes=True) for p in payments
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }

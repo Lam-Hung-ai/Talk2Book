@@ -23,7 +23,9 @@ class PassengerService:
         return PassengerRead.model_validate(passenger, from_attributes=True)
 
     async def get_passenger(self, passenger_id: UUID) -> PassengerRead:
-        passenger = await self.repo.get_or_404(passenger_id, detail="Passenger not found")
+        passenger = await self.repo.get_or_404(
+            passenger_id, detail="Passenger not found"
+        )
         return PassengerRead.model_validate(passenger, from_attributes=True)
 
     async def list_passengers(
@@ -42,7 +44,8 @@ class PassengerService:
 
         return {
             "items": [
-                PassengerRead.model_validate(p, from_attributes=True) for p in passengers
+                PassengerRead.model_validate(p, from_attributes=True)
+                for p in passengers
             ],
             "total": total,
             "page": page,
@@ -53,7 +56,9 @@ class PassengerService:
     async def update_passenger(
         self, passenger_id: UUID, passenger_in: PassengerUpdate
     ) -> PassengerRead:
-        passenger = await self.repo.get_or_404(passenger_id, detail="Passenger not found")
+        passenger = await self.repo.get_or_404(
+            passenger_id, detail="Passenger not found"
+        )
         updated = await self.repo.update(passenger, passenger_in)
         return PassengerRead.model_validate(updated, from_attributes=True)
 
@@ -85,11 +90,11 @@ class PassengerService:
         )
         return {
             "items": [
-                PassengerRead.model_validate(p, from_attributes=True) for p in passengers
+                PassengerRead.model_validate(p, from_attributes=True)
+                for p in passengers
             ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

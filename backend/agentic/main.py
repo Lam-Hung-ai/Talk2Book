@@ -10,25 +10,29 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
-key: str|None = getenv("openrouter_free")
+key: str | None = getenv("openrouter_free")
 if not key:
     raise Exception
 
 llm = ChatOpenAI(
     api_key=key,
     base_url="https://openrouter.ai/api/v1",
-    model="kwaipilot/kat-coder-pro:free"
+    model="kwaipilot/kat-coder-pro:free",
 )
+
 
 @tool
 def get_weather_for_location(city: str) -> str:
     """Get weather for a given city."""
     return f"It's always sunny in {city}"
 
+
 @dataclass
 class Context:
     """Custom runtime context schema."""
+
     user_id: str
+
 
 @tool
 def get_user_location(runtime: ToolRuntime[Context]) -> str:
@@ -36,9 +40,11 @@ def get_user_location(runtime: ToolRuntime[Context]) -> str:
     user_id = runtime.context.user_id
     return "Florida" if user_id == "1" else "SF"
 
+
 @dataclass
 class ResponeFormat:
     """Respone schema for agent."""
+
     punny_response: str
     weather_conditions: str | None = None
 

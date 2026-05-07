@@ -14,7 +14,9 @@ class SearchableRepository[ModelType: SQLModel]:
     def _get_column(self, name: str):
         """Lấy attribute của model dựa trên tên string, có kiểm tra tồn tại."""
         if name not in self._column_names:
-            raise ValueError(f"Column '{name}' không tồn tại trong model {self.model.__name__}")
+            raise ValueError(
+                f"Column '{name}' không tồn tại trong model {self.model.__name__}"
+            )
         return getattr(self.model, name)
 
     def _build_search_clause(
@@ -62,7 +64,9 @@ class SearchableRepository[ModelType: SQLModel]:
         if not query.strip() or not search_columns:
             return []
 
-        clause = self._build_search_clause(query, search_columns, exact_match, case_sensitive)
+        clause = self._build_search_clause(
+            query, search_columns, exact_match, case_sensitive
+        )
         statement = select(self.model).where(clause).offset(skip).limit(limit)
 
         result = await self.db.exec(statement)
@@ -79,7 +83,9 @@ class SearchableRepository[ModelType: SQLModel]:
         if not query.strip() or not search_columns:
             return 0
 
-        clause = self._build_search_clause(query, search_columns, exact_match, case_sensitive)
+        clause = self._build_search_clause(
+            query, search_columns, exact_match, case_sensitive
+        )
         # Tối ưu hóa đếm: SELECT COUNT(*) FROM ... WHERE ...
         count_statement = select(func.count()).select_from(self.model).where(clause)
 

@@ -39,7 +39,8 @@ async def create_booking_audit_log(
     summary="Lấy booking audit log theo ID",
 )
 async def get_booking_audit_log(
-    log_id: UUID, service: BookingAuditLogService = Depends(get_booking_audit_log_service)
+    log_id: UUID,
+    service: BookingAuditLogService = Depends(get_booking_audit_log_service),
 ):
     return await service.get_log(log_id)
 
@@ -100,4 +101,3 @@ async def search_booking_audit_logs(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

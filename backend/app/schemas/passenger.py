@@ -23,4 +23,3 @@ class PassengerRead(PassengerBase):
 
     class Config:
         from_attributes = True
-

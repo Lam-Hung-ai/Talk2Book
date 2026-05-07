@@ -13,7 +13,8 @@ class RouteRepository(BaseCRUD[Route, RouteCreate, RouteUpdate], SearchableRepos
         SearchableRepository.__init__(self, Route, db)
 
     async def get_by_od(self, origin: str, destination: str) -> Route | None:
-        stmt = select(Route).where(Route.origin == origin, Route.destination == destination)
+        stmt = select(Route).where(
+            Route.origin == origin, Route.destination == destination
+        )
         result = await self.db.exec(stmt)
         return result.first()
-

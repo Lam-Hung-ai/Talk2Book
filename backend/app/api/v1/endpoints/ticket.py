@@ -31,7 +31,9 @@ async def create_ticket(
     response_model=TicketRead,
     summary="Lấy ticket theo ID",
 )
-async def get_ticket(ticket_id: UUID, service: TicketService = Depends(get_ticket_service)):
+async def get_ticket(
+    ticket_id: UUID, service: TicketService = Depends(get_ticket_service)
+):
     return await service.get_ticket(ticket_id)
 
 
@@ -67,7 +69,9 @@ async def update_ticket(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Xóa ticket",
 )
-async def delete_ticket(ticket_id: UUID, service: TicketService = Depends(get_ticket_service)):
+async def delete_ticket(
+    ticket_id: UUID, service: TicketService = Depends(get_ticket_service)
+):
     await service.delete_ticket(ticket_id)
     return None
 
@@ -88,4 +92,3 @@ async def search_tickets(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

@@ -43,7 +43,9 @@ class HotelService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [HotelRead.model_validate(h, from_attributes=True) for h in hotels],
+            "items": [
+                HotelRead.model_validate(h, from_attributes=True) for h in hotels
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -88,10 +90,11 @@ class HotelService:
         )
 
         return {
-            "items": [HotelRead.model_validate(h, from_attributes=True) for h in hotels],
+            "items": [
+                HotelRead.model_validate(h, from_attributes=True) for h in hotels
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

@@ -70,9 +70,7 @@ async def update_seat_inventory(
     payload: SeatInventoryUpdate = Body(...),
     service: SeatInventoryService = Depends(get_seat_inventory_service),
 ):
-    return await service.update_inventory(
-        instance_id, cabin, payload
-    )
+    return await service.update_inventory(instance_id, cabin, payload)
 
 
 @router.delete(

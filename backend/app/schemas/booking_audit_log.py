@@ -34,4 +34,3 @@ class BookingAuditLogRead(BookingAuditLogBase):
 
     class Config:
         from_attributes = True
-

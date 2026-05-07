@@ -46,14 +46,18 @@ class TicketService:
         total = await self.repo.get_count(**filters)
 
         return {
-            "items": [TicketRead.model_validate(t, from_attributes=True) for t in tickets],
+            "items": [
+                TicketRead.model_validate(t, from_attributes=True) for t in tickets
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
 
-    async def update_ticket(self, ticket_id: UUID, ticket_in: TicketUpdate) -> TicketRead:
+    async def update_ticket(
+        self, ticket_id: UUID, ticket_in: TicketUpdate
+    ) -> TicketRead:
         ticket = await self.repo.get_or_404(ticket_id, detail="Ticket not found")
         updated = await self.repo.update(ticket, ticket_in)
         return TicketRead.model_validate(updated, from_attributes=True)
@@ -87,10 +91,11 @@ class TicketService:
         )
 
         return {
-            "items": [TicketRead.model_validate(t, from_attributes=True) for t in tickets],
+            "items": [
+                TicketRead.model_validate(t, from_attributes=True) for t in tickets
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

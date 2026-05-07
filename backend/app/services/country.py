@@ -21,7 +21,7 @@ class CountryService:
         if not country:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Country with code '{code}' không tồn tại"
+                detail=f"Country with code '{code}' không tồn tại",
             )
         return country
 
@@ -31,7 +31,7 @@ class CountryService:
         if await self.repo.get_by_code(country_in.code.upper()):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Country code '{country_in.code}' đã tồn tại"
+                detail=f"Country code '{country_in.code}' đã tồn tại",
             )
 
         # Kiểm tra currency_code có tồn tại không
@@ -40,7 +40,7 @@ class CountryService:
         if not currency:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Currency code '{country_in.currency_code}' không tồn tại"
+                detail=f"Currency code '{country_in.currency_code}' không tồn tại",
             )
 
         country_data = country_in.model_dump()
@@ -62,11 +62,13 @@ class CountryService:
         total = await self.repo.get_count()
 
         return {
-            "items": [CountryRead.model_validate(c, from_attributes=True) for c in countries],
+            "items": [
+                CountryRead.model_validate(c, from_attributes=True) for c in countries
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
 
     async def update_country(self, code: str, country_in: CountryUpdate) -> CountryRead:
@@ -81,7 +83,7 @@ class CountryService:
             if not currency:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Currency code '{update_data['currency_code']}' không tồn tại"
+                    detail=f"Currency code '{update_data['currency_code']}' không tồn tại",
                 )
             update_data["currency_code"] = currency_code_upper
 
@@ -99,7 +101,7 @@ class CountryService:
         page: int = 1,
         page_size: int = 20,
         exact_match: bool = False,
-        case_sensitive: bool = False
+        case_sensitive: bool = False,
     ) -> dict[str, Any]:
         """Tìm kiếm countries theo code hoặc name"""
         skip = (page - 1) * page_size
@@ -110,21 +112,22 @@ class CountryService:
             exact_match=exact_match,
             case_sensitive=case_sensitive,
             skip=skip,
-            limit=page_size
+            limit=page_size,
         )
 
         total = await self.repo.count_search(
             query=q,
             search_columns=["code", "name"],
             exact_match=exact_match,
-            case_sensitive=case_sensitive
+            case_sensitive=case_sensitive,
         )
 
         return {
-            "items": [CountryRead.model_validate(c, from_attributes=True) for c in countries],
+            "items": [
+                CountryRead.model_validate(c, from_attributes=True) for c in countries
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
-

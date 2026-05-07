@@ -8,7 +8,9 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.time_slot import TimeSlotCreate, TimeSlotUpdate
 
 
-class TimeSlotRepository(BaseCRUD[TimeSlot, TimeSlotCreate, TimeSlotUpdate], SearchableRepository):
+class TimeSlotRepository(
+    BaseCRUD[TimeSlot, TimeSlotCreate, TimeSlotUpdate], SearchableRepository
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, TimeSlot, db)
         SearchableRepository.__init__(self, TimeSlot, db)
@@ -18,4 +20,3 @@ class TimeSlotRepository(BaseCRUD[TimeSlot, TimeSlotCreate, TimeSlotUpdate], Sea
         stmt = select(TimeSlot).where(TimeSlot.product_id == product_id)
         result = await self.db.exec(stmt)
         return result.all()
-

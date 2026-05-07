@@ -100,4 +100,3 @@ async def search_booking_items(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

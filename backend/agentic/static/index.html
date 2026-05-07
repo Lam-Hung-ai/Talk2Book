@@ -215,7 +215,7 @@
                     // Hook up visualizer to the INCOMING stream (to see AI talking)
                     // Or MIX both? Usually visualizer shows whoever is active.
                     // Let's visualize the remote stream for "AI Speaking" and local for "User Speaking".
-                    // For simplicity, we'll swap the source dynamically or mix them. 
+                    // For simplicity, we'll swap the source dynamically or mix them.
                     // Actually, simpler: Visualize AI when AI speaks, Visualize Mic when User holds button.
 
                     setupAudioAnalysis(event.streams[0]);
@@ -261,9 +261,9 @@
             const remoteSource = audioContext.createMediaStreamSource(remoteStream);
             remoteSource.connect(analyser);
 
-            // We also want to hear it! (Browser usually handles the <audio> tag for hearing, 
+            // We also want to hear it! (Browser usually handles the <audio> tag for hearing,
             // but if we process it with Web Audio API, we might need to connect to destination)
-            // remoteSource.connect(audioContext.destination); 
+            // remoteSource.connect(audioContext.destination);
             // Note: The <audio> element is already playing it, so connecting to destination might cause echo if not careful.
             // Since we created MediaStreamSource from the stream used in <audio>, it's fine.
 

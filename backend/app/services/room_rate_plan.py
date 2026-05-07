@@ -21,7 +21,9 @@ class RoomRatePlanService:
 
     async def get_room_rate_plan_by_id(self, rate_plan_id: UUID) -> RoomRatePlan:
         """Lấy rate plan theo ID, ném 404 nếu không tồn tại"""
-        return await self.repo.get_or_404(rate_plan_id, detail="Room rate plan không tồn tại")
+        return await self.repo.get_or_404(
+            rate_plan_id, detail="Room rate plan không tồn tại"
+        )
 
     async def create_room_rate_plan(
         self, rate_plan_in: RoomRatePlanCreate
@@ -80,7 +82,9 @@ class RoomRatePlanService:
                 if rate_plan_in.hotel_id
                 else str(db_rate_plan.hotel_id)
             )
-            existing = await self.repo.get_by_hotel_and_name(hotel_id, rate_plan_in.name)
+            existing = await self.repo.get_by_hotel_and_name(
+                hotel_id, rate_plan_in.name
+            )
             if existing and existing.id != rate_plan_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -131,4 +135,3 @@ class RoomRatePlanService:
             "page_size": page_size,
             "total_pages": (total + page_size - 1) // page_size,
         }
-

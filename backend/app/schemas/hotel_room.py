@@ -10,9 +10,9 @@ class HotelRoomBase(BaseModel):
     capacity: int = Field(gt=0)
     bed_config: str | None = None
     # Rich fields
-    room_type: str | None = None           # Loại phòng (từ danh mục)
-    area_sqm: float | None = None          # Diện tích m²
-    view_type: str | None = None           # Tầm nhìn (từ danh mục)
+    room_type: str | None = None  # Loại phòng (từ danh mục)
+    area_sqm: float | None = None  # Diện tích m²
+    view_type: str | None = None  # Tầm nhìn (từ danh mục)
     amenities: list[str] | None = None
     service_package: str | None = None
     cancellation_policy: str | None = None
@@ -44,4 +44,3 @@ class HotelRoomRead(HotelRoomBase):
 
     class Config:
         from_attributes = True
-

@@ -31,7 +31,9 @@ async def create_coupon(
     response_model=CouponRead,
     summary="Lấy coupon theo ID",
 )
-async def get_coupon(coupon_id: UUID, service: CouponService = Depends(get_coupon_service)):
+async def get_coupon(
+    coupon_id: UUID, service: CouponService = Depends(get_coupon_service)
+):
     return await service.get_coupon(coupon_id)
 
 
@@ -42,7 +44,9 @@ async def list_coupons(
     is_active: bool | None = Query(None),
     service: CouponService = Depends(get_coupon_service),
 ):
-    return await service.list_coupons(page=page, page_size=page_size, is_active=is_active)
+    return await service.list_coupons(
+        page=page, page_size=page_size, is_active=is_active
+    )
 
 
 @router.put(
@@ -63,7 +67,9 @@ async def update_coupon(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Xóa coupon",
 )
-async def delete_coupon(coupon_id: UUID, service: CouponService = Depends(get_coupon_service)):
+async def delete_coupon(
+    coupon_id: UUID, service: CouponService = Depends(get_coupon_service)
+):
     await service.delete_coupon(coupon_id)
     return None
 
@@ -84,4 +90,3 @@ async def search_coupons(
         exact_match=exact_match,
         case_sensitive=case_sensitive,
     )
-

@@ -28,4 +28,3 @@ class TicketRead(TicketBase):
 
     class Config:
         from_attributes = True
-

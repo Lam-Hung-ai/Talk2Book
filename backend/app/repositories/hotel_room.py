@@ -8,7 +8,9 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.hotel_room import HotelRoomCreate, HotelRoomUpdate
 
 
-class HotelRoomRepository(BaseCRUD[HotelRoom, HotelRoomCreate, HotelRoomUpdate], SearchableRepository):
+class HotelRoomRepository(
+    BaseCRUD[HotelRoom, HotelRoomCreate, HotelRoomUpdate], SearchableRepository
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, HotelRoom, db)
         SearchableRepository.__init__(self, HotelRoom, db)
@@ -26,4 +28,3 @@ class HotelRoomRepository(BaseCRUD[HotelRoom, HotelRoomCreate, HotelRoomUpdate],
                 )
             )
         ).first()
-

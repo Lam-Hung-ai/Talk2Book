@@ -21,13 +21,19 @@ async def create_currency(session: AsyncSession, code: str, name: str) -> Curren
     await session.refresh(item)
     return item
 
-async def list_currencies(session: AsyncSession, limit: int, offset: int) -> tuple[Sequence[Currency], int]:
+
+async def list_currencies(
+    session: AsyncSession, limit: int, offset: int
+) -> tuple[Sequence[Currency], int]:
 
     items = (await session.exec(select(Currency).offset(offset).limit(limit))).all()
     total = (await session.exec(select(Currency))).all()
     return items, len(total)
 
-async def update_currency(session: AsyncSession, code: str, name: str | None) -> Currency:
+
+async def update_currency(
+    session: AsyncSession, code: str, name: str | None
+) -> Currency:
 
     item = await session.get(Currency, code)
     if not item:
@@ -39,6 +45,7 @@ async def update_currency(session: AsyncSession, code: str, name: str | None) ->
     await session.refresh(item)
     return item
 
+
 async def delete_currency(session: AsyncSession, code: str) -> None:
 
     item = await session.get(Currency, code)
@@ -47,8 +54,11 @@ async def delete_currency(session: AsyncSession, code: str) -> None:
     await session.delete(item)
     await session.commit()
 
+
 # Countries
-async def create_country(session: AsyncSession, code: str, name: str, currency_code: str) -> Country:
+async def create_country(
+    session: AsyncSession, code: str, name: str, currency_code: str
+) -> Country:
 
     if await session.get(Country, code):
         raise HTTPException(status_code=409, detail="Country exists")
@@ -60,13 +70,19 @@ async def create_country(session: AsyncSession, code: str, name: str, currency_c
     await session.refresh(item)
     return item
 
-async def list_countries(session: AsyncSession, limit: int, offset: int) -> tuple[Sequence[Country], int]:
+
+async def list_countries(
+    session: AsyncSession, limit: int, offset: int
+) -> tuple[Sequence[Country], int]:
 
     items = (await session.exec(select(Country).offset(offset).limit(limit))).all()
     total = (await session.exec(select(Country))).all()
     return items, len(total)
 
-async def update_country(session: AsyncSession, code: str, name: str | None, currency_code: str | None) -> Country:
+
+async def update_country(
+    session: AsyncSession, code: str, name: str | None, currency_code: str | None
+) -> Country:
 
     item = await session.get(Country, code)
     if not item:
@@ -82,6 +98,7 @@ async def update_country(session: AsyncSession, code: str, name: str | None, cur
     await session.refresh(item)
     return item
 
+
 async def delete_country(session: AsyncSession, code: str) -> None:
     item = await session.get(Country, code)
     if not item:
@@ -89,11 +106,16 @@ async def delete_country(session: AsyncSession, code: str) -> None:
     await session.delete(item)
     await session.commit()
 
+
 # Cities
 async def create_city(session: AsyncSession, name: str, country_code: str) -> City:
     if not await session.get(Country, country_code):
         raise HTTPException(status_code=400, detail="Invalid country_code")
-    existing = (await session.exec(select(City).where(City.country_code == country_code, City.name == name))).first()
+    existing = (
+        await session.exec(
+            select(City).where(City.country_code == country_code, City.name == name)
+        )
+    ).first()
     if existing:
         raise HTTPException(status_code=409, detail="City exists in this country")
     item = City(name=name, country_code=country_code.upper())
@@ -102,7 +124,14 @@ async def create_city(session: AsyncSession, name: str, country_code: str) -> Ci
     await session.refresh(item)
     return item
 
-async def list_cities(session: AsyncSession, limit: int, offset: int, country_code: str | None = None, q: str | None = None):
+
+async def list_cities(
+    session: AsyncSession,
+    limit: int,
+    offset: int,
+    country_code: str | None = None,
+    q: str | None = None,
+):
     query = select(City)
     if country_code:
         query = query.where(City.country_code == country_code.upper())
@@ -112,6 +141,7 @@ async def list_cities(session: AsyncSession, limit: int, offset: int, country_co
     items = (await session.exec(query.offset(offset).limit(limit))).all()
     total = (await session.exec(select(City))).all()
     return items, len(total)
+
 
 async def delete_city(session: AsyncSession, city_id) -> None:
     item = await session.get(City, city_id)

@@ -11,7 +11,9 @@ class CategoryRepository(BaseCRUD[Category, CategoryCreate, CategoryUpdate]):
     def __init__(self, db: AsyncSession):
         super().__init__(Category, db)
 
-    async def get_by_group_and_value(self, group_name: str, value: str) -> Category | None:
+    async def get_by_group_and_value(
+        self, group_name: str, value: str
+    ) -> Category | None:
         result = await self.db.exec(
             select(Category).where(
                 Category.group_name == group_name,

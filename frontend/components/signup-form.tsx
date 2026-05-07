@@ -77,7 +77,7 @@ export function SignupForm({
                     Nhập thông tin dưới đây để tạo tài khoản
                 </p>
               </div>
-              <Controller 
+              <Controller
                 name="name"
                 control={form.control}
                 render={({ field, fieldState }) => (
@@ -90,7 +90,7 @@ export function SignupForm({
                   </Field>
                 )}
               />
-              <Controller  
+              <Controller
                 name="email"
                 control={form.control}
                 render={({ field, fieldState }) => (
@@ -104,7 +104,7 @@ export function SignupForm({
                 )}
               />
               <Field className="grid grid-cols-2 gap-4">
-                <Controller 
+                <Controller
                   name="password"
                   control={form.control}
                   render={({ field, fieldState }) => (
@@ -118,7 +118,7 @@ export function SignupForm({
                   )}
                 />
 
-                <Controller 
+                <Controller
                   name="confirmPassword"
                   control={form.control}
                   render={({ field, fieldState }) => (

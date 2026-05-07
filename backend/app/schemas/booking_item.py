@@ -29,4 +29,3 @@ class BookingItemRead(BookingItemBase):
 
     class Config:
         from_attributes = True
-

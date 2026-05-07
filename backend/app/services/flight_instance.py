@@ -62,7 +62,10 @@ class FlightInstanceService:
         total = await self.repo.get_count()
 
         return {
-            "items": [FlightInstanceRead.model_validate(i, from_attributes=True) for i in items],
+            "items": [
+                FlightInstanceRead.model_validate(i, from_attributes=True)
+                for i in items
+            ],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -70,13 +73,17 @@ class FlightInstanceService:
         }
 
     async def get_instance(self, instance_id: UUID) -> FlightInstanceRead:
-        instance = await self.repo.get_or_404(instance_id, detail="Flight instance not found")
+        instance = await self.repo.get_or_404(
+            instance_id, detail="Flight instance not found"
+        )
         return FlightInstanceRead.model_validate(instance, from_attributes=True)
 
     async def update_instance(
         self, instance_id: UUID, payload: FlightInstanceUpdate
     ) -> FlightInstanceRead:
-        instance = await self.repo.get_or_404(instance_id, detail="Flight instance not found")
+        instance = await self.repo.get_or_404(
+            instance_id, detail="Flight instance not found"
+        )
 
         data = payload.model_dump(exclude_unset=True)
         if "schedule_id" in data:
@@ -91,4 +98,3 @@ class FlightInstanceService:
 
     async def delete_instance(self, instance_id: UUID) -> None:
         await self.repo.delete(instance_id)
-

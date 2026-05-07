@@ -27,4 +27,3 @@ class RouteRead(RouteBase):
 
     class Config:
         from_attributes = True
-

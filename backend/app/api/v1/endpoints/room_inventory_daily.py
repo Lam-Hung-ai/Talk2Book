@@ -107,4 +107,3 @@ async def delete_room_inventory_daily(
     """Xóa room inventory daily"""
     await service.delete_room_inventory_daily(room_id, rate_plan_id, stay_date)
     return None
-

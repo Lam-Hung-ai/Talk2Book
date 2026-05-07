@@ -27,4 +27,3 @@ class SlotInventoryUpdate(BaseModel):
 class SlotInventoryRead(SlotInventoryBase):
     class Config:
         from_attributes = True
-

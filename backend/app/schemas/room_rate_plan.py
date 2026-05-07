@@ -33,4 +33,3 @@ class RoomRatePlanRead(RoomRatePlanBase):
 
     class Config:
         from_attributes = True
-

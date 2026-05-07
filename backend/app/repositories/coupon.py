@@ -9,7 +9,9 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.coupon import CouponCreate, CouponUpdate
 
 
-class CouponRepository(BaseCRUD[Coupon, CouponCreate, CouponUpdate], SearchableRepository[Coupon]):
+class CouponRepository(
+    BaseCRUD[Coupon, CouponCreate, CouponUpdate], SearchableRepository[Coupon]
+):
     def __init__(self, db: AsyncSession):
         BaseCRUD.__init__(self, Coupon, db)
         SearchableRepository.__init__(self, Coupon, db)
@@ -20,4 +22,3 @@ class CouponRepository(BaseCRUD[Coupon, CouponCreate, CouponUpdate], SearchableR
 
     async def get_active(self, *, skip: int = 0, limit: int = 100) -> Sequence[Coupon]:
         return await self.get_multi(skip=skip, limit=limit, is_active=True)
-

@@ -5,7 +5,6 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
-from fastapi_mcp import FastApiMCP
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api import api_router
@@ -72,13 +71,3 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
-
-
-mcp = FastApiMCP(
-    app,
-    name="Talk2Book project",
-    include_operations=load_function_tool_calls(
-        "search", "city", "country", "airport", "user", "booking"
-    ),
-)
-mcp.mount_http()

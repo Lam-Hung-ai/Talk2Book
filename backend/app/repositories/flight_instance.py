@@ -38,4 +38,3 @@ class FlightInstanceRepository(
         stmt = stmt.offset(offset).limit(limit)
         result = await self.db.exec(stmt)
         return result.all()
-

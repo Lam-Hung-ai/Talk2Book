@@ -28,4 +28,3 @@ class TimeSlotRead(TimeSlotBase):
 
     class Config:
         from_attributes = True
-

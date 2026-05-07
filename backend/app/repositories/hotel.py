@@ -20,4 +20,3 @@ class HotelRepository(BaseCRUD[Hotel, HotelCreate, HotelUpdate], SearchableRepos
     async def get_by_city(self, city_id: str, skip: int = 0, limit: int = 100):
         """Lấy danh sách hotel theo city_id"""
         return await self.get_multi(skip=skip, limit=limit, city_id=city_id)
-

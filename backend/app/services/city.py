@@ -28,14 +28,16 @@ class CityService:
         if not country:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Country code '{city_in.country_code}' không tồn tại"
+                detail=f"Country code '{city_in.country_code}' không tồn tại",
             )
 
         # Kiểm tra unique constraint (country_code, name)
-        if await self.repo.get_by_country_code_and_name(country_code_upper, city_in.name):
+        if await self.repo.get_by_country_code_and_name(
+            country_code_upper, city_in.name
+        ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"City '{city_in.name}' đã tồn tại trong country '{country_code_upper}'"
+                detail=f"City '{city_in.name}' đã tồn tại trong country '{country_code_upper}'",
             )
 
         city_data = city_in.model_dump()
@@ -58,7 +60,9 @@ class CityService:
                 country_code.upper(), skip=skip, limit=page_size
             )
             # Đếm tổng số cities của country
-            all_cities = await self.repo.get_by_country_code(country_code.upper(), skip=0, limit=10000)
+            all_cities = await self.repo.get_by_country_code(
+                country_code.upper(), skip=0, limit=10000
+            )
             total = len(all_cities)
         else:
             filters = {}
@@ -70,7 +74,7 @@ class CityService:
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
 
     async def update_city(self, city_id: UUID, city_in: CityUpdate) -> CityRead:
@@ -86,19 +90,23 @@ class CityService:
             if not country:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Country code '{update_data['country_code']}' không tồn tại"
+                    detail=f"Country code '{update_data['country_code']}' không tồn tại",
                 )
             update_data["country_code"] = country_code_upper
 
         # Kiểm tra unique constraint nếu có update name hoặc country_code
         if "name" in update_data or "country_code" in update_data:
-            final_country_code = update_data.get("country_code", db_city.country_code).upper()
+            final_country_code = update_data.get(
+                "country_code", db_city.country_code
+            ).upper()
             final_name = update_data.get("name", db_city.name)
-            existing_city = await self.repo.get_by_country_code_and_name(final_country_code, final_name)
+            existing_city = await self.repo.get_by_country_code_and_name(
+                final_country_code, final_name
+            )
             if existing_city and existing_city.id != city_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"City '{final_name}' đã tồn tại trong country '{final_country_code}'"
+                    detail=f"City '{final_name}' đã tồn tại trong country '{final_country_code}'",
                 )
 
         updated_city = await self.repo.update(db_city, update_data)
@@ -114,7 +122,7 @@ class CityService:
         page: int = 1,
         page_size: int = 20,
         exact_match: bool = False,
-        case_sensitive: bool = False
+        case_sensitive: bool = False,
     ) -> dict[str, Any]:
         """Tìm kiếm cities theo name hoặc country_code"""
         skip = (page - 1) * page_size
@@ -125,14 +133,14 @@ class CityService:
             exact_match=exact_match,
             case_sensitive=case_sensitive,
             skip=skip,
-            limit=page_size
+            limit=page_size,
         )
 
         total = await self.repo.count_search(
             query=q,
             search_columns=["name", "country_code"],
             exact_match=exact_match,
-            case_sensitive=case_sensitive
+            case_sensitive=case_sensitive,
         )
 
         return {
@@ -140,6 +148,5 @@ class CityService:
             "total": total,
             "page": page,
             "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
+            "total_pages": (total + page_size - 1) // page_size,
         }
-

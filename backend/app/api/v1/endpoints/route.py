@@ -55,7 +55,9 @@ async def get_route(route_id: UUID, service: RouteService = Depends(get_route_se
 
 @router.put("/{route_id}", response_model=RouteRead, summary="Cập nhật route")
 async def update_route(
-    route_id: UUID, payload: RouteUpdate, service: RouteService = Depends(get_route_service)
+    route_id: UUID,
+    payload: RouteUpdate,
+    service: RouteService = Depends(get_route_service),
 ):
     return await service.update_route(route_id, payload)
 
@@ -70,4 +72,3 @@ async def delete_route(
 ):
     await service.delete_route(route_id)
     return None
-

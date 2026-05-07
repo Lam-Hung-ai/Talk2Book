@@ -58,7 +58,8 @@ async def list_instances(
     summary="Chi tiết flight instance",
 )
 async def get_instance(
-    instance_id: UUID, service: FlightInstanceService = Depends(get_flight_instance_service)
+    instance_id: UUID,
+    service: FlightInstanceService = Depends(get_flight_instance_service),
 ):
     return await service.get_instance(instance_id)
 
@@ -82,8 +83,8 @@ async def update_instance(
     summary="Xóa flight instance",
 )
 async def delete_instance(
-    instance_id: UUID, service: FlightInstanceService = Depends(get_flight_instance_service)
+    instance_id: UUID,
+    service: FlightInstanceService = Depends(get_flight_instance_service),
 ):
     await service.delete_instance(instance_id)
     return None
-

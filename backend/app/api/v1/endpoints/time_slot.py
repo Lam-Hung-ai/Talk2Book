@@ -42,14 +42,18 @@ async def list_time_slots(
     )
 
 
-@router.get("/{time_slot_id}", response_model=TimeSlotRead, summary="Chi tiết time slot")
+@router.get(
+    "/{time_slot_id}", response_model=TimeSlotRead, summary="Chi tiết time slot"
+)
 async def get_time_slot(
     time_slot_id: UUID, service: TimeSlotService = Depends(get_time_slot_service)
 ):
     return await service.get_time_slot(time_slot_id)
 
 
-@router.put("/{time_slot_id}", response_model=TimeSlotRead, summary="Cập nhật time slot")
+@router.put(
+    "/{time_slot_id}", response_model=TimeSlotRead, summary="Cập nhật time slot"
+)
 async def update_time_slot(
     time_slot_id: UUID,
     payload: TimeSlotUpdate,
@@ -68,4 +72,3 @@ async def delete_time_slot(
 ):
     await service.delete_time_slot(time_slot_id)
     return None
-

@@ -27,7 +27,9 @@ class RoomInventoryDailyUpdate(BaseModel):
     allotment: int | None = Field(default=None, gt=0)
     sold: int | None = Field(default=None, ge=0)
     stop_sell: bool | None = None
-    base_price: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
+    base_price: Decimal | None = Field(
+        default=None, ge=0, max_digits=12, decimal_places=2
+    )
 
 
 class RoomInventoryDailyRead(RoomInventoryDailyBase):
@@ -35,4 +37,3 @@ class RoomInventoryDailyRead(RoomInventoryDailyBase):
 
     class Config:
         from_attributes = True
-

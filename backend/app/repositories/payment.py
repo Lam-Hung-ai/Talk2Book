@@ -12,7 +12,9 @@ from app.repositories.searchable import SearchableRepository
 from app.schemas.payment import PaymentCreate, PaymentUpdate
 
 
-class PaymentRepository(BaseCRUD[Payment, PaymentCreate, PaymentUpdate], SearchableRepository[Payment]):
+class PaymentRepository(
+    BaseCRUD[Payment, PaymentCreate, PaymentUpdate], SearchableRepository[Payment]
+):
     """Repository cho Payment với đầy đủ CRUD và tính năng tìm kiếm"""
 
     def __init__(self, db: AsyncSession):
@@ -20,24 +22,20 @@ class PaymentRepository(BaseCRUD[Payment, PaymentCreate, PaymentUpdate], Searcha
         BaseCRUD.__init__(self, Payment, db)
         SearchableRepository.__init__(self, Payment, db)
 
-    async def get_by_booking_id(self, booking_id: UUID, skip: int = 0, limit: int = 100) -> Sequence[Payment]:
+    async def get_by_booking_id(
+        self, booking_id: UUID, skip: int = 0, limit: int = 100
+    ) -> Sequence[Payment]:
         """Lấy danh sách payments theo booking_id"""
         return await self.get_multi(skip=skip, limit=limit, booking_id=booking_id)
 
     async def get_by_status(
-        self,
-        status: PaymentStatus,
-        skip: int = 0,
-        limit: int = 100
+        self, status: PaymentStatus, skip: int = 0, limit: int = 100
     ) -> Sequence[Payment]:
         """Lấy payments theo trạng thái"""
         return await self.get_multi(skip=skip, limit=limit, status=status)
 
     async def get_by_provider(
-        self,
-        provider: str,
-        skip: int = 0,
-        limit: int = 100
+        self, provider: str, skip: int = 0, limit: int = 100
     ) -> Sequence[Payment]:
         """Lấy payments theo payment gateway"""
         return await self.get_multi(skip=skip, limit=limit, provider=provider)
